@@ -187,10 +187,10 @@ library SiloMathLib {
         (uint256 totalShares, uint256 totalAssets) = _commonConvertTo(_totalAssets, _totalShares, _assetType);
 
         // initially, in case of debt, if silo is empty we return shares==assets
-        // for collateral, this will never be the case, because of `+1` in line above
+        // for collateral, this will never be the case, because of `+1` in line above //@audit where is this +1 in the line above?
         if (totalShares == 0) return _shares;
 
-        assets = _shares.mulDiv(totalAssets, totalShares, _rounding);
+        assets = _shares.mulDiv(totalAssets, totalShares, _rounding); //@audit what is this rounding?
     }
 
     /// @param _collateralMaxLtv maxLTV in 18 decimals that is set for debt asset

@@ -72,7 +72,7 @@ library SiloSolvencyLib {
             debtShareBalance
         );
 
-        return ltv <= _collateralConfig.maxLtv;
+        return ltv <= _collateralConfig.maxLtv; //@audit-issue !ISSUE! this is not always below but can also be equal to 
     }
 
     /// @notice Retrieves assets data required for LTV calculations
@@ -222,7 +222,7 @@ library SiloSolvencyLib {
         }
 
         if (_ltvData.borrowerDebtAssets != 0) {
-            // if no oracle is set, assume price 1, we should also not set oracle for quote token
+            // if no oracle is set, assume price 1, we should also not set oracle for quote token //@audit test if this is the case, no oracel here, no oracle for quote token
             debtValue = address(_ltvData.debtOracle) != address(0)
                 ? _ltvData.debtOracle.quote(_ltvData.borrowerDebtAssets, _debtAsset)
                 : _ltvData.borrowerDebtAssets;

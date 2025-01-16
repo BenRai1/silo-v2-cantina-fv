@@ -14,7 +14,7 @@ import {Hook} from "./lib/Hook.sol";
 contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
     using Hook for uint256;
     
-    uint256 public immutable SILO_ID;
+    uint256 public immutable SILO_ID; 
 
     uint256 internal immutable _DAO_FEE;
     uint256 internal immutable _DEPLOYER_FEE;
@@ -146,7 +146,7 @@ contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
     }
 
     /// @inheritdoc ISiloConfig
-    function setOtherSiloAsCollateralSilo(address _borrower) external virtual {
+    function setOtherSiloAsCollateralSilo(address _borrower) external virtual {//@audit-issue no check if one has already borrowed against the current silo? Is this ok?
         _onlySilo();
         borrowerCollateralSilo[_borrower] = msg.sender == _SILO0 ? _SILO1 : _SILO0;
     }
@@ -335,13 +335,15 @@ contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
     }
 
     /// @inheritdoc ISiloConfig
+    //@audit function returns the right data
+    //@audit function only returns data for the two silos
     function getConfig(address _silo) public view virtual returns (ConfigData memory config) {
         if (_silo == _SILO0) {
             config = _silo0ConfigData();
         } else if (_silo == _SILO1) {
             config = _silo1ConfigData();
         } else {
-            revert WrongSilo();
+            revert WrongSilo(); 
         }
     }
 

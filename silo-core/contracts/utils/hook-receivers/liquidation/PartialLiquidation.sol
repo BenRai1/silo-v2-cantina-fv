@@ -35,11 +35,13 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
         bytes4 customError;
     }
 
-    function initialize(ISiloConfig _siloConfig, bytes calldata) external virtual {
+    //@audit what is the calldata used for?
+    //@audit-issue anyone can call this, why is that?
+    function initialize(ISiloConfig _siloConfig, bytes calldata) external virtual { 
         _initialize(_siloConfig);
     }
 
-    function beforeAction(address, uint256, bytes calldata) external virtual {
+    function beforeAction(address, uint256, bytes calldata) external virtual { 
         // not in use
     }
 
@@ -85,10 +87,10 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
 
         RevertLib.revertIfError(params.customError);
 
-        // we do not allow dust so full liquidation is required
+        // we do not allow dust so full liquidation is required //@audit-issue can this be used to prevent liquidation?
         require(repayDebtAssets <= _maxDebtToCover, FullLiquidationRequired());
 
-        IERC20(debtConfig.token).safeTransferFrom(msg.sender, address(this), repayDebtAssets);
+        IERC20(debtConfig.token).safeTransferFrom(msg.sender, address(this), repayDebtAssets); //@audit why is the debt token used both times, check closer
         IERC20(debtConfig.token).safeIncreaseAllowance(debtConfig.silo, repayDebtAssets);
 
         address shareTokenReceiver = _receiveSToken ? msg.sender : address(this);
@@ -141,7 +143,8 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
             // so there is a need to check assets before we withdraw collateral/protected
 
             if (params.collateralShares != 0) {
-                withdrawCollateral = ISilo(collateralConfig.silo).redeem({
+                withdrawCollateral = ISilo(collateralConfig.silo).
+                ({
                     _shares: params.collateralShares,
                     _receiver: msg.sender,
                     _owner: address(this),
@@ -173,6 +176,7 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
         );
     }
 
+    //@audit what is this supposed to do?
     function hookReceiverConfig(address) external virtual view returns (uint24 hooksBefore, uint24 hooksAfter) {
         return (0, 0);
     }

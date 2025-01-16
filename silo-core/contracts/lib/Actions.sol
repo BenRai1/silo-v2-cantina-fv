@@ -347,7 +347,7 @@ library Actions {
         require(_amount <= Views.maxFlashLoan(_token), FlashLoanNotPossible());
 
         // cast safe, because we checked `fee > type(uint192).max`
-        SiloStorageLib.getSiloStorage().daoAndDeployerRevenue += uint192(fee);
+        SiloStorageLib.getSiloStorage().daoAndDeployerRevenue += uint192(fee); //@audit can this block the flash loan if there are to many fees accumulated? Is this ever reduced?
 
         IERC20(_token).safeTransfer(address(_receiver), _amount);
 
@@ -370,7 +370,7 @@ library Actions {
     /// @dev This function takes into account scenarios where either the DAO or deployer may not be set, distributing
     /// accordingly
     /// @param _silo Silo address
-    function withdrawFees(ISilo _silo) external returns (uint256 daoRevenue, uint256 deployerRevenue) {
+    function withdrawFees(ISilo _silo) external returns (uint256 daoRevenue, uint256 deployerRevenue) { //@audit check closer, how are the fees one can withdraw reduced?
         ISiloConfig siloConfig = ShareTokenLib.siloConfig();
         siloConfig.turnOnReentrancyProtection();
 
@@ -393,7 +393,7 @@ library Actions {
         uint256 protectedAssets = $.totalAssets[ISilo.AssetType.Protected];
 
         // we will never underflow because `_protectedAssets` is always less/equal `siloBalance`
-        unchecked { availableLiquidity = protectedAssets > siloBalance ? 0 : siloBalance - protectedAssets; }
+        unchecked { availableLiquidity = protectedAssets > siloBalance ? 0 : siloBalance - protectedAssets; } //@audit protected assets should never be less than the silo balance, right?
 
         require(availableLiquidity != 0, ISilo.NoLiquidity());
 
@@ -403,7 +403,7 @@ library Actions {
         unchecked { $.daoAndDeployerRevenue -= uint192(earnedFees); }
 
         if (deployerFeeReceiver == address(0)) {
-            // deployer was never setup or deployer NFT has been burned
+            // deployer was never setup or deployer NFT has been burned //@audit how is the deployer changed when NFT is burned?
             IERC20(asset).safeTransfer(daoFeeReceiver, earnedFees);
         } else {
             // split fees proportionally

@@ -192,7 +192,7 @@ library SiloLendingLib {
         IShareToken(_debtShareToken).mint(_args.borrower, _spender, borrowedShares);
 
         if (_token != address(0)) {
-            // fee-on-transfer is ignored.
+            // fee-on-transfer is ignored. //@audit-issue ignoring this should not be save for deposites because it can lead to insolvancy of the silo
             IERC20(_token).safeTransfer(_args.receiver, borrowedAssets);
         }
     }

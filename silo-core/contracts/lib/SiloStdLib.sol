@@ -107,7 +107,7 @@ library SiloStdLib {
         try IInterestRateModel(_interestRateModel).getCompoundInterestRate(_silo, block.timestamp) returns (uint256 r) {
             rcomp = r;
         } catch {
-            // do not lock silo
+            // do not lock silo //@audit-issue why is there nothing happemning when the call fails?
         }
 
         (uint256 collateralAssets, uint256 debtAssets) = ISilo(_silo).getCollateralAndDebtTotalsStorage();

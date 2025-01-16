@@ -219,7 +219,7 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
         address _silo,
         address _borrower,
         address _receiver,
-        uint256 _withdrawAssets,
+        uint256 _withdrawAssets, 
         address _shareToken,
         ISilo.AssetType _assetType
     ) internal virtual returns (uint256 shares) {
