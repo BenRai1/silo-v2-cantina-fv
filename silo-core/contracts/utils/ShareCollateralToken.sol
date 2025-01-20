@@ -9,7 +9,7 @@ import {IShareToken, ShareToken, ISilo} from "./ShareToken.sol";
 /// @title ShareCollateralToken
 /// @notice ERC20 compatible token representing collateral in Silo
 /// @custom:security-contact security@silo.finance
-abstract contract ShareCollateralToken is ShareToken {
+abstract contract ShareCollateralToken is ShareToken { 
     /// @inheritdoc IShareToken
     function mint(address _owner, address /* _spender */, uint256 _amount) external virtual override onlySilo {
         _mint(_owner, _amount);
@@ -23,7 +23,7 @@ abstract contract ShareCollateralToken is ShareToken {
 
     /// @dev decimals of share token
     function decimals() public view virtual override(ShareToken) returns (uint8) {
-        return ShareTokenLib.decimals() + uint8(SiloMathLib._DECIMALS_OFFSET);
+        return ShareTokenLib.decimals() + uint8(SiloMathLib._DECIMALS_OFFSET); //@audit why is this addint the offset ( +3) to the decimals?
     }
 
     /// @dev Check if sender is solvent after the transfer

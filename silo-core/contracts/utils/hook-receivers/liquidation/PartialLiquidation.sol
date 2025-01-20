@@ -143,8 +143,7 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
             // so there is a need to check assets before we withdraw collateral/protected
 
             if (params.collateralShares != 0) {
-                withdrawCollateral = ISilo(collateralConfig.silo).
-                ({
+                withdrawCollateral = ISilo(collateralConfig.silo).redeem({
                     _shares: params.collateralShares,
                     _receiver: msg.sender,
                     _owner: address(this),
@@ -182,6 +181,13 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
     }
 
     /// @inheritdoc IPartialLiquidation
+    /// @dev debt is keep growing over time, so when dApp use this view to calculate max, tx should never revert 
+    //@audit-issue this is not the case because no interest is accrued for the collateral asset => max can be bigger than actual including interest on collateral 
+    /// because actual max can be only higher
+    /// @return collateralToLiquidate underestimated amount of collateral liquidator will get
+    /// @return debtToRepay debt amount needed to be repay to get `collateralToLiquidate`
+    /// @return sTokenRequired TRUE, when liquidation with underlying asset is not possible because of not enough
+    /// liquidity
     function maxLiquidation(address _borrower)
         external
         view

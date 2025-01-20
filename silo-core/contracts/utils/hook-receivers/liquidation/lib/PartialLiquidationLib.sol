@@ -21,7 +21,7 @@ library PartialLiquidationLib {
     /// @dev this is basically LTV == 100%
     uint256 internal constant _BAD_DEBT = 1e18;
 
-    uint256 internal constant _PRECISION_DECIMALS = 1e18;
+    uint256 internal constant _PRECISION_DECIMALS = 1e18; //i: this is more like 100%
 
     /// @dev underestimation for collateral that user gets on liquidation
     /// liquidation is executed based on sTokens, additional flow is: assets -> shares -> assets
@@ -202,6 +202,7 @@ library PartialLiquidationLib {
         pure
         returns (uint256 toLiquidate)
     {
+        // (100 * 1e18) * (20% * 1e18) / 1e18 = 20 * 1e18
         uint256 fee = _maxDebtToCover * _liquidationFee / _PRECISION_DECIMALS;
 
         toLiquidate = _maxDebtToCover + fee;
@@ -233,7 +234,7 @@ library PartialLiquidationLib {
         uint256 _liquidationFee
     ) internal pure returns (uint256 repayValue) {
         if (_totalBorrowerDebtValue == 0) return 0;
-        if (_liquidationFee >= _PRECISION_DECIMALS) return 0;
+        if (_liquidationFee >= _PRECISION_DECIMALS) return 0; //@audit-issue is this checked for when setting liquidation fee? if not, one can create a silo which can not be liquidated
 
         // this will cover case, when _totalBorrowerCollateralValue == 0
         if (_totalBorrowerDebtValue >= _totalBorrowerCollateralValue) return _totalBorrowerDebtValue;
@@ -323,7 +324,7 @@ library PartialLiquidationLib {
     /// @notice must stay private because this is not for general LTV, only for ltv after
     function _ltvAfter(uint256 _collateral, uint256 _debt) private pure returns (uint256 ltv) {
         // previous calculation of LTV
-        ltv = _debt * _PRECISION_DECIMALS;
+        ltv = _debt * _PRECISION_DECIMALS; //@audit why is this devided by 1e18? doesn`t this breake stuff? (Rounding down)
         ltv = Math.ceilDiv(ltv, _collateral); // Rounding.LTV is up/ceil
     }
 }

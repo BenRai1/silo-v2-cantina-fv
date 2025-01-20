@@ -217,7 +217,8 @@ library Views {
         require(_initData.maxLtv1 <= _initData.lt1, ISiloFactory.InvalidMaxLtv());
         require(_initData.liquidationFee0 <= _maxLiquidationFee, ISiloFactory.MaxLiquidationFeeExceeded());
         require(_initData.liquidationFee1 <= _maxLiquidationFee, ISiloFactory.MaxLiquidationFeeExceeded());
-        require(_initData.lt0 + _initData.liquidationFee0 <= _100_PERCENT, ISiloFactory.InvalidLt());
+        //@audit this is to strict if liquidation fee is calculated liquidation value * fee. Or is it calculated differently?
+        require(_initData.lt0 + _initData.liquidationFee0 <= _100_PERCENT, ISiloFactory.InvalidLt()); 
         require(_initData.lt1 + _initData.liquidationFee1 <= _100_PERCENT, ISiloFactory.InvalidLt());
 
         require(

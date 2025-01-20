@@ -46,7 +46,7 @@ contract ShareDebtToken is IERC20R, ShareToken, IShareTokenInitializable {
     }
 
     /// @inheritdoc IERC20R
-    function setReceiveApproval(address owner, uint256 _amount) external virtual override {
+    function setReceiveApproval(address owner, uint256 _amount) external virtual override { 
         NonReentrantLib.nonReentrant(ShareTokenLib.getShareTokenStorage().siloConfig);
 
         _setReceiveApproval(owner, _msgSender(), _amount);

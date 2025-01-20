@@ -12,6 +12,8 @@ Note that some work from the Certora team has already been done in the `certora`
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- |
 | [Silo.sol](https://github.com/Certora/silo-v2-cantina-fv/blob/master/silo-core/contracts/Silo.sol)                                                                   | 452   |
 | [PartialLiquidation.sol](https://github.com/Certora/silo-v2-cantina-fv/blob/master/silo-core/contracts/utils/hook-receivers/liquidation/PartialLiquidation.sol)                                                                   | 155   |
+| [Actions.sol](https://github.com/Certora/silo-v2-cantina-fv/blob/master/silo-core/contracts/lib/Actions.sol)                                                                   | 373   |
+
 
 ## Overview
 - 100,000 USDC of this contest will be allocated for FV.
@@ -120,4 +122,4 @@ Note that some work from the Certora team has already been done in the `certora`
     - Focus on concise, high-level properties.
     - Reduce overuse of `require` statements.
     - Ensure clear documentation, proper naming, and formatting.
-- **Participant Contributions**: The top participants' `certora` folders will be included in the public repository.
+- **Participant Contributions**: The top participants' `certora` folders will be included in the public repository

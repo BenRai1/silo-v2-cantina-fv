@@ -125,7 +125,7 @@ library SiloSolvencyLib {
                 _collateralConfig.daoFee,
                 _collateralConfig.deployerFee
             )
-            : totalCollateralAssets;
+            : totalCollateralAssets; //@audit why is no interest accrued here? Where is it called from and was the interest already accrued before?
 
         ltvData.borrowerCollateralAssets = SiloMathLib.convertToAssets(
             shares, totalCollateralAssets, totalShares, Rounding.COLLATERAL_TO_ASSETS, ISilo.AssetType.Collateral
@@ -222,7 +222,8 @@ library SiloSolvencyLib {
         }
 
         if (_ltvData.borrowerDebtAssets != 0) {
-            // if no oracle is set, assume price 1, we should also not set oracle for quote token //@audit test if this is the case, no oracel here, no oracle for quote token
+            // if no oracle is set, assume price 1, we should also not set oracle for quote token 
+            //@audit test if this is the case, no oracel here, no oracle for quote token. Is this enforced somewhere? (Anyone can create vaults and set oracles)
             debtValue = address(_ltvData.debtOracle) != address(0)
                 ? _ltvData.debtOracle.quote(_ltvData.borrowerDebtAssets, _debtAsset)
                 : _ltvData.borrowerDebtAssets;
@@ -234,6 +235,7 @@ library SiloSolvencyLib {
         pure
         returns (uint256 ltvInDp)
     {
-        ltvInDp = _totalBorrowerDebtValue.mulDiv(_PRECISION_DECIMALS, _sumOfBorrowerCollateralValue, Rounding.LTV);
+        ltvInDp = _totalBorrowerDebtValue.mulDiv(_PRECISION_DECIMALS, _sumOfBorrowerCollateralValue, Rounding.LTV); 
+        //@audit is this rounding up or down? Should be tested by a RULE
     }
 }

@@ -113,7 +113,8 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
 
         siloConfigCached.turnOffReentrancyProtection();
 
-        ISilo(debtConfig.silo).repay(repayDebtAssets, _borrower);
+        // mutation: fail to repay in "liquidationCall"
+        // ISilo(debtConfig.silo).repay(repayDebtAssets, _borrower);
 
         if (_receiveSToken) {
             if (params.collateralShares != 0) {
@@ -219,7 +220,7 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
         address _silo,
         address _borrower,
         address _receiver,
-        uint256 _withdrawAssets, 
+        uint256 _withdrawAssets,
         address _shareToken,
         ISilo.AssetType _assetType
     ) internal virtual returns (uint256 shares) {

@@ -326,6 +326,6 @@ library SiloMathLib {
 
             (totalShares, totalAssets) = _assetType == ISilo.AssetType.Debt
                 ? (_totalShares, _totalAssets)
-                : (_totalShares + _DECIMALS_OFFSET_POW, _totalAssets + 1);
+                : (_totalShares + _DECIMALS_OFFSET_POW, _totalAssets + 1); //@audit why are the totalShares increased by 10**3 and totalAssets by 1?
     }
 }

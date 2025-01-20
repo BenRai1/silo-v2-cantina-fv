@@ -80,7 +80,7 @@ contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
     /// @param _siloId ID of this pool assigned by factory
     /// @param _configData0 silo configuration data for token0
     /// @param _configData1 silo configuration data for token1
-    constructor( // solhint-disable-line function-max-lines
+    constructor( // solhint-disable-line function-max-lines //@audit missing sanity checks for e.g. flashFee 
         uint256 _siloId,
         ConfigData memory _configData0,
         ConfigData memory _configData1
@@ -97,7 +97,7 @@ contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
         // TOKEN #0
 
         _SILO0 = _configData0.silo;
-        _TOKEN0 = _configData0.token;
+        _TOKEN0 = _configData0.token; //i: what token does the silo hold
 
         _PROTECTED_COLLATERAL_SHARE_TOKEN0 = _configData0.protectedShareToken;
         _COLLATERAL_SHARE_TOKEN0 = _configData0.silo;
@@ -108,10 +108,14 @@ contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
 
         _INTEREST_RATE_MODEL0 = _configData0.interestRateModel;
 
+
         _MAX_LTV0 = _configData0.maxLtv;
+        //@audit-issue !ISSUE! missing check if liquidationTreshhold(LT) is compatible with LiquidationFee (liquidatiable when lt is 1,05 but liquidation fee is 6%) => if fee is to high, every liquidation will result in a loss
         _LT0 = _configData0.lt;
         _LIQUIDATION_TARGET_LTV0 = _configData0.liquidationTargetLtv;
-        _LIQUIDATION_FEE0 = _configData0.liquidationFee;
+        //@audit-issue missing check for this to be less than 1e18 => if set like this, no liquidations will be possible 
+        // becasue estimateMaxRepayValue will return 0 => maxLiquidationPreview returns 0 => 
+        _LIQUIDATION_FEE0 = _configData0.liquidationFee; 
         _FLASHLOAN_FEE0 = _configData0.flashloanFee;
 
         _CALL_BEFORE_QUOTE0 = _configData0.callBeforeQuote;
@@ -209,7 +213,7 @@ contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
 
         address collateralSilo = borrowerCollateralSilo[_borrower];
 
-        collateralConfig = getConfig(collateralSilo);
+        collateralConfig = getConfig(collateralSilo); //@audit both silos can be the same, right? What is the purpose of borrowing my own collateral?
         debtConfig = getConfig(debtSilo);
     }
 

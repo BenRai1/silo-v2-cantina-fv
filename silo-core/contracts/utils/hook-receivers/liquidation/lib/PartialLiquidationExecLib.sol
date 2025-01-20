@@ -127,7 +127,8 @@ library PartialLiquidationExecLib {
         view
         returns (uint256 receiveCollateralAssets, uint256 repayDebtAssets, bytes4 customError)
     {
-        uint256 sumOfCollateralAssets = _ltvData.borrowerCollateralAssets + _ltvData.borrowerProtectedAssets;
+        //@audit is it possible that protected and collateral are not the same asset?
+        uint256 sumOfCollateralAssets = _ltvData.borrowerCollateralAssets + _ltvData.borrowerProtectedAssets; 
 
         if (_ltvData.borrowerDebtAssets == 0 || _params.maxDebtToCover == 0) {
             return (0, 0, IPartialLiquidation.NoDebtToCover.selector);
@@ -135,11 +136,11 @@ library PartialLiquidationExecLib {
 
         if (sumOfCollateralAssets == 0) {
             return (
-                0,
-                _params.maxDebtToCover > _ltvData.borrowerDebtAssets
+                0, //i: receiveCollateralAssets
+                _params.maxDebtToCover > _ltvData.borrowerDebtAssets //i: repayDebtAssets //@audit why is this bigget than 0? Does the caller pay this without getting anything?
                     ? _ltvData.borrowerDebtAssets
                     : _params.maxDebtToCover,
-                bytes4(0) // no error
+                bytes4(0) // no error //i: customError
             );
         }
 
