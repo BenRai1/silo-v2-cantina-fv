@@ -127,11 +127,11 @@ abstract contract ShareToken is ERC20PermitUpgradeable, IShareToken {
         override(ERC20Upgradeable, IERC20)
         returns (bool result)
     {
-        ISiloConfig siloConfigCached = _crossNonReentrantBefore();
+        ISiloConfig siloConfigCached = _crossNonReentrantBefore(); //i: turns on reentrancy protection
 
         result = ERC20Upgradeable.transferFrom(_from, _to, _amount);
 
-        siloConfigCached.turnOffReentrancyProtection();
+        siloConfigCached.turnOffReentrancyProtection(); 
     }
 
     /// @inheritdoc ERC20Upgradeable

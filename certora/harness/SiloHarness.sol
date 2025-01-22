@@ -113,22 +113,26 @@ contract SiloHarness is Silo {
         debtAssets = $.totalAssets[ISilo.AssetType.Debt];
     }
 
-    // function convertDepositToAssetsOrToSharesHarness(
-    //             uint256 _assets,
-    //             uint256 _shares,
-    //             uint256 _totalAssets,
-    //             uint256 _totalShares,
-    //             ISilo.AssetType _assetType
-    // ) external pure returns (uint256, uint256) {
-    //     return SiloMathLib.convertToAssetsOrToShares(
-    //                 _assets,
-    //                 _shares,
-    //                 totalAssets,
-    //                 _collateralShareToken.totalSupply(),
-    //                 Rounding.DEPOSIT_TO_ASSETS,
-    //                 Rounding.DEPOSIT_TO_SHARES,
-    //                 ISilo.AssetType(uint256(_collateralType))
-    //             );
-    // }
+    function borrowerCollateralSiloHarness(address borrower) external view returns (address collateralSilo){
+        ISiloConfig siloConfig = ShareTokenLib.siloConfig();
+        return siloConfig.borrowerCollateralSilo(borrower);
+    }
+     
+
+    function ltvBelowMaxLtvHarness(address borrower) external view returns (bool borrowerIsBelowMaxLtv) {
+        ISiloConfig siloConfig = ShareTokenLib.siloConfig();
+
+        ISiloConfig.ConfigData memory collateralConfig;
+        ISiloConfig.ConfigData memory debtConfig;
+
+        bool borrowerIsBelowMaxLtv = SiloSolvencyLib.isBelowMaxLtv(
+            collateralConfig, debtConfig, borrower, ISilo.AccrueInterestInMemory.No
+        );
+
+    }
+
+
+
+
 
 }

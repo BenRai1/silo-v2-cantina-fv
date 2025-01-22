@@ -99,90 +99,6 @@ methods {
 
     //------------------------------------------------- RUNNING -------------------------------------------------
 
-
-    
-    //protected share token balance always increases after `mint()` only for receiver
-    rule mintProtectedSharesIncreaseOnlyForReceiver(env e){
-        configForEightTokensSetupRequirements();
-        uint256 shares;
-        address receiver;
-        totalSuppliesMoreThanBalance(receiver);
-        address otherUser;
-        require receiver != otherUser;
-
-        //balances before
-        uint256 sharesReceiverBefore = shareProtectedCollateralToken0.balanceOf(receiver);
-        uint256 sharesOtherUserBefore = shareProtectedCollateralToken0.balanceOf(otherUser);
-        require(sharesReceiverBefore + shares <= max_uint256);
-
-        mint(e, shares, receiver, ISilo.CollateralType.Protected);
-
-        //balances after mint
-        uint256 sharesReceiverAfter = shareProtectedCollateralToken0.balanceOf(receiver);
-        uint256 sharesOtherUserAfter = shareProtectedCollateralToken0.balanceOf(otherUser);
-
-        //only receiver balance increases
-        assert sharesReceiverAfter > sharesReceiverBefore;
-        assert sharesOtherUserAfter == sharesOtherUserBefore;
-    }
-    
-    
-    
-    
-    //collateral share token balance always increases after `mint()` only for receiver
-    rule mintCollateralSharesIncreaseOnlyForReceiver(env e){
-        configForEightTokensSetupRequirements();
-        uint256 shares;
-        address receiver;
-        totalSuppliesMoreThanBalance(receiver);
-        address otherUser;
-        require receiver != otherUser;
-
-        //balances before
-        uint256 sharesReceiverBefore = silo0.balanceOf(receiver);
-        uint256 sharesOtherUserBefore = silo0.balanceOf(otherUser);
-
-        mint(e, shares, receiver);
-
-        //balances after mint
-        uint256 sharesReceiverAfter = silo0.balanceOf(receiver);
-        uint256 sharesOtherUserAfter = silo0.balanceOf(otherUser);
-
-        //only receiver balance increases
-        assert sharesReceiverAfter > sharesReceiverBefore;
-        assert sharesOtherUserAfter == sharesOtherUserBefore;
-    }
-
-
-
-
-
-
-
-    rule onlySpecificFunctionsCanChangeTotalSupplyProtected(env e, method f, calldataarg args) filtered{f-> !f.isView} {
-        uint256 totalSupplyBefore = shareProtectedCollateralToken0.totalSupply();
-
-        f(e, args);
-
-        uint256 totalSupplyAfter = shareProtectedCollateralToken0.totalSupply();
-
-        assert(totalSupplyBefore != totalSupplyAfter => 
-            // ShareProtectedCollateralToken0
-                f.selector == sig:burn(address,address,uint256).selector || 
-                f.selector == sig:mint(address,address,uint256).selector ||
-            //ShareDebtToken0
-                // f.selector == sig:callOnBehalfOfShareToken(address,uint256,ISilo.CallType,bytes).selector || //because of defaultHavoc
-            //Silo0
-                f.selector == sig:flashLoan(address,address,uint256,bytes).selector || //because of defaultHavoc
-                f.selector == sig:updateHooks().selector || //because of defaultHavoc
-                f.selector == sig:redeem(uint256,address,address,ISilo.CollateralType).selector || 
-                f.selector == sig:deposit(uint256,address,ISilo.CollateralType).selector ||
-                f.selector == sig:mint(uint256,address,ISilo.CollateralType).selector ||
-                f.selector == sig:transitionCollateral(uint256,address,ISilo.CollateralType).selector ||
-                f.selector == sig:withdraw(uint256,address,address,ISilo.CollateralType).selector || 
-                f.selector == sig:callOnBehalfOfSilo(address,uint256,ISilo.CallType,bytes).selector 
-        );
-    }
   
 
     
@@ -316,9 +232,94 @@ methods {
 
 //------------------------------- RULES OK START ------------------------------------
 
-    
+
 
     
+    
+    
+    
+    
+
+
+
+
+
+
+
+    rule onlySpecificFunctionsCanChangeTotalSupplyProtected(env e, method f, calldataarg args) filtered{f-> !f.isView} {
+        uint256 totalSupplyBefore = shareProtectedCollateralToken0.totalSupply();
+
+        f(e, args);
+
+        uint256 totalSupplyAfter = shareProtectedCollateralToken0.totalSupply();
+
+        assert(totalSupplyBefore != totalSupplyAfter => 
+            // ShareProtectedCollateralToken0
+                f.selector == sig:burn(address,address,uint256).selector || 
+                f.selector == sig:mint(address,address,uint256).selector ||
+            //ShareDebtToken0
+                // f.selector == sig:callOnBehalfOfShareToken(address,uint256,ISilo.CallType,bytes).selector || //because of defaultHavoc
+            //Silo0
+                f.selector == sig:flashLoan(address,address,uint256,bytes).selector || //because of defaultHavoc
+                f.selector == sig:updateHooks().selector || //because of defaultHavoc
+                f.selector == sig:redeem(uint256,address,address,ISilo.CollateralType).selector || 
+                f.selector == sig:deposit(uint256,address,ISilo.CollateralType).selector ||
+                f.selector == sig:mint(uint256,address,ISilo.CollateralType).selector ||
+                f.selector == sig:transitionCollateral(uint256,address,ISilo.CollateralType).selector ||
+                f.selector == sig:withdraw(uint256,address,address,ISilo.CollateralType).selector || 
+                f.selector == sig:callOnBehalfOfSilo(address,uint256,ISilo.CallType,bytes).selector 
+        );
+    }
+    
+    //protected share token balance always increases after `mint()` only for receiver
+    rule mintProtectedSharesIncreaseOnlyForReceiver(env e){
+        configForEightTokensSetupRequirements();
+        uint256 shares;
+        address receiver;
+        totalSuppliesMoreThanBalance(receiver);
+        address otherUser;
+        require receiver != otherUser;
+
+        //balances before
+        uint256 sharesReceiverBefore = shareProtectedCollateralToken0.balanceOf(receiver);
+        uint256 sharesOtherUserBefore = shareProtectedCollateralToken0.balanceOf(otherUser);
+        require(sharesReceiverBefore + shares <= max_uint256);
+
+        mint(e, shares, receiver, ISilo.CollateralType.Protected);
+
+        //balances after mint
+        uint256 sharesReceiverAfter = shareProtectedCollateralToken0.balanceOf(receiver);
+        uint256 sharesOtherUserAfter = shareProtectedCollateralToken0.balanceOf(otherUser);
+
+        //only receiver balance increases
+        assert sharesReceiverAfter > sharesReceiverBefore;
+        assert sharesOtherUserAfter == sharesOtherUserBefore;
+    }
+
+    //collateral share token balance always increases after `mint()` only for receiver
+    rule mintCollateralSharesIncreaseOnlyForReceiver(env e){
+        configForEightTokensSetupRequirements();
+        uint256 shares;
+        address receiver;
+        totalSuppliesMoreThanBalance(receiver);
+        address otherUser;
+        require receiver != otherUser;
+
+        //balances before
+        uint256 sharesReceiverBefore = silo0.balanceOf(receiver);
+        uint256 sharesOtherUserBefore = silo0.balanceOf(otherUser);
+
+        mint(e, shares, receiver);
+
+        //balances after mint
+        uint256 sharesReceiverAfter = silo0.balanceOf(receiver);
+        uint256 sharesOtherUserAfter = silo0.balanceOf(otherUser);
+
+        //only receiver balance increases
+        assert sharesReceiverAfter > sharesReceiverBefore;
+        assert sharesOtherUserAfter == sharesOtherUserBefore;
+    }
+
     // `deposit()`/`mint()` always increase balance of underlying token for the silo
     rule depositAndMintIncreaseUnderlyingToken(env e, method f, calldataarg args) filtered{f->
         f.selector == sig:deposit(uint256,address).selector || 
