@@ -9,6 +9,9 @@ import {IShareToken} from "silo-core/contracts/interfaces/IShareToken.sol";
 import {ISilo} from "silo-core/contracts/interfaces/ISilo.sol";
 import {Views} from "silo-core/contracts/lib/Views.sol";
 import {ShareTokenLib} from "silo-core/contracts//lib/ShareTokenLib.sol";
+import "silo-core/contracts/lib/SiloStorageLib.sol";
+import {Rounding} from "silo-core/contracts/lib/Rounding.sol";
+import {Math} from "gitmodules/openzeppelin-contracts-5/contracts/utils/math/Math.sol";
 
 contract SiloHarness is Silo {
     constructor(ISiloFactory _siloFactory) Silo(_siloFactory) {}
@@ -102,5 +105,30 @@ contract SiloHarness is Silo {
         IShareToken.ShareTokenStorage storage $ = ShareTokenLib.getShareTokenStorage();
         return $.silo;
     }
-    
+
+    function totalAssetsHarness() external view returns (uint256 protectedAssets, uint256 collateralAssets, uint256 debtAssets) {
+        ISilo.SiloStorage storage $ = SiloStorageLib.getSiloStorage();
+        protectedAssets = $.totalAssets[ISilo.AssetType.Protected];
+        collateralAssets = $.totalAssets[ISilo.AssetType.Collateral];
+        debtAssets = $.totalAssets[ISilo.AssetType.Debt];
+    }
+
+    // function convertDepositToAssetsOrToSharesHarness(
+    //             uint256 _assets,
+    //             uint256 _shares,
+    //             uint256 _totalAssets,
+    //             uint256 _totalShares,
+    //             ISilo.AssetType _assetType
+    // ) external pure returns (uint256, uint256) {
+    //     return SiloMathLib.convertToAssetsOrToShares(
+    //                 _assets,
+    //                 _shares,
+    //                 totalAssets,
+    //                 _collateralShareToken.totalSupply(),
+    //                 Rounding.DEPOSIT_TO_ASSETS,
+    //                 Rounding.DEPOSIT_TO_SHARES,
+    //                 ISilo.AssetType(uint256(_collateralType))
+    //             );
+    // }
+
 }

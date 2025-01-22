@@ -41,7 +41,7 @@ library SiloStdLib {
     /// @param _assetType used to read proper storage data
     /// @return totalAssets total assets in Silo with interest for given asset type
     /// @return totalShares total shares in Silo for given asset type
-    function getTotalAssetsAndTotalSharesWithInterest(
+    function getTotalAssetsAndTotalSharesWithInterest( //@audit how is this returning the values with interest? No interest is accrued here...
         ISiloConfig.ConfigData memory _configData,
         ISilo.AssetType _assetType
     )

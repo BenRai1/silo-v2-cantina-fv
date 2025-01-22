@@ -14,9 +14,7 @@ methods {
     function Token0.balanceOf(address) external returns(uint256) envfree;
     function Silo0.balanceOf(address) external returns(uint256) envfree;
     function ShareDebtToken0.balanceOf(address) external returns(uint256) envfree;
-    function ShareProtectedCollateralToken0.balanceOf(
-        address
-    ) external returns(uint256) envfree;
+    function ShareProtectedCollateralToken0.balanceOf(address) external returns(uint256) envfree;
 
     function Token0.totalSupply() external returns(uint256) envfree;
     function Silo0.totalSupply() external returns(uint256) envfree;

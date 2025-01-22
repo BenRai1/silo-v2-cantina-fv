@@ -1,12 +1,6 @@
-/* Verifies the protocol allows anyone user access 
- * This setup is for a single silo - `Silo0`
- */
+/* Rules concerning deposit and mint  */
 
-import "../setup/single_silo_tokens_requirements.spec";
-import "../setup/summaries/silo0_summaries.spec";
-import "../setup/summaries/siloconfig_dispatchers.spec";
-import "../setup/summaries/config_for_one_in_cvl.spec";
-import "../setup/summaries/safe-approximations.spec";
+import "../setup/CompleteSiloSetup.spec";
 import "./0base_Silo.spec";
 
 methods {
@@ -80,21 +74,107 @@ methods {
 // ---- Functions and ghosts END ---------------------------------------------------
 
 //------------------------------- RULES TEST START ----------------------------------
+    //------------------------------------------------- RUNNING -------------------------------------------------
+        //only Silo can call mint
+        rule onlySiloCanCallMint(env e){
+            address receiver;
+            address depositor;
+            uint256 shares; 
+            
+            silo0.mint(e,receiver, depositor, shares);
+
+            assert e.msg.sender == getSiloFromStorage(e);
+        }
+
+        //only Silo can call burn
+        rule onlySiloCanCallBurn(env e){
+            address owner;
+            address spender;
+            uint256 shares; 
+            
+            silo0.burn(e,owner, spender, shares);
+
+            assert e.msg.sender == getSiloFromStorage(e);
+        }
+
+    //------------------------------------------------- RUNNING -------------------------------------------------
+
+
     
+    //protected share token balance always increases after `mint()` only for receiver
+    rule mintProtectedSharesIncreaseOnlyForReceiver(env e){
+        configForEightTokensSetupRequirements();
+        uint256 shares;
+        address receiver;
+        totalSuppliesMoreThanBalance(receiver);
+        address otherUser;
+        require receiver != otherUser;
+
+        //balances before
+        uint256 sharesReceiverBefore = shareProtectedCollateralToken0.balanceOf(receiver);
+        uint256 sharesOtherUserBefore = shareProtectedCollateralToken0.balanceOf(otherUser);
+        require(sharesReceiverBefore + shares <= max_uint256);
+
+        mint(e, shares, receiver, ISilo.CollateralType.Protected);
+
+        //balances after mint
+        uint256 sharesReceiverAfter = shareProtectedCollateralToken0.balanceOf(receiver);
+        uint256 sharesOtherUserAfter = shareProtectedCollateralToken0.balanceOf(otherUser);
+
+        //only receiver balance increases
+        assert sharesReceiverAfter > sharesReceiverBefore;
+        assert sharesOtherUserAfter == sharesOtherUserBefore;
+    }
+    
+    
+    
+    
+    //collateral share token balance always increases after `mint()` only for receiver
+    rule mintCollateralSharesIncreaseOnlyForReceiver(env e){
+        configForEightTokensSetupRequirements();
+        uint256 shares;
+        address receiver;
+        totalSuppliesMoreThanBalance(receiver);
+        address otherUser;
+        require receiver != otherUser;
+
+        //balances before
+        uint256 sharesReceiverBefore = silo0.balanceOf(receiver);
+        uint256 sharesOtherUserBefore = silo0.balanceOf(otherUser);
+
+        mint(e, shares, receiver);
+
+        //balances after mint
+        uint256 sharesReceiverAfter = silo0.balanceOf(receiver);
+        uint256 sharesOtherUserAfter = silo0.balanceOf(otherUser);
+
+        //only receiver balance increases
+        assert sharesReceiverAfter > sharesReceiverBefore;
+        assert sharesOtherUserAfter == sharesOtherUserBefore;
+    }
+
+
+
+
+
+
+
     rule onlySpecificFunctionsCanChangeTotalSupplyProtected(env e, method f, calldataarg args) filtered{f-> !f.isView} {
-        uint256 totalSupplyBefore = silo0.totalSupply();
+        uint256 totalSupplyBefore = shareProtectedCollateralToken0.totalSupply();
 
         f(e, args);
 
-        uint256 totalSupplyAfter = silo0.totalSupply();
+        uint256 totalSupplyAfter = shareProtectedCollateralToken0.totalSupply();
 
         assert(totalSupplyBefore != totalSupplyAfter => 
+            // ShareProtectedCollateralToken0
                 f.selector == sig:burn(address,address,uint256).selector || 
-                f.selector == sig:withdraw(uint256,address,address).selector ||
-                f.selector == sig:redeem(uint256,address,address).selector ||
-                f.selector == sig:deposit(uint256,address).selector ||
-                f.selector == sig:mint(uint256,address).selector ||
                 f.selector == sig:mint(address,address,uint256).selector ||
+            //ShareDebtToken0
+                // f.selector == sig:callOnBehalfOfShareToken(address,uint256,ISilo.CallType,bytes).selector || //because of defaultHavoc
+            //Silo0
+                f.selector == sig:flashLoan(address,address,uint256,bytes).selector || //because of defaultHavoc
+                f.selector == sig:updateHooks().selector || //because of defaultHavoc
                 f.selector == sig:redeem(uint256,address,address,ISilo.CollateralType).selector || 
                 f.selector == sig:deposit(uint256,address,ISilo.CollateralType).selector ||
                 f.selector == sig:mint(uint256,address,ISilo.CollateralType).selector ||
@@ -103,9 +183,208 @@ methods {
                 f.selector == sig:callOnBehalfOfSilo(address,uint256,ISilo.CallType,bytes).selector 
         );
     }
+  
+
+    
+
+    
+
+    
+
+    
 
 
 
+
+
+
+        // mint protected collateral
+            // no one has allowance
+            // invariants: protected Assets >= ProtectedAsset shares
+            //invariant: silo holds at least the amount of assets that are protected
+        // do something
+        // withdraw protected collateral => should not fail
+
+    //when a user deposits x and withdraws x he is left with 0 shares
+
+
+    // minting the amount of shares rereived by depositiong cost the same amount of assets and vice versa (use return values of deposit and mint)
+    // the right amount of assets are transfered when minting
+    // the right amount of shares are transfered when depositing
+    // the right amount of assets are transfered when redeeming
+    // the right amount of shares are transfered when withdrawing
+
+    
+
+    //callOnBehalfOfSilo can only be called by hookReceiver
+
+
+    
+
+
+//------------------------------- RULES TEST END ----------------------------------
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+    //@audit-issue issue dispatcher?? Burned shares are way more than minted shares 3000 deposit vs 1000 withdraw 
+    // https://prover.certora.com/output/8418/66c140cb44854949b028734589bbdafc/?anonymousKey=8e49709abb33853627e0a87899814187f18d9569
+    //When a user deposits x assets and withdraws x assets he gets back the same amount 
+    rule withdrawRecoversDeposit(env e){
+        configForEightTokensSetupRequirements();
+        uint256 assets;
+        address sender = e.msg.sender;
+
+        //ensure no interst is accrued
+        require require_uint64(e.block.timestamp) == silo0.getSiloDataInterestRateTimestamp(e);
+        
+        //balance before
+        uint256 assetsSenderToken0Before = token0.balanceOf(sender);
+        uint256 sharesSenderBefore = silo0.balanceOf(sender);
+
+        deposit(e, assets, sender);
+
+        //balance after deposit
+        uint256 assetsSenderToken0AfterDeposit = token0.balanceOf(sender);
+        uint256 sharesSenderAfterDeposit = silo0.balanceOf(sender);
+
+        withdraw(e, assets, sender, sender);
+
+        //balance after withdraw
+        uint256 assetsSenderToken0AfterWithdraw = token0.balanceOf(sender);
+        uint256 sharesSenderAfterWithdraw = silo0.balanceOf(sender);
+
+        // final balances equals the starting balance
+        assert assetsSenderToken0Before == assetsSenderToken0AfterWithdraw;
+        // no shares are left to redeem
+        assert sharesSenderBefore == sharesSenderAfterWithdraw;
+    } 
+
+    //@audit-issue issue with dispatcher? Result is one more asset given back than used for minting
+    //when a user mints x shares and burns x shares he gets back the same value 
+    rule redeemRecoversMint(env e){
+        configForEightTokensSetupRequirements();
+        uint256 shares;
+        address sender = e.msg.sender;
+        
+        //balance before
+        uint256 assetsSenderToken0Before = token0.balanceOf(sender);
+        uint256 sharesSenderBefore = silo0.balanceOf(sender);
+
+        mint(e, shares, sender);
+
+        //balance after mint
+        uint256 assetsSenderToken0AfterMint = token0.balanceOf(sender);
+
+        redeem(e, shares, sender, sender);
+
+        //balance after burn
+        uint256 assetsSenderToken0AfterRedeem = token0.balanceOf(sender);
+        uint256 sharesSenderAfterRedeem = silo0.balanceOf(sender);
+
+        //assert that the final balances equals the starting balance
+        assert assetsSenderToken0Before == assetsSenderToken0AfterRedeem; 
+        //assert that no shares are left to redeem
+        assert sharesSenderBefore == sharesSenderAfterRedeem;
+    }
+
+
+    //protected collateral can always be withdrawn //@audit-issue killed becasue of time out(??)
+    rule protectedCanAlwaysBeWithdrawn(env e, method f, calldataarg arg) filtered{f-> !f.isView}{
+        configForEightTokensSetupRequirements();
+        uint256 assets;
+        address sender = e.msg.sender;
+
+        //deposit protected collateral
+        deposit(e, assets, sender, ISilo.CollateralType.Protected);
+
+        //shares sender after deposit
+        uint256 protectedCollateralSharesSenderAfterDeposit = shareProtectedCollateralToken0.balanceOf(sender);
+
+        f(e, arg);
+
+        //shares sender after function call
+        uint256 protectedCollateralSharesSenderAfterFunctionCall = shareProtectedCollateralToken0.balanceOf(sender);
+        require(protectedCollateralSharesSenderAfterFunctionCall == protectedCollateralSharesSenderAfterDeposit);
+
+        //withdraw protected collateral
+        withdraw@withrevert(e, assets, sender, sender, ISilo.CollateralType.Protected);
+
+        assert !lastReverted;
+    }
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+//------------------------------- RULES OK START ------------------------------------
+
+    
+
+    
+    // `deposit()`/`mint()` always increase balance of underlying token for the silo
+    rule depositAndMintIncreaseUnderlyingToken(env e, method f, calldataarg args) filtered{f->
+        f.selector == sig:deposit(uint256,address).selector || 
+        f.selector == sig:mint(uint256,address).selector ||
+        f.selector == sig:deposit(uint256,address,ISilo.CollateralType).selector ||
+        f.selector == sig:mint(uint256,address,ISilo.CollateralType).selector
+    } {
+        configForEightTokensSetupRequirements();
+        nonSceneAddressRequirements(e.msg.sender);
+        totalSuppliesMoreThanBalances(e.msg.sender, silo0);
+        uint256 balanceSiloBefore = token0.balanceOf(silo0);
+
+        f(e, args);
+
+        uint256 balanceSiloAfter = token0.balanceOf(silo0);
+
+        assert balanceSiloAfter > balanceSiloBefore;
+    }
+
+    //collateral share token balance always increases after `deposit()` only for receiver
+    rule depositCollateralSharesIncreaseOnlyForReceiver(env e ){
+        configForEightTokensSetupRequirements();
+        uint256 assets;
+        address receiver;
+        totalSuppliesMoreThanBalance(receiver);
+        address otherUser;
+        require receiver != otherUser;
+
+        //balances before
+        uint256 sharesReceiverBefore = silo0.balanceOf(receiver);
+        uint256 sharesOtherUserBefore = silo0.balanceOf(otherUser);
+
+        deposit(e, assets, receiver);
+
+        //balances after mint
+        uint256 sharesReceiverAfter = silo0.balanceOf(receiver);
+        uint256 sharesOtherUserAfter = silo0.balanceOf(otherUser);
+
+        //only receiver balance increases
+        assert sharesReceiverAfter > sharesReceiverBefore;
+        assert sharesOtherUserAfter == sharesOtherUserBefore;
+    }
+
+    //protected share token balance always increases after `deposit()` only for receiver
+    rule depositProtectedSharesIncreaseOnlyForReceiver(env e ){
+        configForEightTokensSetupRequirements();
+        uint256 assets;
+        address receiver;
+        totalSuppliesMoreThanBalance(receiver);
+        address otherUser;
+        require receiver != otherUser;
+
+        //balances before
+        uint256 sharesReceiverBefore = shareProtectedCollateralToken0.balanceOf(receiver);
+        uint256 sharesOtherUserBefore = shareProtectedCollateralToken0.balanceOf(otherUser);
+
+        deposit(e, assets, receiver, ISilo.CollateralType.Protected);
+
+        //balances after mint
+        uint256 sharesReceiverAfter = shareProtectedCollateralToken0.balanceOf(receiver);
+        uint256 sharesOtherUserAfter = shareProtectedCollateralToken0.balanceOf(otherUser);
+
+        //only receiver balance increases
+        assert sharesReceiverAfter > sharesReceiverBefore;
+        assert sharesOtherUserAfter == sharesOtherUserBefore;
+    }
 
     //with the same share amount, the result of all mints is the same
     rule mintResultIsTheSameBalances(env e) {
@@ -166,138 +445,7 @@ methods {
         //assert that the final balances are the same
         assert assetsSenderToken0AfterMint == assetsSenderToken0AfterMintCollateral && assetsSenderToken0AfterMint == assetsSenderToken0AfterMintProtectedCollateral;
         assert assetsSiloToken0AfterMint == assetsSiloToken0AfterMintCollateral && assetsSiloToken0AfterMint == assetsSiloToken0AfterMintProtectedCollateral;
-    }
-  
-
-    //when a user mints x and burns x he gets back the same value
-    rule redeemRecoversMint(env e){
-        configForEightTokensSetupRequirements();
-        uint256 shares;
-        address sender = e.msg.sender;
-        
-        //balance before
-        uint256 assetsSenderToken0Before = token0.balanceOf(sender);
-        uint256 sharesSenderBefore = silo0.balanceOf(sender);
-
-        mint(e, shares, sender);
-
-        //balance after mint
-        uint256 assetsSenderToken0AfterMint = token0.balanceOf(sender);
-
-        redeem(e, shares, sender, sender);
-
-        //balance after burn
-        uint256 assetsSenderToken0AfterRedeem = token0.balanceOf(sender);
-        uint256 sharesSenderAfterRedeem = silo0.balanceOf(sender);
-
-        //assert that the final balances equals the starting balance
-        //@audit-issue how to make it equal but not exactly the same? 
-        // Also, we had more assets after burn, this should be an issue: https://prover.certora.com/output/8418/d43cc3c0c83a457eaad21f5b8d0ebacf/?anonymousKey=22676493230c29d653a5272a7407faa8f649c4fb
-        assert assetsSenderToken0Before == assetsSenderToken0AfterRedeem; 
-        //assert that no shares are left to redeem
-        assert sharesSenderBefore == sharesSenderAfterRedeem;
-    }
-
-    //When a user deposits x and withdraws max he gets back the same amount
-    rule withdrawRecoversDeposit(env e){
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address sender = e.msg.sender;
-
-        //ensure no interst is accrued
-        require require_uint64(e.block.timestamp) == silo0.getSiloDataInterestRateTimestamp(e);
-        
-        //balance before
-        uint256 assetsSenderToken0Before = token0.balanceOf(sender);
-        uint256 sharesSenderBefore = silo0.balanceOf(sender);
-
-        deposit(e, assets, sender);
-
-        //balance after deposit
-        uint256 assetsSenderToken0AfterDeposit = token0.balanceOf(sender);
-
-        withdraw(e, assets, sender, sender);
-
-        //balance after withdraw
-        uint256 assetsSenderToken0AfterWithdraw = token0.balanceOf(sender);
-        uint256 sharesSenderAfterWithdraw = silo0.balanceOf(sender);
-
-        // final balances equals the starting balance
-        assert assetsSenderToken0Before == assetsSenderToken0AfterWithdraw;
-        // no shares are left to redeem
-        assert sharesSenderBefore == sharesSenderAfterWithdraw;
-    } 
-
-    //protected collateral can always be withdrawn
-    rule protectedCanAlwaysBeWithdrawn(env e, method f, calldataarg arg) filtered{f-> !f.isView}{
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address sender = e.msg.sender;
-
-        //deposit protected collateral
-        deposit(e, assets, sender, ISilo.CollateralType.Protected);
-
-        //shares sender after deposit
-        uint256 protectedCollateralSharesSenderAfterDeposit = shareProtectedCollateralToken0.balanceOf(sender);
-
-        f(e, arg);
-
-        //shares sender after function call
-        uint256 protectedCollateralSharesSenderAfterFunctionCall = shareProtectedCollateralToken0.balanceOf(sender);
-        require(protectedCollateralSharesSenderAfterFunctionCall == protectedCollateralSharesSenderAfterDeposit);
-
-        //withdraw protected collateral
-        withdraw@withrevert(e, assets, sender, sender, ISilo.CollateralType.Protected);
-
-        assert !lastReverted;
-    }
-
-    
-
-
-
-
-
-
-        // mint protected collateral
-            // no one has allowance
-            // invariants: protected Assets >= ProtectedAsset shares
-            //invariant: silo holds at least the amount of assets that are protected
-        // do something
-        // withdraw protected collateral => should not fail
-
-    //when a user deposits x and withdraws x he is left with 0 shares
-
-
-    // minting the amount of shares rereived by depositiong cost the same amount of assets and vice versa (use return values of deposit and mint)
-    // the right amount of assets are transfered when minting
-    // the right amount of shares are transfered when depositing
-    // the right amount of assets are transfered when redeeming
-    // the right amount of shares are transfered when withdrawing
-
-
-
-
-    
-
-    
-        
-    
-
-    //callOnBehalfOfSilo can only be called by hookReceiver
-
-
-
-//------------------------------- RULES TEST END ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES OK START ------------------------------------
-
-
-    
+    }    
 
     //mint moves underlying asset to silo
     rule mintMovesUnderlyingAssetToSilo(env e) {
@@ -900,7 +1048,7 @@ methods {
     }
 
     //only specific functions can change the ballance of a user
-    rule onlySpecificFunctionsCanChangeBalanceOfUser(env e, method f, calldataarg args) filtered{f-> !f.isView} {
+    rule onlySpecificFunctionsCanChangeCollateralBalanceOfUser(env e, method f, calldataarg args) filtered{f-> !f.isView} {
         address user;
         uint256 balanceBefore = silo0.balanceOf(user);
 
@@ -939,15 +1087,6 @@ methods {
         assert balance == balanceResult && totalSupply == totalSupplyResult;
     }
 
-    //only Silo can call mint and burn
-    rule onlySiloCanCallMintAndBurn(env e, method f, calldataarg args) filtered{f->
-        f.selector == sig:mint(address,address,uint256).selector || 
-        f.selector == sig:burn(address,address,uint256).selector} {
-        
-        f(e, args);
-
-        assert e.msg.sender == getSiloFromStorage(e);
-    }
 
     //only specific functions can change the total supply
     rule onlySpecificFunctionsCanChangeTotalSupplyCollateral(env e, method f, calldataarg args) filtered{f-> !f.isView} {
@@ -972,6 +1111,9 @@ methods {
                 f.selector == sig:callOnBehalfOfSilo(address,uint256,ISilo.CallType,bytes).selector 
         );
     }
+    
+
+
 
 //------------------------------- RULES OK END ------------------------------------
 
@@ -984,11 +1126,6 @@ methods {
 //------------------------------- ISSUES OK END-------------------------------
 
 //-------------------------------OLD RULES START----------------------------------
-
-
-
-    // ---- Rules ------------------------------------------------------------------
-
     /// @title For testing the setup
     rule sanityWithSetup_borrow() {
         calldataarg args;

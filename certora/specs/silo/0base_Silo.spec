@@ -4,12 +4,15 @@ methods{
    function _.balanceOf(address user) external envfree; 
    function _.allowance(address owner, address spender) external envfree;
    function _.silo() external envfree;
+   function silo1.totalAssetsHarness() external returns (uint256, uint256, uint256)envfree;
 }
 //add all view functions to methodes and make them envfree
 
 /////////////////// METHODS END ///////////////////////
 
 ///////////////// DEFINITIONS START /////////////////////
+
+
 // definition HARNESS_VIEW_METHODS(method f) returns bool 
 //    = HARNESS_METHODS(f) || f.isView;"
    //definition HARNESS_METHODS(method f) returns bool = 

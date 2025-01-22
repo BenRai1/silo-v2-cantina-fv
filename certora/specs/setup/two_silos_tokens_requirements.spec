@@ -65,7 +65,7 @@ function configForEightTokensSetupRequirements() {
     require shareDebtToken1.siloConfig() == siloConfig;
 }
 
-function totalSupplyMoreThanBalance(address user1) {
+function totalSuppliesMoreThanBalance(address user1) {
     require (
         to_mathint(silo0.totalSupply()) >=
         silo0.balanceOf(user1)
@@ -104,7 +104,7 @@ function totalSupplyMoreThanBalance(address user1) {
 function totalSuppliesMoreThanBalances(address user1, address user2) {
     if (user1 == user2) 
     {
-        totalSupplyMoreThanBalance(user1);
+        totalSuppliesMoreThanBalance(user1);
         return;
     }
     // require user1 != user2;
