@@ -8,11 +8,11 @@ methods {
         returns (uint256) => accrueInterestForAsset_noStateChange(_interestRateModel, _daoFee, _deployerFee);
 
     function _.getCompoundInterestRate(address, uint256) external => getCompoundInterestRate_noStateChange() expect void;
+    function _.getCompoundInterestRateAndUpdate(uint256, uint256, uint256) external => getCompoundInterestRateAndUpdate_noStateChange() expect void;
 }
 
 function accrueInterest_noStateChange() returns uint256 {
     uint256 anyInterest;
-
     return (anyInterest);
 }
 
@@ -24,3 +24,5 @@ function accrueInterestForAsset_noStateChange(address _interestRateModel, uint25
 }
 
 function getCompoundInterestRate_noStateChange() {}
+
+function getCompoundInterestRateAndUpdate_noStateChange() {}

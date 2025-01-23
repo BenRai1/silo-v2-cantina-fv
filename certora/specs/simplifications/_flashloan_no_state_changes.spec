@@ -1,6 +1,6 @@
 methods {
 
-    function _.onFlashLoan(address, address, uint256, uint192, bytes) external 
+    function _.onFlashLoan(address, address, uint256, uint256, bytes) external 
             => onFlashLoan__noStateChange() expect void;
 
    

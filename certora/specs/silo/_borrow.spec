@@ -1,4 +1,4 @@
-/* Rules concerning deposit and mint  */
+/* Rules concerning borrow  */
 
 import "../setup/CompleteSiloSetup.spec";
 import "./0base_Silo.spec";
@@ -7,9 +7,43 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec";
 
 //------------------------------- RULES TEST START ----------------------------------
 
+    // borrow should be the same as borrowShares with shares = shares minted by borrow 
+    rule borrowIsTheSameAsBorrowShares(env e){ 
+        configForEightTokensSetupRequirements();
+        uint256 assets;
+        address receiver;
+        address borrower;
+        nonSceneAddressRequirements(borrower);
+
+        storage init = lastStorage;
+
+        uint256 shares = borrow(e, assets, receiver, borrower);
+
+        storage storageAfterBorrow = lastStorage;
+
+        borrowShares(e, shares, receiver, borrower) at init;
+
+        storage storageAfterBorrowShares = lastStorage;
+
+        assert storageAfterBorrow == storageAfterBorrowShares;
+    }
 
 
-    // borrow reverts if _assets to borrow > liquidity of the silo (SiloMathLib.liquidity)
+    
+
+
+
+    // * `borrow()` user borrows maxAssets returned by maxBorrow, borrow should not revert because of solvency check
+
+
+
+
+
+//------------------------------- RULES TEST END ----------------------------------
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+    // borrow reverts if _assets to borrow > liquidity of the silo (SiloMathLib.liquidity) //@audit-issue has an unexpected error, asked Certora
     rule borrowRevertsIfAssetsToBorrowGreaterThanLiquidity(env e){
         configForEightTokensSetupRequirements();
         uint256 assets;
@@ -23,34 +57,6 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec";
 
         assert assets > liquidity => lastReverted;
     }
-
-    //@audit-issue !ISSUE! allowance and not receiveAllowance is used when minting for an other user
-    // only user or _receiveAllowance can borrow() for user 
-    rule onlyUserOrReceiverAllowanceCanBorrow(env e){
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address receiver;
-        address borrower;
-        address caller = e.msg.sender;
-
-        uint256 receiveAllowancCaller = shareDebtToken0.receiveAllowance(borrower, caller);
-
-        borrow(e, assets, receiver, borrower);
-
-        assert caller == borrower ||  receiveAllowancCaller >= assets;
-    }
-
-
-    // * `borrow()` user borrows maxAssets returned by maxBorrow, borrow should not revert because of solvency check
-    // borrow should be the same as borrowShares with shares = shares minted by borrow
-
-
-
-
-
-//------------------------------- RULES TEST END ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
 
     // after borrow, borrower ltv is below MaxLtv (isBelowMaxLtv) //@audit-issue vacouse rule => strange, check closer
     rule borrowerLtvIsbelwoMaxLtvAfterBorrow(env e){

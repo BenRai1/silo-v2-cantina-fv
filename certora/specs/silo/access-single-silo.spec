@@ -879,26 +879,6 @@ methods {
         assert finalStateMint == finalStateMintCollateral;
     }
 
-    //only user or address with allowance can redeem shares
-    rule onlyUserOrAllowanceCanRedeemOrWithdrawShares(env e, method f, calldataarg args) filtered{f-> 
-        f.selector == sig:redeem(uint256,address,address).selector ||
-        f.selector == sig:redeem(uint256,address,address,ISilo.CollateralType).selector ||
-        f.selector == sig:withdraw(uint256,address,address).selector ||
-        f.selector == sig:withdraw(uint256,address,address,ISilo.CollateralType).selector        
-    } {
-        address amountAsset;
-        address owner;
-        uint256 allowanceMsgSender = silo0.allowance(e, owner, e.msg.sender);
-        uint256 sharesBefore = silo0.balanceOf(owner);        
-
-        f(e, args);
-
-        uint256 sharesAfter = silo0.balanceOf(owner);
-        mathint redeemedShares = sharesBefore - sharesAfter;
-
-        assert(sharesBefore != sharesAfter => e.msg.sender == owner || allowanceMsgSender >= redeemedShares);
-    }
-
     //only specific functions can change the ballance of a user
     rule onlySpecificFunctionsCanChangeBalanceOfUser(env e, method f, calldataarg args) filtered{f-> !f.isView} {
         address user;

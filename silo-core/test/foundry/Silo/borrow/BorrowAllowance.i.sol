@@ -6,6 +6,7 @@ import {Test} from "forge-std/Test.sol";
 import {ISiloConfig} from "silo-core/contracts/interfaces/ISiloConfig.sol";
 import {IShareToken} from "silo-core/contracts/interfaces/IShareToken.sol";
 import {IERC20Errors} from "openzeppelin5/interfaces/draft-IERC6093.sol";
+import {ShareDebtToken} from "silo-core/contracts/utils/ShareDebtToken.sol";
 
 import {SiloLittleHelper} from "../../_common/SiloLittleHelper.sol";
 
@@ -68,5 +69,30 @@ contract BorrowAllowanceTest is SiloLittleHelper, Test {
         assertEq(token1.balanceOf(RECEIVER), ASSETS / 2, "RECEIVER got tokens after");
 
         assertEq(IShareToken(debtShareToken).allowance(BORROWER, address(this)), ASSETS / 2, "allowance reduced");
+    }
+
+    /*
+    FOUNDRY_PROFILE=core-test forge test --ffi -vv --mt test_borrow_withoutReceiveAllowance
+    */
+
+    function test_borrow_withoutReceiveAllowance() public {
+        (,, address debtShareToken) = siloConfig.getShareTokens(address(silo1));
+
+        // BORROWER give "normal" allowance to the DEPOSITOR
+        vm.prank(BORROWER);
+        IShareToken(debtShareToken).approve(DEPOSITOR, ASSETS);
+
+        assertEq(ShareDebtToken(debtShareToken).receiveAllowance(DEPOSITOR, BORROWER), 0, "DEPOSITOR not allowed to send debt to BORROWER");
+        assertEq(IShareToken(debtShareToken).balanceOf(BORROWER), 0, "BORROWER no debt before");
+        assertEq(token1.balanceOf(RECEIVER), 0, "RECEIVER no tokens before");
+
+        // DEPOSITOR try to borrow for BORROWER without having receive allowance
+        vm.prank(DEPOSITOR);
+        silo1.borrow(ASSETS / 2, RECEIVER, BORROWER);
+
+        assertEq(IShareToken(debtShareToken).balanceOf(BORROWER), ASSETS / 2, "BORROWER has debt after");
+
+        assertEq(token1.balanceOf(RECEIVER), ASSETS / 2, "RECEIVER got tokens after");
+
     }
 }
