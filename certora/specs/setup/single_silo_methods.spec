@@ -29,5 +29,14 @@ methods {
     function ShareDebtToken0.siloConfig() external returns (address) envfree;
     function ShareProtectedCollateralToken0.siloConfig() external returns (address) envfree;
 
+    function Silo0.allowance(address, address) external returns (uint256) envfree;
+    function Token0.allowance(address, address) external returns (uint256) envfree;
+    function ShareDebtToken0.allowance(address, address) external returns (uint256) envfree;
+    function ShareProtectedCollateralToken0.allowance(address, address) external returns (uint256) envfree;
+    
     function Silo0.config() external returns (address) envfree;
+    function Silo0.getSiloStorage() external returns (uint192, uint64, uint256, uint256, uint256) envfree;
+    function SiloConfig.borrowerCollateralSilo(address) external returns (address) envfree;
+
+    
 } 

@@ -1,28 +1,32 @@
 methods {
-    function Silo._accrueInterest()
-        internal
-        returns (uint256) => accrueInterest_noStateChange();
+    function _._accrueInterest() internal => accrueInterest_noStateChange()  expect uint256;
+    // function Silo1._accrueInterest() internal returns (uint256) => accrueInterest_noStateChange();
 
-    function Silo._accrueInterestForAsset(address _interestRateModel, uint256 _daoFee, uint256 _deployerFee)
+    function _._accrueInterestForAsset(address _interestRateModel, uint256 _daoFee, uint256 _deployerFee)
         internal
-        returns (uint256) => accrueInterestForAsset_noStateChange(_interestRateModel, _daoFee, _deployerFee);
+        => accrueInterestForAsset_noStateChange(_interestRateModel, _daoFee, _deployerFee)  expect uint256;
+        // returns (uint256) => accrueInterestForAsset_noStateChange(_interestRateModel, _daoFee, _deployerFee);
 
-    function _.getCompoundInterestRate(address, uint256) external => getCompoundInterestRate_noStateChange() expect void;
-    function _.getCompoundInterestRateAndUpdate(uint256, uint256, uint256) external => getCompoundInterestRateAndUpdate_noStateChange() expect void;
+    function _.getCompoundInterestRate(address, uint256) external => getCompoundInterestRate_noStateChange() expect uint256;
+    function _.getCompoundInterestRateAndUpdate(uint256, uint256, uint256) external => getCompoundInterestRateAndUpdate_noStateChange() expect uint256;
 }
 
 function accrueInterest_noStateChange() returns uint256 {
-    uint256 anyInterest;
-    return (anyInterest);
+    return 0;
 }
 
 function accrueInterestForAsset_noStateChange(address _interestRateModel, uint256 _daoFee, uint256 _deployerFee)
     returns uint256
 {
-    uint256 anyInterest;
-    return anyInterest;
+    return 0;
 }
 
-function getCompoundInterestRate_noStateChange() {}
 
-function getCompoundInterestRateAndUpdate_noStateChange() {}
+function getCompoundInterestRate_noStateChange() returns uint256  {
+    return 0;
+}
+
+function getCompoundInterestRateAndUpdate_noStateChange() returns uint256 {
+    return 0;
+}
+

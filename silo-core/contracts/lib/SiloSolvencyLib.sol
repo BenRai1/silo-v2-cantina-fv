@@ -125,7 +125,7 @@ library SiloSolvencyLib {
                 _collateralConfig.daoFee,
                 _collateralConfig.deployerFee
             )
-            : totalCollateralAssets; //@audit why is no interest accrued here? Where is it called from and was the interest already accrued before?
+            : totalCollateralAssets; //i: no interest accrued because _accrueInMemory == NO
 
         ltvData.borrowerCollateralAssets = SiloMathLib.convertToAssets(
             shares, totalCollateralAssets, totalShares, Rounding.COLLATERAL_TO_ASSETS, ISilo.AssetType.Collateral

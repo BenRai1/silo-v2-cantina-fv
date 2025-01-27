@@ -14,21 +14,21 @@ import "../simplifications/_hooks_no_state_change.spec";
 
 //calls to silo0 do not change balances of silo1 tokens
 rule callsToSilo0DoNotChangeBalancesOfSilo1Tokens2(env e, method f, calldataarg args) filtered{f -> 
-        f.selector != sig:transferFrom(address,address,uint256).selector ||
-        f.selector != sig:transitionCollateral(uint256,address,ISilo.CollateralType).selector ||
-        f.selector != sig:callOnBehalfOfSilo(address,uint256,ISilo.CallType,bytes).selector ||
-        f.selector != sig:flashLoan(address,address,uint256,bytes).selector ||
-        f.selector != sig:withdrawFees().selector ||
-        f.selector != sig:switchCollateralToThisSilo().selector ||
-        f.selector != sig:updateHooks().selector ||
-        f.selector != sig:borrowShares(uint256,address,address).selector ||
-        f.selector != sig:withdraw(uint256,address,address).selector ||
-        f.selector != sig:redeem(uint256,address,address).selector ||
-        f.selector != sig:borrow(uint256,address,address).selector ||
-        f.selector != sig:transfer(address,uint256).selector ||
-        f.selector != sig:initialize(address).selector ||
-        f.selector != sig:redeem(uint256,address,address,ISilo.CollateralType).selector ||
-        f.selector != sig:withdraw(uint256,address,address,ISilo.CollateralType).selector
+        f.selector == sig:transferFrom(address,address,uint256).selector ||
+        f.selector == sig:transitionCollateral(uint256,address,ISilo.CollateralType).selector ||
+        f.selector == sig:callOnBehalfOfSilo(address,uint256,ISilo.CallType,bytes).selector ||
+        f.selector == sig:flashLoan(address,address,uint256,bytes).selector ||
+        f.selector == sig:withdrawFees().selector ||
+        f.selector == sig:switchCollateralToThisSilo().selector ||
+        f.selector == sig:updateHooks().selector ||
+        f.selector == sig:borrowShares(uint256,address,address).selector ||
+        f.selector == sig:withdraw(uint256,address,address).selector ||
+        f.selector == sig:redeem(uint256,address,address).selector ||
+        f.selector == sig:borrow(uint256,address,address).selector ||
+        f.selector == sig:transfer(address,uint256).selector ||
+        f.selector == sig:initialize(address).selector ||
+        f.selector == sig:redeem(uint256,address,address,ISilo.CollateralType).selector ||
+        f.selector == sig:withdraw(uint256,address,address,ISilo.CollateralType).selector
 } {
     configForEightTokensSetupRequirements();
     address user;

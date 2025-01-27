@@ -9,6 +9,9 @@ methods{
    function ltvBelowMaxLtvHarness(address) external returns (bool) envfree;
    function shareDebtToken0.receiveAllowance(address,address) external returns (uint256) envfree;
    function shareDebtToken1.receiveAllowance(address,address) external returns (uint256) envfree;
+
+
+   function _.getCollateralAndDebtTotalsStorage() external => DISPATCHER(true);
 }
 //add all view functions to methodes and make them envfree
 
@@ -28,7 +31,9 @@ methods{
       f.selector == sig:getSiloFromStorage().selector ||
       f.selector == sig:totalAssetsHarness().selector ||
       f.selector == sig:borrowerCollateralSiloHarness(address).selector ||
-      f.selector == sig:ltvBelowMaxLtvHarness(address).selector;
+      f.selector == sig:ltvBelowMaxLtvHarness(address).selector ||
+      f.selector == sig:getUserAssetsHarness(address).selector ||
+      f.selector == sig:convertToAssetsHarness(uint256, ISilo.AssetType).selector;
 
 
 
@@ -47,6 +52,12 @@ methods{
 ///////////////// DEFINITIONS END /////////////////////
 
 ////////////////// FUNCTIONS START //////////////////////
+
+/// @title `approxSameWithRange` implementation in CVL
+/// @notice This will never revert!
+function cvlApproxSameWithRange(uint256 x, uint256 y, uint256 range) returns bool {
+    return x > y ? x - y <= range : y-x <= range;
+}
 
 ////////////////// FUNCTIONS END //////////////////////
 

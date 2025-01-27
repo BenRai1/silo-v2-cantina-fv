@@ -195,3 +195,14 @@ function totalSuppliesMoreThanThreeBalances(address user1, address user2, addres
         token1.balanceOf(user1) + token1.balanceOf(user2) + token1.balanceOf(user3)
     );
 }
+
+//------------------------ ADDED BY ME -----------------------------------------
+
+function threeUsersNotEqual(address user1, address user2, address user3) {
+    nonSceneAddressRequirements(user1);
+    nonSceneAddressRequirements(user2);
+    nonSceneAddressRequirements(user3);
+    require user1 != user2;
+    require user1 != user3;
+    require user2 != user3;    
+}

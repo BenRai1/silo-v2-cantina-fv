@@ -90,7 +90,7 @@ library SiloMathLib {
             return (_totalDebtAssets, 0);
         }
 
-        accruedInterest = mulDivOverflow(_totalDebtAssets, _rcomp, _PRECISION_DECIMALS);
+        accruedInterest = mulDivOverflow(_totalDebtAssets, _rcomp, _PRECISION_DECIMALS); 
 
         unchecked {
             // We intentionally allow overflow here, to prevent transaction revert due to interest calculation.

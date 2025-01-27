@@ -15,9 +15,7 @@ methods {
     function Token1.balanceOf(address) external returns(uint256) envfree;
     function Silo1.balanceOf(address) external returns(uint256) envfree;
     function ShareDebtToken1.balanceOf(address) external returns(uint256) envfree;
-    function ShareProtectedCollateralToken1.balanceOf(
-        address
-    ) external returns(uint256) envfree;
+    function ShareProtectedCollateralToken1.balanceOf(address) external returns(uint256) envfree;
 
     function Token1.totalSupply() external returns(uint256) envfree;
     function Silo1.totalSupply() external returns(uint256) envfree;
@@ -32,5 +30,11 @@ methods {
     function ShareDebtToken1.siloConfig() external returns (address) envfree;
     function ShareProtectedCollateralToken1.siloConfig() external returns (address) envfree;
 
+    function Silo1.allowance(address, address) external returns (uint256) envfree;
+    function Token1.allowance(address, address) external returns (uint256) envfree;
+    function ShareDebtToken1.allowance(address, address) external returns (uint256) envfree;
+    function ShareProtectedCollateralToken1.allowance(address, address) external returns (uint256) envfree;
+    
     function Silo1.config() external returns (address) envfree;
+    function Silo1.getSiloStorage() external returns (uint192, uint64, uint256, uint256, uint256) envfree;
 } 

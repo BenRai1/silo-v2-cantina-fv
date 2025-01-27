@@ -5,6 +5,8 @@ import {Silo} from "silo-core/contracts/Silo.sol";
 import {ISiloFactory} from "silo-core/contracts/interfaces/ISiloFactory.sol";
 import {ISiloConfig} from "silo-core/contracts/interfaces/ISiloConfig.sol";
 import {SiloSolvencyLib} from "silo-core/contracts/lib/SiloSolvencyLib.sol";
+import {SiloMathLib} from "silo-core/contracts/lib/SiloMathLib.sol";
+import {SiloStdLib} from "silo-core/contracts/lib/SiloStdLib.sol";
 import {IShareToken} from "silo-core/contracts/interfaces/IShareToken.sol";
 import {ISilo} from "silo-core/contracts/interfaces/ISilo.sol";
 import {Views} from "silo-core/contracts/lib/Views.sol";
@@ -129,6 +131,39 @@ contract SiloHarness is Silo {
             collateralConfig, debtConfig, borrower, ISilo.AccrueInterestInMemory.No
         );
 
+    }
+
+    function getUserAssetsHarness(address user) external view 
+            returns (uint256 protectedAssets, uint256 collateralAssets, uint256 debtAssets) {
+        //get siloConfig
+        ISiloConfig siloConfig = ShareTokenLib.siloConfig();
+
+        //get deposit config to know the addresses of the tokens
+        ISiloConfig.ConfigData memory silo0Config = siloConfig.getConfig(address(this));
+
+        //get balance of tokens of the user and convert them to assets
+        uint256 protectedShares = IShareToken(silo0Config.protectedShareToken).balanceOf(user);
+        protectedAssets = convertToAssetsHarness(protectedShares, AssetType.Protected);
+
+        uint256 collateralShares = IShareToken(silo0Config.collateralShareToken).balanceOf(user);
+        collateralAssets = convertToAssetsHarness(collateralShares, AssetType.Collateral);
+
+        uint256 debtShares = IShareToken(silo0Config.debtShareToken).balanceOf(user);
+        debtAssets = convertToAssetsHarness(debtShares, AssetType.Debt);
+    }
+
+    function convertToAssetsHarness(uint256 _shares, AssetType _assetType) public view returns (uint256 assets) {
+        (
+            uint256 totalSiloAssets, uint256 totalShares
+        ) = SiloStdLib.getTotalAssetsAndTotalSharesWithInterest(ShareTokenLib.getConfig(), _assetType);
+
+        assets = SiloMathLib.convertToAssets(
+            _shares,
+            totalSiloAssets,
+            totalShares,
+            _assetType == AssetType.Debt ? Rounding.REPAY_TO_ASSETS : Rounding.WITHDRAW_TO_ASSETS, 
+            _assetType
+        );
     }
 
 

@@ -658,7 +658,9 @@ contract Silo is ISilo, ShareCollateralToken {
             _shares,
             totalSiloAssets,
             totalShares,
-            _assetType == AssetType.Debt ? Rounding.BORROW_TO_ASSETS : Rounding.DEPOSIT_TO_ASSETS,
+            //@audit-issue LOW (??) when called from silo.convertToAssets: should be WITHDRAW_TO_ASSETS and not DEPOSIT_TO_ASSETS
+            //i: BORROW_TO_ASSETS = FLOOR, DEPOSIT_TO_ASSETS = CEIL, WITHDRAW_TO_ASSETS = FLOOR
+            _assetType == AssetType.Debt ? Rounding.BORROW_TO_ASSETS : Rounding.DEPOSIT_TO_ASSETS, 
             _assetType
         );
     }

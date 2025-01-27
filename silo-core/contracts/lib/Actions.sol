@@ -246,7 +246,8 @@ library Actions {
                 assets: 0,
                 shares: _args.shares,
                 owner: _args.owner,
-                receiver: _args.owner,
+                //@audit-issue are assets really moved here? If so why is the receiver the owner but the payer for the deposit msg.sender?
+                receiver: _args.owner, 
                 spender: msg.sender,
                 collateralType: _args.transitionFrom
             })
@@ -269,6 +270,7 @@ library Actions {
         });
 
         // If deposit is collateral, then check the solvency.
+        ////@audit why check the solvancy? Both protected and collateral are part of the solvancy or a user, right?
         if (depositConfig.silo == collateralConfig.silo) {
             _checkSolvencyWithoutAccruingInterest(collateralConfig, debtConfig, _args.owner);
         }
