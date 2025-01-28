@@ -69,6 +69,10 @@ import "../simplifications/_flashloan_no_state_changes.spec";
             f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)
         }
 
+    //INVARIANT: liquidity can never be bigger than balance of silo0
+    invariant liquidityNeverBiggerThanBalanceOfSilo0(env e)  
+        token0.balanceOf(silo0) >= getLiquidity(e);
+
 
 
 //------------------------------- RULES TEST END ----------------------------------

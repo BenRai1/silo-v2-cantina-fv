@@ -5,7 +5,9 @@ import "./0base_Silo.spec";
 import "../simplifications/Silo_noAccrueInterest_simplification_UNSAFE.spec";
 import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec";
 import "../simplifications/Oracle_quote_one_UNSAFE.spec";
-import "../simplifications/_flashloan_no_state_changes.spec";
+// import "../simplifications/_flashloan_no_state_changes.spec";
+
+using EmptyFlashloanReceiver as flashLoanReceiver;
 
 //------------------------------- RULES TEST START ----------------------------------
 
@@ -15,11 +17,11 @@ import "../simplifications/_flashloan_no_state_changes.spec";
         uint256 assets1;
         uint256 assets2;
         uint256 shares;
-        address receiver;
+        address receiver = flashLoanReceiver;
         address owner;
         nonSceneAddressRequirements(e.msg.sender);
         nonSceneAddressRequirements(receiver);
-        totalSuppliesMoreThanThreeBalances(receiver, owner, silo0);
+        totalSuppliesMoreThanThreeBalances(e.msg.sender, owner, silo0);
 
         //value before
         uint256 maxFlashLoanBefore = maxFlashLoan(token0);
@@ -45,7 +47,7 @@ import "../simplifications/_flashloan_no_state_changes.spec";
     rule flashLoanNoChangeIfFeeZero(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
-        address receiver;
+        address receiver = flashLoanReceiver;
         address token = token0;
         bytes data;
 
@@ -57,7 +59,10 @@ import "../simplifications/_flashloan_no_state_changes.spec";
         storage storageBefore = lastStorage;
 
         //flashLoan()
-        flashLoan(e, receiver, token, amount, data);
+        flashLoan@withrevert(e, receiver, token, amount, data);
+
+        //is it possible to call this
+        satisfy !lastReverted;
 
         //storage after
         storage storageAfter = lastStorage;
@@ -70,7 +75,7 @@ import "../simplifications/_flashloan_no_state_changes.spec";
     rule flashLoanDaoAndDeployerRevenueAndSiloBalanceIncreaseByFlashFee(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
-        address receiver;
+        address receiver = flashLoanReceiver;
         address token = token0;
         bytes data;
 
@@ -98,6 +103,7 @@ import "../simplifications/_flashloan_no_state_changes.spec";
         configForEightTokensSetupRequirements();
         uint256 siloBalance = token0.balanceOf(silo0);
         uint256 protectedAssets = totalProtectedAssetsHarness();
+        require siloBalance >= protectedAssets;
         uint256 maxFlashLoanValue = maxFlashLoan(token0);
         assert maxFlashLoanValue == siloBalance - protectedAssets;
     }
@@ -113,7 +119,7 @@ import "../simplifications/_flashloan_no_state_changes.spec";
     rule flashLoanDoesNotChangeAssetsOrShareBalances(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
-        address receiver;
+        address receiver = flashLoanReceiver;
         address token = token0;
         bytes data;
         address user;
@@ -152,7 +158,7 @@ import "../simplifications/_flashloan_no_state_changes.spec";
     rule flashLoanRevertsForNonToken0(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
-        address receiver;
+        address receiver = flashLoanReceiver;
         address token = token1;
         bytes data;
 
@@ -166,7 +172,7 @@ import "../simplifications/_flashloan_no_state_changes.spec";
     rule flashLoanRevertsForFeesGreaterThanMaxUint192(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
-        address receiver;
+        address receiver = flashLoanReceiver;
         address token = token0;
         bytes data;
 
@@ -182,7 +188,7 @@ import "../simplifications/_flashloan_no_state_changes.spec";
     rule flashLoanRevertsForAmountGreaterThanMaxFlashLoan(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
-        address receiver;
+        address receiver = flashLoanReceiver;
         address token = token0;
         bytes data;
         uint256 maxFlashloan = maxFlashLoan(token0);
@@ -193,8 +199,8 @@ import "../simplifications/_flashloan_no_state_changes.spec";
         assert lastReverted;
     }
 
-    //only recipient can call falshloan ISSUE
-    rule flashLoanOnlyRecipientCanCall(env e) {
+    //flashLoan() can be called //@audit only test
+    rule flashLoanCanbeCalledBefore(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
         address receiver;
@@ -202,12 +208,23 @@ import "../simplifications/_flashloan_no_state_changes.spec";
         bytes data;
 
         flashLoan@withrevert(e, receiver, token, amount, data);
+        satisfy !lastReverted;
+    }
 
-        assert !lastReverted;
+    //flashLoan() can be called //@audit only test
+    rule flashLoanCanbeCalledNEW(env e) {
+        configForEightTokensSetupRequirements();
+        uint256 amount;
+        address receiver = flashLoanReceiver;
+        address token = token0;
+        bytes data;
+
+        flashLoan@withrevert(e, receiver, token, amount, data);
+        satisfy !lastReverted;
     }
 
 
-    //@audit-issue anyone can call falshloan for a receiver if the contract is set up for it
+
 
 
 //------------------------------- RULES TEST END ----------------------------------
@@ -241,7 +258,7 @@ import "../simplifications/_flashloan_no_state_changes.spec";
     rule flashLoanRevertsForAmountZero(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount = 0;
-        address receiver;
+        address receiver = flashLoanReceiver;
         address token = token0;
         bytes data;
 
