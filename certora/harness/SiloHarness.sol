@@ -115,6 +115,11 @@ contract SiloHarness is Silo {
         debtAssets = $.totalAssets[ISilo.AssetType.Debt];
     }
 
+    function totalProtectedAssetsHarness() external view returns (uint256 protectedAssets) {
+        ISilo.SiloStorage storage $ = SiloStorageLib.getSiloStorage();
+        protectedAssets = $.totalAssets[ISilo.AssetType.Protected];
+    }
+
     function borrowerCollateralSiloHarness(address borrower) external view returns (address collateralSilo){
         ISiloConfig siloConfig = ShareTokenLib.siloConfig();
         return siloConfig.borrowerCollateralSilo(borrower);
@@ -166,8 +171,47 @@ contract SiloHarness is Silo {
         );
     }
 
+    function repayHarness(
+        IShareToken _debtShareToken,
+        uint256 _assets,
+        uint256 _shares,
+        address _borrower
+    ) external returns (uint256 assets, uint256 shares) {
+        ISilo.SiloStorage storage $ = SiloStorageLib.getSiloStorage();
 
+        uint256 totalDebtAssets = $.totalAssets[ISilo.AssetType.Debt];
+        (uint256 debtSharesBalance, uint256 totalDebtShares) = _debtShareToken.balanceOfAndTotalSupply(_borrower);
 
+        (assets, shares) = SiloMathLib.convertToAssetsOrToShares({
+            _assets: _assets,
+            _shares: _shares,
+            _totalAssets: totalDebtAssets,
+            _totalShares: totalDebtShares,
+            _roundingToAssets: Rounding.REPAY_TO_ASSETS,
+            _roundingToShares: Rounding.REPAY_TO_SHARES,
+            _assetType: ISilo.AssetType.Debt
+        });
 
+        if (shares > debtSharesBalance) {
+            shares = debtSharesBalance;
+
+            (assets, shares) = SiloMathLib.convertToAssetsOrToShares({
+                _assets: 0,
+                _shares: shares,
+                _totalAssets: totalDebtAssets,
+                _totalShares: totalDebtShares,
+                _roundingToAssets: Rounding.REPAY_TO_ASSETS,
+                _roundingToShares: Rounding.REPAY_TO_SHARES,
+                _assetType: ISilo.AssetType.Debt
+            });
+        }
+    }
+
+    function flashFeeHarness(address token, uint256 amount) external view returns (uint256) {
+        IShareToken.ShareTokenStorage storage _shareStorage = ShareTokenLib.getShareTokenStorage();
+
+        // flashFee will revert for wrong token
+        return SiloStdLib.flashFee(_shareStorage.siloConfig, token, amount);
+    }
 
 }

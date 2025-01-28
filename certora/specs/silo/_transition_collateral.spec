@@ -9,50 +9,6 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 //------------------------------- RULES TEST START ----------------------------------
 
 
-    // transitionCollateral: same as calling redeem and deposit
-    rule transitionCollateralSameAsRedeemAndDeposit(env e){
-        configForEightTokensSetupRequirements();
-        uint256 share;
-        address owner;
-        address sender = e.msg.sender;
-
-        //initState
-        storage initialStorage = lastStorage;
-
-        //transition
-        transitionCollateral(e, share, owner, ISilo.CollateralType.Collateral);
-
-        //values after transition
-        //token0 balance
-        uint256 siloToken0BalanceAfterTransition = token0.balanceOf(silo0);
-        uint256 ownerToken0BalanceAfterTransition = token0.balanceOf(owner);
-        uint256 senderToken0BalanceAfterTransition = token0.balanceOf(sender);
-
-        //share balance
-        uint256 ownerCollateralSharesAfterTransition = silo0.balanceOf(owner);
-        uint256 ownerProtectedSharesAfterTransition = shareProtectedCollateralToken0.balanceOf(owner);
-
-
-        //withdraw and deposit
-
-        uint256 assets = redeem(e, share, e.msg.sender, owner, ISilo.CollateralType.Collateral) at initialStorage;
-        deposit(e, assets, owner, ISilo.CollateralType.Protected); //i: deposit uses allowance
-
-        //values after redeem and deposit
-        //token0 balance
-        uint256 siloToken0BalanceAfterRedeemAndDeposit = token0.balanceOf(silo0);
-        uint256 ownerToken0BalanceAfterRedeemAndDeposit = token0.balanceOf(owner);
-
-        //share balance
-        uint256 ownerCollateralSharesAfterRedeemAndDeposit = silo0.balanceOf(owner);
-        uint256 ownerProtectedSharesAfterRedeemAndDeposit = shareProtectedCollateralToken0.balanceOf(owner);
-
-        //result is the same
-        assert siloToken0BalanceAfterTransition == siloToken0BalanceAfterRedeemAndDeposit;
-        assert ownerToken0BalanceAfterTransition == ownerToken0BalanceAfterRedeemAndDeposit;
-        assert ownerCollateralSharesAfterTransition == ownerCollateralSharesAfterRedeemAndDeposit;
-        assert ownerProtectedSharesAfterTransition == ownerProtectedSharesAfterRedeemAndDeposit;       
-    }
 
     
 
@@ -63,7 +19,7 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 
-//------------------------- transitionCollateral and user assets -------------------------
+    //------------------------- transitionCollateral and user assets -------------------------
 
         ////@audit what happens if you minting x shares and redeem x shares? Does it result in the same balance of token0? Strange behavior for transitionCollateralShouldNotIncreaseUserAssets
         //minting and then redeeming the same amount of shares results in the same balance of token0
@@ -171,7 +127,50 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 
 
 
+    // transitionCollateral: same as calling redeem and deposit
+    rule transitionCollateralSameAsRedeemAndDeposit(env e){
+        configForEightTokensSetupRequirements();
+        uint256 share;
+        address owner;
+        address sender = e.msg.sender;
 
+        //initState
+        storage initialStorage = lastStorage;
+
+        //transition
+        transitionCollateral(e, share, owner, ISilo.CollateralType.Collateral);
+
+        //values after transition
+        //token0 balance
+        uint256 siloToken0BalanceAfterTransition = token0.balanceOf(silo0);
+        uint256 ownerToken0BalanceAfterTransition = token0.balanceOf(owner);
+        uint256 senderToken0BalanceAfterTransition = token0.balanceOf(sender);
+
+        //share balance
+        uint256 ownerCollateralSharesAfterTransition = silo0.balanceOf(owner);
+        uint256 ownerProtectedSharesAfterTransition = shareProtectedCollateralToken0.balanceOf(owner);
+
+
+        //withdraw and deposit
+
+        uint256 assets = redeem(e, share, e.msg.sender, owner, ISilo.CollateralType.Collateral) at initialStorage;
+        deposit(e, assets, owner, ISilo.CollateralType.Protected); //i: deposit uses allowance
+
+        //values after redeem and deposit
+        //token0 balance
+        uint256 siloToken0BalanceAfterRedeemAndDeposit = token0.balanceOf(silo0);
+        uint256 ownerToken0BalanceAfterRedeemAndDeposit = token0.balanceOf(owner);
+
+        //share balance
+        uint256 ownerCollateralSharesAfterRedeemAndDeposit = silo0.balanceOf(owner);
+        uint256 ownerProtectedSharesAfterRedeemAndDeposit = shareProtectedCollateralToken0.balanceOf(owner);
+
+        //result is the same
+        assert siloToken0BalanceAfterTransition == siloToken0BalanceAfterRedeemAndDeposit;
+        assert ownerToken0BalanceAfterTransition == ownerToken0BalanceAfterRedeemAndDeposit;
+        assert ownerCollateralSharesAfterTransition == ownerCollateralSharesAfterRedeemAndDeposit;
+        assert ownerProtectedSharesAfterTransition == ownerProtectedSharesAfterRedeemAndDeposit;       
+    }
     
     // transitionCollateral: prot => coll: Owner: protectedShares decrease by share, collateral shares increase / OtherUser: protectedShares  /collateralShares stay the same
     rule transitionCollateralProtToCollShares(env e){

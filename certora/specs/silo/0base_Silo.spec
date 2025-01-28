@@ -9,6 +9,11 @@ methods{
    function ltvBelowMaxLtvHarness(address) external returns (bool) envfree;
    function shareDebtToken0.receiveAllowance(address,address) external returns (uint256) envfree;
    function shareDebtToken1.receiveAllowance(address,address) external returns (uint256) envfree;
+   function repayHarness(address,uint256,uint256,address) external returns (uint256, uint256)  envfree;
+   function totalProtectedAssetsHarness() external returns (uint256) envfree;
+   function maxFlashLoan(address) external returns (uint256) envfree;
+   function flashFeeHarness(address token, uint256 amount) external returns (uint256) envfree;
+   function _.getFeesWithAsset(address _silo) external envfree;
 
 
    function _.getCollateralAndDebtTotalsStorage() external => DISPATCHER(true);
@@ -19,6 +24,9 @@ methods{
 
 ///////////////// DEFINITIONS START /////////////////////
    definition HARNESS_METHODS(method f) returns bool = 
+      f.selector == sig:flashFeeHarness(address,uint256).selector ||
+      f.selector == sig:totalProtectedAssetsHarness().selector ||
+      f.selector == sig:repayHarness(address,uint256,uint256,address).selector ||
       f.selector == sig:getSiloDataInterestRateTimestamp().selector ||
       f.selector == sig:getSiloDataDaoAndDeployerRevenue().selector ||
       f.selector == sig:getFlashloanFee0().selector ||
@@ -55,7 +63,7 @@ methods{
 
 /// @title `approxSameWithRange` implementation in CVL
 /// @notice This will never revert!
-function cvlApproxSameWithRange(uint256 x, uint256 y, uint256 range) returns bool {
+function cvlApproxSameWithRange(mathint x, mathint y, uint256 range) returns bool {
     return x > y ? x - y <= range : y-x <= range;
 }
 

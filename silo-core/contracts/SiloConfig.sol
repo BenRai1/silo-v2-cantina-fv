@@ -150,7 +150,7 @@ contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
     }
 
     /// @inheritdoc ISiloConfig
-    function setOtherSiloAsCollateralSilo(address _borrower) external virtual {//@audit-issue no check if one has already borrowed against the current silo? Is this ok?
+    function setOtherSiloAsCollateralSilo(address _borrower) external virtual {//i: only one of the silos can call this => check if other silo was borrowed is done before
         _onlySilo();
         borrowerCollateralSilo[_borrower] = msg.sender == _SILO0 ? _SILO1 : _SILO0;
     }

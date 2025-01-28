@@ -8,6 +8,5 @@ methods {
 }
 
 function onFlashLoan__noStateChange() returns bytes32 {
-   bytes32 anyBytes;
-   return anyBytes;
+   return keccak256("ERC3156FlashBorrower.onFlashLoan");
 }

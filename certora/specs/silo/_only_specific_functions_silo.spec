@@ -10,12 +10,348 @@ import "../simplifications/_flashloan_no_state_changes.spec";
 
 //------------------------------- RULES TEST START ----------------------------------
 
+
+    //--------------------- Definitions ---------------------
+
     definition FUNCTIONS_TO_EXCLUDE(method f) returns bool =
-        f.selector == sig:updateHooks().selector ||
+        f.selector == sig:Silo0.flashLoan(address,address,uint256,bytes).selector ||
         f.selector == sig:Silo0.callOnBehalfOfSilo(address,uint256,ISilo.CallType,bytes).selector ||
+        f.selector == sig:updateHooks().selector ||
         f.selector == sig:ShareDebtToken0.callOnBehalfOfShareToken(address,uint256,ISilo.CallType,bytes).selector ||
         f.selector == sig:ShareProtectedCollateralToken0.permit(address,address,uint256,uint256,uint8,bytes32,bytes32).selector ||
-    f.selector == sig:Silo0.initialize(address).selector;
+        f.selector == sig:Silo0.initialize(address).selector ||
+    f.selector == sig:ShareDebtToken0.initialize(address,address,uint24).selector;
+
+    //invariant borrowerCollateralSilo can only be 0, silo0 or silo1
+    invariant borrowerCollateralSiloCanOnlyBe0Silo0OrSilo1(address user, address owner) 
+     (siloConfig.borrowerCollateralSilo(user) == 0 || siloConfig.borrowerCollateralSilo(user) == silo0 || siloConfig.borrowerCollateralSilo(user) == silo1) &&
+     (siloConfig.borrowerCollateralSilo(owner) == 0 || siloConfig.borrowerCollateralSilo(owner) == silo0 || siloConfig.borrowerCollateralSilo(owner) == silo1)
+        filtered { 
+            f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)
+        }
+
+        { 
+                preserved transfer(address to, uint256 amount) with (env e){
+                    require e.msg.sender == owner;
+                }
+
+                preserved transferFrom(address from, address to, uint256 amount) with (env e1){
+                    require from == owner;
+                }
+                
+                preserved forwardTransferFromNoChecks(address from, address to, uint256 amount) with (env e2){
+                    require from == owner;
+                }
+    }
+
+    //INVARIANT: if debt tokens, borrowerCollateralSilo must be silo0 or silo1 
+    invariant ifDebtTokensBorrowerCollateralSiloMustBeSilo0OrSilo1(address user)
+        (shareDebtToken0.balanceOf(user) != 0 || shareDebtToken1.balanceOf(user) != 0) => 
+        (siloConfig.borrowerCollateralSilo(user) == silo0 || siloConfig.borrowerCollateralSilo(user) == silo1)
+        filtered { 
+            f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)
+    }
+
+    //INVARIANT: user can only have debtToken0 or debtToken1
+    invariant userCanOnlyHaveDebtToken0OrDebtToken1(address user)
+        (shareDebtToken0.balanceOf(user) != 0 && shareDebtToken1.balanceOf(user) == 0) || 
+        (shareDebtToken0.balanceOf(user) == 0 && shareDebtToken1.balanceOf(user) != 0) ||
+        (shareDebtToken0.balanceOf(user) == 0 && shareDebtToken1.balanceOf(user) == 0) 
+        filtered {
+            f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)
+    }
+
+
+    //INVARIANT siloBalance token0 alway bigger or equal to sprotectedAssets
+    invariant siloBalanceToken0AlwaysBiggerOrEqualThanSprotectedAssets()
+        token0.balanceOf(silo0) >= totalProtectedAssetsHarness()
+        filtered { 
+            f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)
+        }
+
+
+
+//------------------------------- RULES TEST END ----------------------------------
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+//------------------------------- RULES OK START ------------------------------------
+
+    
+    // borrowerCollateralSilo:only specific functions can change it
+    rule borrowerCollateralSiloOnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+        address user;
+
+        //value to change
+        address borrowerCollateralSiloBefore = siloConfig.borrowerCollateralSilo(e, user);
+
+        //execute function
+        f(e, args);
+
+        //value after
+        address borrowerCollateralSiloAfter = siloConfig.borrowerCollateralSilo(e, user);
+
+        //only specific functions can change it
+        assert (borrowerCollateralSiloBefore != borrowerCollateralSiloAfter => 
+            f.selector == sig:ShareDebtToken0.transfer(address,uint256).selector ||
+            f.selector == sig:ShareDebtToken0.transferFrom(address,address,uint256).selector ||
+            f.selector == sig:ShareDebtToken0.forwardTransferFromNoChecks(address,address,uint256).selector ||
+            f.selector == sig:Silo0.switchCollateralToThisSilo().selector ||
+            f.selector == sig:Silo0.flashLoan(address,address,uint256,bytes).selector || // because of DEFAULT HAVOC
+            f.selector == sig:Silo0.borrow(uint256,address,address).selector ||
+            f.selector == sig:Silo0.borrowSameAsset(uint256,address,address).selector ||
+            f.selector == sig:Silo0.borrowShares(uint256,address,address).selector ||
+            f.selector == sig:Silo0.repay(uint256,address).selector ||
+            f.selector == sig:Silo0.repayShares(uint256,address).selector
+        );
+    }
+
+    // shareDebtToken0:only specific functions can change hookSetup
+    rule shareDebtToken0OnlySpecificFunctionsCanChangeHookSetup(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+
+        //value to change
+        IShareToken.HookSetup hookSetupBefore = shareDebtToken0.hookSetup(e);
+
+        //execute function
+        f(e, args);
+
+        //value after
+        IShareToken.HookSetup hookSetupAfter = shareDebtToken0.hookSetup(e);
+
+        //only specific functions can change it
+        assert (hookSetupBefore != hookSetupAfter => 
+            f.selector == sig:ShareDebtToken0.synchronizeHooks(uint24,uint24).selector // will be false
+        );
+    }
+
+    // shareProtectedCollateralToken0:only specific functions can change allowance
+    rule shareProtectedTokenOnlySpecificFunctionsCanChangeAllowance(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+        address owner;
+        address spender;
+
+        //value to change
+        uint256 allowanceBefore = shareProtectedCollateralToken0.allowance(owner, spender);
+
+        //execute function
+        f(e, args);
+
+        //value after
+        uint256 allowanceAfter = shareProtectedCollateralToken0.allowance(owner, spender);
+
+        //only specific functions can change it
+        assert (allowanceBefore != allowanceAfter => 
+            f.selector == sig:ShareProtectedCollateralToken0.burn(address,address,uint256).selector ||
+            f.selector == sig:ShareProtectedCollateralToken0.approve(address,uint256).selector ||
+            f.selector == sig:Silo0.transitionCollateral(uint256,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.withdraw(uint256,address,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.redeem(uint256,address,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.transferFrom(address,address,uint256).selector
+        );
+    }
+
+    // silo0 (CollateralShares):only specific functions can change allowance
+    rule silo0OnlySpecificFunctionsCanChangeAllowance(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+        address owner;
+        address spender;
+
+        //value to change
+        uint256 allowanceBefore = silo0.allowance(owner, spender);
+
+        //execute function
+        f(e, args);
+
+        //value after
+        uint256 allowanceAfter = silo0.allowance(owner, spender);
+
+        //only specific functions can change it
+        assert (allowanceBefore != allowanceAfter => 
+            f.selector == sig:Silo0.burn(address,address,uint256).selector ||
+            f.selector == sig:Silo0.approve(address,uint256).selector ||
+            f.selector == sig:Silo0.transferFrom(address,address,uint256).selector ||
+            f.selector == sig:Silo0.permit(address,address,uint256,uint256,uint8,bytes32,bytes32).selector ||
+            f.selector == sig:Silo0.redeem(uint256,address,address).selector ||
+            f.selector == sig:Silo0.redeem(uint256,address,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.withdraw(uint256,address,address).selector ||
+            f.selector == sig:Silo0.withdraw(uint256,address,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.transitionCollateral(uint256,address,ISilo.CollateralType).selector
+        );
+    }
+
+    // shareDebtToken0:only specific functions can change allowance
+    rule shareDebtToken0OnlySpecificFunctionsCanChangeAllowance(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+        address owner;
+        address spender;
+
+        //value to change
+        uint256 allowanceBefore = shareDebtToken0.allowance(owner, spender);
+
+        //execute function
+        f(e, args);
+
+        //value after
+        uint256 allowanceAfter = shareDebtToken0.allowance(owner, spender);
+
+        //only specific functions can change it
+        assert (allowanceBefore != allowanceAfter => 
+            f.selector == sig:ShareDebtToken0.permit(address,address,uint256,uint256,uint8,bytes32,bytes32).selector ||
+            f.selector == sig:ShareDebtToken0.mint(address,address,uint256).selector ||
+            f.selector == sig:ShareDebtToken0.approve(address,uint256).selector ||
+            f.selector == sig:ShareDebtToken0.transferFrom(address,address,uint256).selector ||
+            f.selector == sig:Silo0.borrowSameAsset(uint256,address,address).selector ||
+            f.selector == sig:Silo0.borrow(uint256,address,address).selector ||
+            f.selector == sig:Silo0.borrowShares(uint256,address,address).selector
+        );
+    }
+
+    // shareDebtToken0:only specific functions can change receiverAllowance
+    rule shareDebtToken0OnlySpecificFunctionsCanChangeReceiverAllowance(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+        address owner;
+        address spender;
+
+        //value to change
+        uint256 allowanceBefore = shareDebtToken0.receiveAllowance(owner, spender);
+
+        //execute function
+        f(e, args);
+
+        //value after
+        uint256 allowanceAfter = shareDebtToken0.receiveAllowance(owner, spender);
+
+        //only specific functions can change it
+        assert (allowanceBefore != allowanceAfter => 
+            f.selector == sig:shareDebtToken0.setReceiveApproval(address,uint256).selector ||
+            f.selector == sig:ShareDebtToken0.decreaseReceiveAllowance(address,uint256).selector ||
+            f.selector == sig:ShareDebtToken0.increaseReceiveAllowance(address,uint256).selector ||
+            f.selector == sig:ShareDebtToken0.transferFrom(address,address,uint256).selector ||
+            f.selector == sig:shareDebtToken0.transfer(address,uint256).selector
+        );
+    }
+    
+    // shareProtectedCollateralToken0:only specific functions can change hookSetup
+    rule shareProtectedToken0OnlySpecificFunctionsCanChangeHookSetup(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+
+        //value to change
+        IShareToken.HookSetup hookSetupBefore = shareProtectedCollateralToken0.hookSetup(e);
+
+        //execute function
+        f(e, args);
+
+        //value after
+        IShareToken.HookSetup hookSetupAfter = shareProtectedCollateralToken0.hookSetup(e);
+
+        //only specific functions can change it
+        assert (hookSetupBefore != hookSetupAfter => 
+            f.selector == sig:ShareProtectedCollateralToken0.synchronizeHooks(uint24,uint24).selector
+        );
+    }
+    
+    // silo0 (CollateralShares):only specific functions can change hookSetup
+    rule silo0OnlySpecificFunctionsCanChangeHookSetup(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+
+        //value to change
+        IShareToken.HookSetup hookSetupBefore = silo0.hookSetup(e);
+
+        //execute function
+        f(e, args);
+
+        //value after
+        IShareToken.HookSetup hookSetupAfter = silo0.hookSetup(e);
+
+        //only specific functions can change it
+        assert (hookSetupBefore != hookSetupAfter => 
+            f.selector == sig:Silo0.synchronizeHooks(uint24,uint24).selector
+        );
+    }
+    
+
+    // totalAssets PROTECTED:only specific functions can change it
+    rule totalAssetsProtectedOnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+
+        //value to change
+        uint256 totalAssetsBefore;
+        (_, _, totalAssetsBefore, _, _) = silo0.getSiloStorage();
+
+        //execute function
+        f(e, args);
+
+        //value after
+        uint256 totalAssetsAfter;
+        (_, _, totalAssetsAfter, _, _) = silo0.getSiloStorage();
+
+        //only specific functions can change it
+        assert (totalAssetsBefore != totalAssetsAfter => 
+            f.selector == sig:Silo0.deposit(uint256,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.mint(uint256,address, ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.redeem(uint256,address,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.withdraw(uint256,address,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.transitionCollateral(uint256,address,ISilo.CollateralType).selector 
+        );
+    }    
+    
+    // totalAssets COLLATERAL:only specific functions can change it
+    rule totalAssetsCollateralOnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+
+        //value to change
+        uint256 totalAssetsBefore;
+        (_, _, _, totalAssetsBefore, _) = silo0.getSiloStorage();
+
+        //execute function
+        f(e, args);
+
+        //value after
+        uint256 totalAssetsAfter;
+        (_, _, _, totalAssetsAfter, _) = silo0.getSiloStorage();
+
+        //only specific functions can change it
+        assert (totalAssetsBefore != totalAssetsAfter => 
+            f.selector == sig:Silo0.deposit(uint256,address).selector ||
+            f.selector == sig:Silo0.deposit(uint256,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.mint(uint256,address).selector ||
+            f.selector == sig:Silo0.mint(uint256,address, ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.redeem(uint256,address,address).selector ||
+            f.selector == sig:Silo0.redeem(uint256,address,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.withdraw(uint256,address,address).selector ||
+            f.selector == sig:Silo0.withdraw(uint256,address,address,ISilo.CollateralType).selector ||
+            f.selector == sig:Silo0.transitionCollateral(uint256,address,ISilo.CollateralType).selector // will be worng because accrue interest changes it
+        );
+    }
+
+    // totalAssets DEBT:only specific functions can change it
+    rule totalAssetsDebtOnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
+        configForEightTokensSetupRequirements();
+
+        //value to change
+        uint256 totalAssetsBefore;
+        (_, _, _, _, totalAssetsBefore) = silo0.getSiloStorage();
+
+        //execute function
+        f(e, args);
+
+        //value after
+        uint256 totalAssetsAfter;
+        (_, _, _, _, totalAssetsAfter) = silo0.getSiloStorage();
+
+        //only specific functions can change it
+        assert (totalAssetsBefore != totalAssetsAfter => 
+            f.selector == sig:Silo0.borrow(uint256,address,address).selector ||
+            f.selector == sig:Silo0.borrowSameAsset(uint256,address,address).selector ||
+            f.selector == sig:Silo0.borrowShares(uint256,address,address).selector ||
+            f.selector == sig:Silo0.repay(uint256,address).selector ||
+            f.selector == sig:Silo0.repayShares(uint256,address).selector // will be wrong because accrue interest changes it
+        );
+    }
 
     // token0: only specific functions can change balances
     rule token0OnlySpecificFunctionsCanChangeBalances(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
@@ -184,336 +520,6 @@ import "../simplifications/_flashloan_no_state_changes.spec";
             f.selector == sig:Silo0.transferFrom(address,address,uint256).selector
         );
     }
-
-    // shareProtectedCollateralToken0:only specific functions can change allowance
-    rule shareProtectedTokenOnlySpecificFunctionsCanChangeAllowance(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-        address owner;
-        address spender;
-
-        //value to change
-        uint256 allowanceBefore = shareProtectedCollateralToken0.allowance(owner, spender);
-
-        //execute function
-        f(e, args);
-
-        //value after
-        uint256 allowanceAfter = shareProtectedCollateralToken0.allowance(owner, spender);
-
-        //only specific functions can change it
-        assert (allowanceBefore != allowanceAfter => 
-            f.selector == sig:ShareProtectedCollateralToken0.burn(address,address,uint256).selector ||
-            f.selector == sig:ShareProtectedCollateralToken0.approve(address,uint256).selector ||
-            f.selector == sig:Silo0.transitionCollateral(uint256,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.withdraw(uint256,address,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.redeem(uint256,address,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.transferFrom(address,address,uint256).selector
-        );
-    }
-
-    // silo0 (CollateralShares):only specific functions can change allowance
-    rule silo0OnlySpecificFunctionsCanChangeAllowance(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-        address owner;
-        address spender;
-
-        //value to change
-        uint256 allowanceBefore = silo0.allowance(owner, spender);
-
-        //execute function
-        f(e, args);
-
-        //value after
-        uint256 allowanceAfter = silo0.allowance(owner, spender);
-
-        //only specific functions can change it
-        assert (allowanceBefore != allowanceAfter => 
-            f.selector == sig:Silo0.burn(address,address,uint256).selector ||
-            f.selector == sig:Silo0.approve(address,uint256).selector ||
-            f.selector == sig:Silo0.transferFrom(address,address,uint256).selector ||
-            f.selector == sig:Silo0.permit(address,address,uint256,uint256,uint8,bytes32,bytes32).selector ||
-            f.selector == sig:Silo0.redeem(uint256,address,address).selector ||
-            f.selector == sig:Silo0.redeem(uint256,address,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.withdraw(uint256,address,address).selector ||
-            f.selector == sig:Silo0.withdraw(uint256,address,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.transitionCollateral(uint256,address,ISilo.CollateralType).selector
-        );
-    }
-
-    // shareDebtToken0:only specific functions can change allowance
-    rule shareDebtToken0OnlySpecificFunctionsCanChangeAllowance(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-        address owner;
-        address spender;
-
-        //value to change
-        uint256 allowanceBefore = shareDebtToken0.allowance(owner, spender);
-
-        //execute function
-        f(e, args);
-
-        //value after
-        uint256 allowanceAfter = shareDebtToken0.allowance(owner, spender);
-
-        //only specific functions can change it
-        assert (allowanceBefore != allowanceAfter => 
-            f.selector == sig:ShareDebtToken0.permit(address,address,uint256,uint256,uint8,bytes32,bytes32).selector ||
-            f.selector == sig:ShareDebtToken0.mint(address,address,uint256).selector ||
-            f.selector == sig:ShareDebtToken0.approve(address,uint256).selector ||
-            f.selector == sig:ShareDebtToken0.transferFrom(address,address,uint256).selector
-        );
-    }
-
-    // shareDebtToken0:only specific functions can change receiverAllowance
-    rule shareDebtToken0OnlySpecificFunctionsCanChangeReceiverAllowance(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-        address owner;
-        address spender;
-
-        //value to change
-        uint256 allowanceBefore = shareDebtToken0.receiveAllowance(owner, spender);
-
-        //execute function
-        f(e, args);
-
-        //value after
-        uint256 allowanceAfter = shareDebtToken0.receiveAllowance(owner, spender);
-
-        //only specific functions can change it
-        assert (allowanceBefore != allowanceAfter => 
-            f.selector == sig:shareDebtToken0.setReceiveApproval(address,uint256).selector ||
-            f.selector == sig:shareDebtToken0.transfer(address,uint256).selector
-        );
-    }
-    
-    // shareProtectedCollateralToken0:only specific functions can change hookSetup
-    rule shareProtectedToken0OnlySpecificFunctionsCanChangeHookSetup(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-
-        //value to change
-        IShareToken.HookSetup hookSetupBefore = shareProtectedCollateralToken0.hookSetup(e);
-
-        //execute function
-        f(e, args);
-
-        //value after
-        IShareToken.HookSetup hookSetupAfter = shareProtectedCollateralToken0.hookSetup(e);
-
-        //only specific functions can change it
-        assert (hookSetupBefore != hookSetupAfter => 
-            f.selector == sig:Silo0.allowance(address,address).selector // will be false
-        );
-    }
-    
-    // silo0 (CollateralShares):only specific functions can change hookSetup
-    rule silo0OnlySpecificFunctionsCanChangeHookSetup(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-
-        //value to change
-        IShareToken.HookSetup hookSetupBefore = silo0.hookSetup(e);
-
-        //execute function
-        f(e, args);
-
-        //value after
-        IShareToken.HookSetup hookSetupAfter = silo0.hookSetup(e);
-
-        //only specific functions can change it
-        assert (hookSetupBefore != hookSetupAfter => 
-            f.selector == sig:Silo0.allowance(address,address).selector // will be false
-        );
-    }
-    
-
-
-
-
-
-
-
-
-
-    // shareDebtToken0:only specific functions can change hookSetup
-    rule shareDebtToken0OnlySpecificFunctionsCanChangeHookSetup(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-
-        //value to change
-        IShareToken.HookSetup hookSetupBefore = shareDebtToken0.hookSetup(e);
-
-        //execute function
-        f(e, args);
-
-        //value after
-        IShareToken.HookSetup hookSetupAfter = shareDebtToken0.hookSetup(e);
-
-        //only specific functions can change it
-        assert (hookSetupBefore != hookSetupAfter => 
-            f.selector == sig:Silo0.allowance(address,address).selector // will be false
-        );
-    }
-    
-    // daoAndDeployerRevenue0:only specific functions can change it
-    rule daoAndDeployerRevenue0OnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-
-        //value to change
-        uint256 daoAndDeployerRevenueBefore;
-        (daoAndDeployerRevenueBefore, _, _, _, _) = silo0.getSiloStorage();
-
-        //execute function
-        f(e, args);
-
-        //value after
-        uint256 daoAndDeployerRevenueAfter;
-        (daoAndDeployerRevenueAfter, _, _, _, _) = silo0.getSiloStorage();
-
-        //only specific functions can change it
-        assert (daoAndDeployerRevenueBefore != daoAndDeployerRevenueAfter => 
-            f.selector == sig:Silo0.withdrawFees().selector // will be false becasue it is changed when interest is accrued 
-        );
-    }
-    
-    // interestRateTimestamp:only specific functions can change it
-    rule interestRateTimestampOnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-
-        //value to change
-        uint256 interestRateTimestampBefore;
-        (_, interestRateTimestampBefore, _, _, _) = silo0.getSiloStorage();
-
-
-        //execute function
-        f(e, args);
-
-        //value after
-        uint256 interestRateTimestampAfter;
-        (_, interestRateTimestampAfter, _, _, _) = silo0.getSiloStorage();
-
-        //only specific functions can change it
-        assert (interestRateTimestampBefore != interestRateTimestampAfter => 
-            f.selector == sig:Silo0.accrueInterest().selector // will be false beacuse a lot to other functions accrue interest
-        );
-    }
-    
-    // totalAssets PROTECTED:only specific functions can change it
-    rule totalAssetsProtectedOnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-
-        //value to change
-        uint256 totalAssetsBefore;
-        (_, _, totalAssetsBefore, _, _) = silo0.getSiloStorage();
-
-        //execute function
-        f(e, args);
-
-        //value after
-        uint256 totalAssetsAfter;
-        (_, _, totalAssetsAfter, _, _) = silo0.getSiloStorage();
-
-        //only specific functions can change it
-        assert (totalAssetsBefore != totalAssetsAfter => 
-            f.selector == sig:Silo0.deposit(uint256,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.mint(uint256,address, ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.redeem(uint256,address,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.withdraw(uint256,address,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.transitionCollateral(uint256,address,ISilo.CollateralType).selector 
-        );
-    }    
-    
-    // totalAssets COLLATERAL:only specific functions can change it
-    rule totalAssetsCollateralOnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-
-        //value to change
-        uint256 totalAssetsBefore;
-        (_, _, _, totalAssetsBefore, _) = silo0.getSiloStorage();
-
-        //execute function
-        f(e, args);
-
-        //value after
-        uint256 totalAssetsAfter;
-        (_, _, _, totalAssetsAfter, _) = silo0.getSiloStorage();
-
-        //only specific functions can change it
-        assert (totalAssetsBefore != totalAssetsAfter => 
-            f.selector == sig:Silo0.deposit(uint256,address).selector ||
-            f.selector == sig:Silo0.deposit(uint256,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.mint(uint256,address).selector ||
-            f.selector == sig:Silo0.mint(uint256,address, ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.redeem(uint256,address,address).selector ||
-            f.selector == sig:Silo0.redeem(uint256,address,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.withdraw(uint256,address,address).selector ||
-            f.selector == sig:Silo0.withdraw(uint256,address,address,ISilo.CollateralType).selector ||
-            f.selector == sig:Silo0.transitionCollateral(uint256,address,ISilo.CollateralType).selector // will be worng because accrue interest changes it
-        );
-    }
-
-    // totalAssets DEBT:only specific functions can change it
-    rule totalAssetsDebtOnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-
-        //value to change
-        uint256 totalAssetsBefore;
-        (_, _, _, _, totalAssetsBefore) = silo0.getSiloStorage();
-
-        //execute function
-        f(e, args);
-
-        //value after
-        uint256 totalAssetsAfter;
-        (_, _, _, _, totalAssetsAfter) = silo0.getSiloStorage();
-
-        //only specific functions can change it
-        assert (totalAssetsBefore != totalAssetsAfter => 
-            f.selector == sig:Silo0.borrow(uint256,address,address).selector ||
-            f.selector == sig:Silo0.borrowSameAsset(uint256,address,address).selector ||
-            f.selector == sig:Silo0.borrowShares(uint256,address,address).selector ||
-            f.selector == sig:Silo0.repay(uint256,address).selector ||
-            f.selector == sig:Silo0.repayShares(uint256,address).selector // will be wrong because accrue interest changes it
-        );
-    }
-
-    // borrowerCollateralSilo:only specific functions can change it
-    rule borrowerCollateralSiloOnlySpecificFunctionsCanChangeIt(env e, method f, calldataarg args) filtered{ f-> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)} {
-        configForEightTokensSetupRequirements();
-        address user;
-
-        //value to change
-        address borrowerCollateralSiloBefore = siloConfig.borrowerCollateralSilo(e, user);
-
-        //execute function
-        f(e, args);
-
-        //value after
-        address borrowerCollateralSiloAfter = siloConfig.borrowerCollateralSilo(e, user);
-
-        //only specific functions can change it
-        assert (borrowerCollateralSiloBefore != borrowerCollateralSiloAfter => 
-            f.selector == sig:Silo0.borrow(uint256,address,address).selector ||
-            f.selector == sig:Silo0.borrowSameAsset(uint256,address,address).selector ||
-            f.selector == sig:Silo0.borrowShares(uint256,address,address).selector ||
-            f.selector == sig:Silo0.repay(uint256,address).selector ||
-            f.selector == sig:Silo0.repayShares(uint256,address).selector
-        );
-    }
-
-    //invariant borrowerCollateralSilo can only be 0, silo0 or silo1
-    invariant borrowerCollateralSiloCanOnlyBe0Silo0OrSilo1(address user) 
-     siloConfig.borrowerCollateralSilo(user) == 0 || 
-     siloConfig.borrowerCollateralSilo(user) == silo0 || 
-     siloConfig.borrowerCollateralSilo(user) == silo1;
-
-
-
-
-//------------------------------- RULES TEST END ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES OK START ------------------------------------
 
 //------------------------------- RULES OK END ------------------------------------
 
