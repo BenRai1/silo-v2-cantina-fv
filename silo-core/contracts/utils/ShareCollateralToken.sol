@@ -32,7 +32,8 @@ abstract contract ShareCollateralToken is ShareToken {
 
         // for minting or burning, Silo is responsible to check all necessary conditions
         // for transfer make sure that _sender is solvent after transfer
-        if (ShareTokenLib.isTransfer(_sender, _recipient) && $.transferWithChecks) {
+        //@audit-issue !ISSUE! can transferWithChecks be false? If so one can send collateral tokens and get insolvant
+        if (ShareTokenLib.isTransfer(_sender, _recipient) && $.transferWithChecks) { 
             bool senderIsSolvent = ShareCollateralTokenLib.isSolventAfterCollateralTransfer(_sender);
             require(senderIsSolvent, IShareToken.SenderNotSolventAfterTransfer());
         }

@@ -214,4 +214,26 @@ contract SiloHarness is Silo {
         return SiloStdLib.flashFee(_shareStorage.siloConfig, token, amount);
     }
 
+        //check if hook is activated
+        //token: 0 = no token; 1 = protected; 2 = collateral; 3 = debt
+    function hookCallActivatedHarness(uint256 action, bool before) public view returns (bool) {
+
+
+        IShareToken.ShareTokenStorage storage _shareStorage = ShareTokenLib.getShareTokenStorage();
+        if (before) {
+            uint256 hooksBefore = _shareStorage.hookSetup.hooksBefore;
+            return hooksBefore & action == action;
+        } else {
+            uint256 hooksAfter = _shareStorage.hookSetup.hooksAfter;
+            return hooksAfter & action == action;
+        }
+    }
+
+    function hookReceiverHarness(address silo) external view returns (address) {
+        ISiloConfig siloConfig = ShareTokenLib.siloConfig();
+        return siloConfig.getConfig(silo).hookReceiver;
+    }
+
+    
+
 }

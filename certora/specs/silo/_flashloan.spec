@@ -9,41 +9,13 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 
 using EmptyFlashloanReceiver as flashLoanReceiver;
 
+methods{
+    function _.onFlashLoan(address, address, uint256, uint256, bytes) external => DISPATCHER(true);
+}
+
 //------------------------------- RULES TEST START ----------------------------------
 
-    // * `maxFlashLoan()` should return the same value before and after deposit/withdraw of protected assets and `withdrawFees()`
-    rule maxFlashLoanUnchangedAfterDepositWithdrawProtected(env e) {
-        configForEightTokensSetupRequirements();
-        uint256 assets1;
-        uint256 assets2;
-        uint256 shares;
-        address receiver = flashLoanReceiver;
-        address owner;
-        nonSceneAddressRequirements(e.msg.sender);
-        nonSceneAddressRequirements(receiver);
-        totalSuppliesMoreThanThreeBalances(e.msg.sender, owner, silo0);
-
-        //value before
-        uint256 maxFlashLoanBefore = maxFlashLoan(token0);
-
-        //deposit
-        deposit(e, assets1, receiver, ISilo.CollateralType.Protected);
-
-        //value after deposit
-        uint256 maxFlashLoanAfterDeposit = maxFlashLoan(token0);
-
-        //withdraw
-        withdraw(e, assets2, receiver, owner, ISilo.CollateralType.Protected);
-
-        //value after withdraw
-        uint256 maxFlashLoanAfterWithdraw = maxFlashLoan(token0);
-
-        //maxFlashloan the same
-        assert maxFlashLoanBefore == maxFlashLoanAfterDeposit;
-        assert maxFlashLoanBefore == maxFlashLoanAfterWithdraw;
-    }
-
-    // * `flashLoan()` should never change any storage if flashloanFee is zero
+    // * `flashLoan()` should never change any storage if flashloanFee is zero //@audit-issue allowance changes
     rule flashLoanNoChangeIfFeeZero(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
@@ -98,24 +70,23 @@ using EmptyFlashloanReceiver as flashLoanReceiver;
         assert siloBalanceAfter == siloBalanceBefore + flashFee;
     }
 
-    // maxFlashLoan() returns siloBalance - protected Assets
-    rule maxFlashLoanReturnsSiloBalanceMinusProtectedAssets(env e) {
-        configForEightTokensSetupRequirements();
-        uint256 siloBalance = token0.balanceOf(silo0);
-        uint256 protectedAssets = totalProtectedAssetsHarness();
-        require siloBalance >= protectedAssets;
-        uint256 maxFlashLoanValue = maxFlashLoan(token0);
-        assert maxFlashLoanValue == siloBalance - protectedAssets;
-    }
+    
 
-    // maxFlashLoan() returns 0 for token which are not token0
-    rule maxFlashLoanReturnsZeroForNonToken0(env e) {
-        configForEightTokensSetupRequirements();
-        uint256 maxFlashLoanValue = maxFlashLoan(token1);
-        assert maxFlashLoanValue == 0;
-    }
 
-    // flashLoan() does not change assets or shareBalances
+
+
+
+
+//------------------------------- RULES TEST END ----------------------------------
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+//------------------------------- RULES OK START ------------------------------------
+
+// flashLoan() does not change assets or shareBalances
     rule flashLoanDoesNotChangeAssetsOrShareBalances(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
@@ -154,6 +125,48 @@ using EmptyFlashloanReceiver as flashLoanReceiver;
         assert userDebtSharesBefore == userDebtSharesAfter;
     }
 
+    // maxFlashLoan() returns siloBalance - protected Assets
+    rule maxFlashLoanReturnsSiloBalanceMinusProtectedAssets(env e) {
+        configForEightTokensSetupRequirements();
+        uint256 siloBalance = token0.balanceOf(silo0);
+        uint256 protectedAssets = totalProtectedAssetsHarness();
+        require siloBalance >= protectedAssets;
+        uint256 maxFlashLoanValue = maxFlashLoan(token0);
+        assert maxFlashLoanValue == siloBalance - protectedAssets;
+    }
+
+    // * `maxFlashLoan()` should return the same value before and after deposit/withdraw of protected assets and `withdrawFees()`
+    rule maxFlashLoanUnchangedAfterDepositWithdrawProtected(env e) {
+        configForEightTokensSetupRequirements();
+        uint256 assets1;
+        uint256 assets2;
+        uint256 shares;
+        address receiver = flashLoanReceiver;
+        address owner;
+        nonSceneAddressRequirements(e.msg.sender);
+        nonSceneAddressRequirements(receiver);
+        totalSuppliesMoreThanThreeBalances(e.msg.sender, owner, silo0);
+
+        //value before
+        uint256 maxFlashLoanBefore = maxFlashLoan(token0);
+
+        //deposit
+        deposit(e, assets1, receiver, ISilo.CollateralType.Protected);
+
+        //value after deposit
+        uint256 maxFlashLoanAfterDeposit = maxFlashLoan(token0);
+
+        //withdraw
+        withdraw(e, assets2, receiver, owner, ISilo.CollateralType.Protected);
+
+        //value after withdraw
+        uint256 maxFlashLoanAfterWithdraw = maxFlashLoan(token0);
+
+        //maxFlashloan the same
+        assert maxFlashLoanBefore == maxFlashLoanAfterDeposit;
+        assert maxFlashLoanBefore == maxFlashLoanAfterWithdraw;
+    }
+
     // flashLoan() reverts for token which are not token0
     rule flashLoanRevertsForNonToken0(env e) {
         configForEightTokensSetupRequirements();
@@ -166,7 +179,6 @@ using EmptyFlashloanReceiver as flashLoanReceiver;
 
         assert lastReverted;
     }
-
 
     // flashLoan() reverts for fees > max_uint192
     rule flashLoanRevertsForFeesGreaterThanMaxUint192(env e) {
@@ -199,43 +211,12 @@ using EmptyFlashloanReceiver as flashLoanReceiver;
         assert lastReverted;
     }
 
-    //flashLoan() can be called //@audit only test
-    rule flashLoanCanbeCalledBefore(env e) {
+    // maxFlashLoan() returns 0 for token which are not token0
+    rule maxFlashLoanReturnsZeroForNonToken0(env e) {
         configForEightTokensSetupRequirements();
-        uint256 amount;
-        address receiver;
-        address token = token0;
-        bytes data;
-
-        flashLoan@withrevert(e, receiver, token, amount, data);
-        satisfy !lastReverted;
+        uint256 maxFlashLoanValue = maxFlashLoan(token1);
+        assert maxFlashLoanValue == 0;
     }
-
-    //flashLoan() can be called //@audit only test
-    rule flashLoanCanbeCalledNEW(env e) {
-        configForEightTokensSetupRequirements();
-        uint256 amount;
-        address receiver = flashLoanReceiver;
-        address token = token0;
-        bytes data;
-
-        flashLoan@withrevert(e, receiver, token, amount, data);
-        satisfy !lastReverted;
-    }
-
-
-
-
-
-//------------------------------- RULES TEST END ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES OK START ------------------------------------
-
 
     // * `flashFee()` returns non-zero value if fee is set to non-zero value
     rule flashFeeNonZero(env e) {

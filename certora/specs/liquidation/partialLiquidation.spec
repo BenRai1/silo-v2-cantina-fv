@@ -4,7 +4,7 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 import "../simplifications/SimplifiedGetCompoundInterestRateAndUpdate_SAFE.spec";
 import "../simplifications/SiloMathLib_SAFE.spec";
 
-//------------------------------- DEFENITION AND METHODS START ----------------------------------
+//------------------------------- DEFENITION AND METHODS START ---------------------------------- //i: in video 16:19
 
     methods {
         // ---- `envfree` ----------------------------------------------------------

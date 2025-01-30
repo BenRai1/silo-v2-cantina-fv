@@ -49,7 +49,21 @@ import "../simplifications/_flashloan_no_state_changes.spec";
         (shareDebtToken0.balanceOf(user) != 0 || shareDebtToken1.balanceOf(user) != 0) => 
         (siloConfig.borrowerCollateralSilo(user) == silo0 || siloConfig.borrowerCollateralSilo(user) == silo1)
         filtered { 
-            f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)
+            f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f) &&
+            f.selector != sig:ShareDebtToken0.mint(address,address,uint256).selector //can only be called by silo and not directly
+        }
+        {
+            preserved transfer(address to, uint256 amount) with (env e){
+                require siloConfig.borrowerCollateralSilo(e.msg.sender) == silo0 || siloConfig.borrowerCollateralSilo(e.msg.sender) == silo1;
+            }
+
+            preserved transferFrom(address from, address to, uint256 amount) with (env e1){
+                require siloConfig.borrowerCollateralSilo(from) == silo0 || siloConfig.borrowerCollateralSilo(from) == silo1;
+            }
+
+            preserved forwardTransferFromNoChecks(address from, address to, uint256 amount) with (env e2){
+                require siloConfig.borrowerCollateralSilo(from) == silo0 || siloConfig.borrowerCollateralSilo(from) == silo1;
+            }        
     }
 
     //INVARIANT: user can only have debtToken0 or debtToken1

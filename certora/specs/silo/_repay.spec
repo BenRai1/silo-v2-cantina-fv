@@ -8,6 +8,63 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 
 //------------------------------- RULES TEST START ----------------------------------
     
+
+
+
+    
+
+
+
+
+
+
+//------------------------------- RULES TEST END ----------------------------------
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+
+    // repay() any user that can repay the debt should be able to repay the debt //@audit-issue if (!success) revert for second call
+    rule repayAnyUserCanRepay (env e1, env e2) {
+        configForEightTokensSetupRequirements();
+        uint256 assets;
+        address borrower;
+        address msgSender1 = e1.msg.sender;
+        address msgSender2 = e2.msg.sender;
+        threeUsersNotEqual(borrower, msgSender1, msgSender2);
+        nonSceneAddressRequirements(msgSender1);
+        nonSceneAddressRequirements(msgSender2);
+        totalSuppliesMoreThanBalance(borrower);
+
+        //balances before
+        uint256 borrowerDebtShareTokensBefore = shareDebtToken0.balanceOf(borrower);
+        uint256 msgSender1BalanceBefore = token0.balanceOf(msgSender1);
+        uint256 msgSender2BalanceBefore = token0.balanceOf(msgSender2);
+        require(msgSender1BalanceBefore == msgSender2BalanceBefore);
+
+        //prevent revert because of sending ETH
+        require(e1.msg.value == e2.msg.value);
+
+        //init state
+        storage init = lastStorage;
+
+        //repay1
+        repay(e1, assets, borrower);
+
+        //balance after repay1
+        uint256 borrowerDebtShareTokensAfterRepay1 = shareDebtToken0.balanceOf(borrower);
+
+        //repay2
+        repay@withrevert(e2, assets, borrower) at init;
+
+        bool secondReverted = lastReverted;
+
+        //balance after repay2
+        uint256 borrowerDebtShareTokensAfterRepay2 = shareDebtToken0.balanceOf(borrower);
+
+        satisfy !secondReverted;
+        assert borrowerDebtShareTokensAfterRepay1 == borrowerDebtShareTokensAfterRepay2;
+    }
+
     // repay() can not repay more assets than borrowed (check balances of token0)
     rule repayMoreAssetsThanBorrowed (env e) {
         configForEightTokensSetupRequirements();
@@ -126,62 +183,6 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 
         //did not revert
         assert !lastReverted;
-    }
-
-
-
-    
-
-
-
-
-
-
-//------------------------------- RULES TEST END ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-
-    // repay() any user that can repay the debt should be able to repay the debt //@audit-issue if (!success) revert for second call
-    rule repayAnyUserCanRepay (env e1, env e2) {
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address borrower;
-        address msgSender1 = e1.msg.sender;
-        address msgSender2 = e2.msg.sender;
-        threeUsersNotEqual(borrower, msgSender1, msgSender2);
-        nonSceneAddressRequirements(msgSender1);
-        nonSceneAddressRequirements(msgSender2);
-        totalSuppliesMoreThanBalance(borrower);
-
-        //balances before
-        uint256 borrowerDebtShareTokensBefore = shareDebtToken0.balanceOf(borrower);
-        uint256 msgSender1BalanceBefore = token0.balanceOf(msgSender1);
-        uint256 msgSender2BalanceBefore = token0.balanceOf(msgSender2);
-        require(msgSender1BalanceBefore == msgSender2BalanceBefore);
-
-        //prevent revert because of sending ETH
-        require(e1.msg.value == e2.msg.value);
-
-        //init state
-        storage init = lastStorage;
-
-        //repay1
-        repay(e1, assets, borrower);
-
-        //balance after repay1
-        uint256 borrowerDebtShareTokensAfterRepay1 = shareDebtToken0.balanceOf(borrower);
-
-        //repay2
-        repay@withrevert(e2, assets, borrower) at init;
-
-        bool secondReverted = lastReverted;
-
-        //balance after repay2
-        uint256 borrowerDebtShareTokensAfterRepay2 = shareDebtToken0.balanceOf(borrower);
-
-        satisfy !secondReverted;
-        assert borrowerDebtShareTokensAfterRepay1 == borrowerDebtShareTokensAfterRepay2;
     }
 
 

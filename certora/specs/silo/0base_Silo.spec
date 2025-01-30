@@ -14,6 +14,8 @@ methods{
    function maxFlashLoan(address) external returns (uint256) envfree;
    function flashFeeHarness(address token, uint256 amount) external returns (uint256) envfree;
    function _.getFeesWithAsset(address _silo) external envfree;
+   function hookCallActivatedHarness(uint256 action, bool before) external returns (bool) envfree;
+   function hookReceiverHarness(address silo) external returns (address) envfree;
 
 
    function _.getCollateralAndDebtTotalsStorage() external => DISPATCHER(true);
@@ -24,6 +26,8 @@ methods{
 
 ///////////////// DEFINITIONS START /////////////////////
    definition HARNESS_METHODS(method f) returns bool = 
+      f.selector == sig:hookReceiverHarness(address).selector ||
+      f.selector == sig:hookCallActivatedHarness(uint256,bool).selector ||
       f.selector == sig:flashFeeHarness(address,uint256).selector ||
       f.selector == sig:totalProtectedAssetsHarness().selector ||
       f.selector == sig:repayHarness(address,uint256,uint256,address).selector ||
