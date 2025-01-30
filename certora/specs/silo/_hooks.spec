@@ -73,6 +73,17 @@ methods{
 
     // liquidation() should call beforeAction() and afterAction() hooks if activated //@audit-issue not called anywhere
 
+
+//------------------------------- RULES TEST END ----------------------------------
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+//------------------------------- RULES OK START ------------------------------------
+
+
+
     //INVARIANT: hookSetup (hooksBefore, hooksAfter) for all tokens is the same
     invariant sameHookSetupSameForAllTokens(env e) 
         silo0.hookSetup(e).hooksBefore == shareProtectedCollateralToken0.hookSetup(e).hooksBefore &&
@@ -90,18 +101,6 @@ methods{
             }
 
     }
-
-//------------------------------- RULES TEST END ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES OK START ------------------------------------
-
-
-
-
 
     // transitionCollateral(CollateralType.Protected) should call beforeAction() and afterAction() hooks if activated
     rule transitionCollateralProtectedHooks(env e) {

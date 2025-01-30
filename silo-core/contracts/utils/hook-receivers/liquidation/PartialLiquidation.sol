@@ -175,7 +175,7 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
         );
     }
 
-    //@audit what is this supposed to do?
+    //i: returns the type of hooks that the HookReceiver supports (which hook types should be called before and after specifc actions)
     function hookReceiverConfig(address) external virtual view returns (uint24 hooksBefore, uint24 hooksAfter) {
         return (0, 0);
     }

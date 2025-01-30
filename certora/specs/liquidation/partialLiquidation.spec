@@ -1,13 +1,18 @@
 import "../setup/CompleteSiloSetup.spec";
 import "../silo/unresolved.spec";
 import "../simplifications/Oracle_quote_one_UNSAFE.spec";
-import "../simplifications/SimplifiedGetCompoundInterestRateAndUpdate_SAFE.spec";
 import "../simplifications/SiloMathLib_SAFE.spec";
+import "../simplifications/Silo_noAccrueInterest_simplification_UNSAFE.spec"; //accrueInterest does not change state
+import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide DEFAUL HAVOC for oracle calls
+// import "../simplifications/SimplifiedGetCompoundInterestRateAndUpdate_SAFE.spec";
+// import "../simplifications/_hooks_no_state_change.spec"; //calls to hooks do not change state
+
 
 //------------------------------- DEFENITION AND METHODS START ---------------------------------- //i: in video 16:19
 
     methods {
         // ---- `envfree` ----------------------------------------------------------
+        function _.repay(uint256,address) external => DISPATCHER(true);
         function _.balanceOf(address) external envfree;
         
     }
@@ -17,28 +22,538 @@ import "../simplifications/SiloMathLib_SAFE.spec";
 
 //------------------------------- DEFENITION AND METHODS END ----------------------------------
 
+//------------------------FUNCTIONS START------------------------
+    //inital setup for liquidations
+    function setupLiquidationRules(env e, address borrower) {
+        nonSceneAddressRequirements(e.msg.sender);
+        nonSceneAddressRequirements(borrower);
+        require(borrower != e.msg.sender);
+
+        //debt silo not collateral silo
+        address debtSilo = siloConfig.getDebtSilo(e, borrower);
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        require(debtSilo != collateralSilo);
+    }
+
+    //ensure the borrower has only protected shares, no normal collateral shares
+    function borrowerHasOnlyProtectedShares(env e, address borrower) {
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        require(collateralSilo.balanceOf(e, borrower) == 0);
+
+    }
+//------------------------FUNCTIONS END------------------------
+
 
 //------------------------------- RULES TEST START ----------------------------------
 
-    
-    //no debt, no liquidation
-    rule noDebtNoLiquidation(env e){
-        address _collateralAsset;
-        address _debtAsset;
-        address _borrower;
-        uint256 _maxDebtToCover;
-        bool _receiveSToken;
+    // ---------------------------------reverts	
+    // 	liquidationCall() reverts if siloConfig == 0 
+    rule revertIfSiloConfigIsZero(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+        require siloConfig(e) == 0;
 
-        uint256 balanceDebtAssetBorrower = _debtAsset.balanceOf(e, _borrower);
-
-        storage init = lastStorage;
-        liquidationCall@withrevert(e, _collateralAsset, _debtAsset, _borrower, _maxDebtToCover, _receiveSToken);
-        storage final = lastStorage;
-        assert init == final;
+        //function call
+        liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+        
+        //call reverted
+        assert lastReverted;        
     }
 
+    // 	liquidationCall() reverts if _borrower has no debtAssets
+    rule revertIfBorrowerHasNoDebtAssets(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        require siloConfig.getDebtSilo(e, borrower).balanceOf(e, borrower) == 0;
+
+        //function call
+        liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+        
+        //call reverted
+        assert lastReverted;        
+    }
+    
+    // 	liquidationCall() reverts if liquidty of collateralSilo is 0 and user only has collateralShare and _receiveSToken == false
+    rule revertIfCollateralSiloLiquidityIsZero(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        address protectedShareToken = siloConfig.getConfig(e, collateralSilo).protectedShareToken;
+        require collateralSilo.getLiquidity(e) == 0;
+        require protectedShareToken.balanceOf(e, borrower) == 0;
+        require !receiveSToken;
+
+        //function call
+        liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+        
+        //call reverted
+        assert lastReverted;        
+    }
+    
+    // ---------------------------------borrower	
+    
+    // 	liquidationCall() collateralShares (protected) of borrower decrease (might be false since function works if collateralAssets are 0)
+    rule borrowerCollateralShareDecrease(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+        borrowerHasOnlyProtectedShares(e, borrower);
+
+        //values before
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        address protectedShareToken = siloConfig.getConfig(e, collateralSilo).protectedShareToken;
+        uint256 balanceOfProtectedSharesBefore = protectedShareToken.balanceOf(e, borrower);
+
+        //function call
+        liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 balanceOfProtectedSharesAfter = protectedShareToken.balanceOf(e, borrower);
+
+        //asserts
+        assert balanceOfProtectedSharesAfter < balanceOfProtectedSharesBefore;   
+    }
+    
+    // 	liquidationCall() debtShares of borrower decrease
+    rule borrowerDebtSharesDecrease(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+
+        //values before
+        address debtSilo = siloConfig.getDebtSilo(e, borrower);
+        address debtShareToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
+        uint256 balanceDebtSharesBefore = debtShareToken.balanceOf(e, borrower);
+
+        //function call
+        liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 balanceDebtSharesAfter = debtShareToken.balanceOf(e, borrower);
+
+        //asserts
+        assert balanceDebtSharesAfter < balanceDebtSharesBefore;   
+    }
+    
+    // 	liquidationCall() after liquidation, if borrower still has protectedShares, the amount of collateralShare did not change
+    rule protectedCollateralIsLiquidatedFirst(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+
+        //values before
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        address protectedShareToken = siloConfig.getConfig(e, collateralSilo).protectedShareToken;
+        uint256 balanceOfProtectedSharesBefore = protectedShareToken.balanceOf(e, borrower);
+        uint256 balanceCollateralSharesBefore = collateralSilo.balanceOf(e, borrower);
+
+        //function call
+        liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 balanceOfProtectedSharesAfter = protectedShareToken.balanceOf(e, borrower);
+        uint256 balanceCollateralSharesAfter = collateralSilo.balanceOf(e, borrower);
+
+        //asserts
+        assert balanceOfProtectedSharesAfter > 0 => balanceCollateralSharesAfter == balanceCollateralSharesBefore;   
+    }
+    
+    // ---------------------------------other user	
+    
+    // 	liquidationCall() no balances for other user changes if user is not msg.sender, _borrower or silo
+    rule balanceOfOtherUserDoesNotChange(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+        address otherUser;
+        nonSceneAddressRequirements(otherUser);
+        threeUsersNotEqual(e.msg.sender, borrower, otherUser);
+
+        //values before
+        uint256 balanceCollateralShares0Before = silo0.balanceOf(e, otherUser);
+        uint256 balanceOfProtectedShares0Before = shareProtectedCollateralToken0.balanceOf(e, otherUser);
+        uint256 balanceDebtShares0Before = shareDebtToken0.balanceOf(e, otherUser);
+        uint256 balanceToken0Before = token0.balanceOf(e, otherUser);
+        uint256 balanceCollateralShares1Before = silo1.balanceOf(e, otherUser);
+        uint256 balanceOfProtectedShares1Before = shareProtectedCollateralToken1.balanceOf(e, otherUser);
+        uint256 balanceDebtShares1Before = shareDebtToken1.balanceOf(e, otherUser);
+        uint256 balanceToken1Before = token1.balanceOf(e, otherUser);
+
+        //function call
+        liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);    
+
+        //values after
+        uint256 balanceCollateralShares0After = silo0.balanceOf(e, otherUser);
+        uint256 balanceOfProtectedShares0After = shareProtectedCollateralToken0.balanceOf(e, otherUser);
+        uint256 balanceDebtShares0After = shareDebtToken0.balanceOf(e, otherUser);
+        uint256 balanceToken0After = token0.balanceOf(e, otherUser);
+        uint256 balanceCollateralShares1After = silo1.balanceOf(e, otherUser);
+        uint256 balanceOfProtectedShares1After = shareProtectedCollateralToken1.balanceOf(e, otherUser);
+        uint256 balanceDebtShares1After = shareDebtToken1.balanceOf(e, otherUser);
+        uint256 balanceToken1After = token1.balanceOf(e, otherUser);
+
+        //asserts
+        assert balanceCollateralShares0Before == balanceCollateralShares0After;
+        assert balanceOfProtectedShares0Before == balanceOfProtectedShares0After;
+        assert balanceDebtShares0Before == balanceDebtShares0After;
+        assert balanceToken0Before == balanceToken0After;
+        assert balanceCollateralShares1Before == balanceCollateralShares1After;
+        assert balanceOfProtectedShares1Before == balanceOfProtectedShares1After;
+        assert balanceDebtShares1Before == balanceDebtShares1After;
+        assert balanceToken1Before == balanceToken1After;
+    }        
+    
+    // ---------------------------------msg.sender	
+    
+    // 	liquidationCall() _receiveSToken == false => balance collateralToken for msg.sender increases by withdrawCollateral
+    rule balanceCollateralTokenForMsgSenderIncreasesByWithdrawCollateral(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+        address msgSender = e.msg.sender;
+
+        //setup
+        require !receiveSToken;
+
+        //values before
+        uint256 balanceCollateralTokenBefore = collateralAsset.balanceOf(e, msgSender);
+
+        //function call
+        uint256 withdrawCollateral; 
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);    
+
+        //values after
+        uint256 balanceCollateralTokenAfter = collateralAsset.balanceOf(e, msgSender);
+
+        //asserts
+        assert balanceCollateralTokenAfter == balanceCollateralTokenBefore + withdrawCollateral;
+    }
+    
+    // 	liquidationCall() _receiveSToken == false => collateralShare of msg.sender do not change
+    rule collateralShareOfMsgSenderDoesNotChange(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+        address msgSender = e.msg.sender;
+
+        //setup
+        require !receiveSToken;
+
+        //values before
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        uint256 balanceCollateralSharesBefore = collateralSilo.balanceOf(e, msgSender);
+        address protectedShareToken = siloConfig.getConfig(e, collateralSilo).protectedShareToken;
+        uint256 balanceOfProtectedSharesBefore = protectedShareToken.balanceOf(e, msgSender);
+
+        //function call
+        uint256 withdrawCollateral; 
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);    
+
+        //values after
+        uint256 balanceCollateralSharesAfter = collateralSilo.balanceOf(e, msgSender);
+        uint256 balanceOfProtectedSharesAfter = protectedShareToken.balanceOf(e, msgSender);
+
+        //asserts
+        assert balanceCollateralSharesAfter == balanceCollateralSharesBefore;
+        assert balanceOfProtectedSharesAfter == balanceOfProtectedSharesBefore;
+    }
+    
+    // 	liquidationCall() _receiveSToken == true => msg.sender balances of collateralShares increase (sum of both)
+    rule msgSenderBalancesOfCollateralSharesIncreaseSumOfBoth(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+        address msgSender = e.msg.sender;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+        borrowerHasOnlyProtectedShares(e, borrower);
+        require receiveSToken;
+
+        //values before
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        uint256 balanceCollateralSharesBefore = collateralSilo.balanceOf(e, msgSender);
+        address protectedShareToken = siloConfig.getConfig(e, collateralSilo).protectedShareToken;
+        uint256 balanceOfProtectedSharesBefore = protectedShareToken.balanceOf(e, msgSender);
+
+        //function call
+        uint256 withdrawCollateral; 
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);    
+
+        //values after
+        uint256 balanceCollateralSharesAfter = collateralSilo.balanceOf(e, msgSender);
+        uint256 balanceOfProtectedSharesAfter = protectedShareToken.balanceOf(e, msgSender);
+
+        //asserts
+        assert balanceCollateralSharesAfter == balanceCollateralSharesBefore;
+        assert balanceOfProtectedSharesAfter > balanceOfProtectedSharesBefore;
+    }
+    
+    // 	liquidationCall() _debtAsset balance of msg.sender decreases by repayDebtAssets 
+    rule debtAssetBalanceOfMsgSenderDecreasesByRepayDebtAssets(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+        address msgSender = e.msg.sender;
+
+        //setup
+
+        //values before
+        uint256 balanceDebtAssetBefore = debtAsset.balanceOf(e, msgSender);
+
+        //function call
+        uint256 withdrawCollateral; 
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);    
+
+        //values after
+        uint256 balanceDebtAssetAfter = debtAsset.balanceOf(e, msgSender);
+
+        //asserts
+        assert balanceDebtAssetAfter == balanceDebtAssetBefore - repayDebtAssets;
+    }
+
+    // --------------------------------- debtSilo	
+    
+    // 	liquidationCall() debtAssets in debtSilo are reduced by "repayDebtAssets"
+    rule debtAssetsInDebtSiloAreReducedByRepayDebtAssets(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+
+        //values before
+        address debtSilo = siloConfig.getDebtSilo(e, borrower);
+        uint256 debtAssetBefore;
+        (_, _, _, _, debtAssetBefore) = debtSilo.getSiloStorage(e);
+
+        //function call
+        uint256 withdrawCollateral; 
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);    
+
+        //values after
+        uint256 debtAssetAfter;
+        (_, _, _, _, debtAssetAfter) = debtSilo.getSiloStorage(e);
+
+        //asserts
+        assert debtAssetAfter == debtAssetBefore - repayDebtAssets;
+    }
+    
+    // 	liquidationCall() _debtAsset(underlyingToken) balance of silo increases by repayDebtAssets //@audit will fail becasue of missing setup
+    rule debtAssetBalanceOfSiloIncreasesByRepayDebtAssets(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+
+        //values before
+        address debtSilo = siloConfig.getDebtSilo(e, borrower);
+        uint256 balanceUnderlyingTokenBefore = debtAsset.balanceOf(e, debtSilo);
+
+        //function call
+        uint256 withdrawCollateral; 
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);    
+
+        //values after
+        uint256 balanceUnderlyingTokenAfter = debtAsset.balanceOf(e, debtSilo);
+
+        //asserts
+        assert balanceUnderlyingTokenAfter == balanceUnderlyingTokenBefore + repayDebtAssets;
+    }
+
+    // --------------------------------- colateralSilo	
+    
+    // 	liquidationCall() _receiveSToken == false => balance collateralToken for collateralSilo decreases by withdrawCollateral
+    rule balanceCollateralTokenForCollateralSiloDecreasesByWithdrawCollateral(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        require !receiveSToken;
+
+        //values before
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        uint256 balanceCollateralTokenBefore = collateralAsset.balanceOf(e, collateralSilo);
+
+        //function call
+        uint256 withdrawCollateral;
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 balanceCollateralTokenAfter = collateralAsset.balanceOf(e, collateralSilo);
+
+        //asserts
+        assert balanceCollateralTokenAfter == balanceCollateralTokenBefore - withdrawCollateral;
+    }
+    
+    // 	liquidationCall() _receiveSToken == false => collateralAssets for collateralSilo decreases by withdrawCollateral
+    rule collateralAssetsForCollateralSiloDecreaseByWithdrawCollateral(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+        borrowerHasOnlyProtectedShares(e, borrower);
+        require !receiveSToken;
+
+        //values before
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        uint256 protectedAssetsBefore;
+        (_, _, protectedAssetsBefore, _, _) = collateralSilo.getSiloStorage(e);
+
+        //function call
+        uint256 withdrawCollateral;
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 protectedAssetsAfter;
+        (_, _, protectedAssetsAfter, _, _) = collateralSilo.getSiloStorage(e);
+
+        //asserts
+        assert protectedAssetsAfter == protectedAssetsBefore - withdrawCollateral;
+    }
+
+    // 	liquidationCall() _receiveSToken == true => no balance of collateralAsset changes
+    rule collateralAssetsSiloDoNotChange(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+        
+        //setup
+        setupLiquidationRules(e, borrower);
+        borrowerHasOnlyProtectedShares(e, borrower);
+        require receiveSToken;
+
+        //values before
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        uint256 protectedAssetsBefore;
+        uint256 collateralAssetsBefore;
+        (_, _, protectedAssetsBefore, collateralAssetsBefore, _) = collateralSilo.getSiloStorage(e);
+
+        //function call
+        uint256 withdrawCollateral;
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 protectedAssetsAfter;
+        uint256 collateralAssetsAfter;
+        (_, _, protectedAssetsAfter, collateralAssetsAfter, _) = collateralSilo.getSiloStorage(e);
+
+        //asserts
+        assert collateralAssetsAfter == collateralAssetsBefore;
+        assert protectedAssetsAfter == protectedAssetsBefore;
+    }
+    
+    
+    // 	liquidationCall() _receiveSToken == true => collateralAssets of collateralSilo stays the same
+    rule noBalanceOfCollateralAssetChanges(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+        borrowerHasOnlyProtectedShares(e, borrower);
+        require receiveSToken;
+
+        //values before
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        uint256 balanceCollateralTokenBefore = collateralAsset.balanceOf(e, collateralSilo);
+
+        //function call
+        uint256 withdrawCollateral;
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 balanceCollateralTokenAfter = collateralAsset.balanceOf(e, collateralSilo);
+
+        //asserts
+        assert balanceCollateralTokenAfter == balanceCollateralTokenBefore;
+    }
+    
+    // --------------------------------- general	
+    
     //using the result of maxLiquidation to call liquidationCall should never revert
-   
 
 
 
@@ -72,6 +587,82 @@ import "../simplifications/SiloMathLib_SAFE.spec";
 
 //------------------------------- RULES OK START ------------------------------------
 
+    // 	liquidationCall() reverts if _maxDebtToConvert == 0
+    rule revertIfMaxDebtToConvertIsZero(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+        require maxDebtToCover == 0;
+
+        //function call
+        liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+        
+        //call reverted
+        assert lastReverted;        
+    }
+    
+    // 	liquidationCall() reverts if debtSilo of borrower == 0
+    rule revertIfDebtSiloIsZero(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+        require siloConfig.getDebtSilo(e, borrower) == 0;
+
+        //function call
+        liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+        
+        //call reverted
+        assert lastReverted;        
+    }
+    
+    // 	liquidationCall() reverts if _collateralAsset is not the asset of the collateralSilo
+    rule revertIfCollateralAssetIsNotTheAssetOfCollateralSilo(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        address underlyingToken = siloConfig.getConfig(e, collateralSilo).token;
+        require underlyingToken != collateralAsset;
+
+        //function call
+        liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+        
+        //call reverted
+        assert lastReverted;        
+    }
+    
+    // 	liquidationCall() reverts if the _debtAsset is not the asset in the debtSilo
+    rule revertIfDebtAssetIsNotTheAssetInDebtSilo(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        address debtSilo = siloConfig.getDebtSilo(e, borrower);
+        address underlyingToken = siloConfig.getConfig(e, debtSilo).token;
+        require underlyingToken != debtAsset;
+
+        //function call
+        liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+        
+        //call reverted
+        assert lastReverted;        
+    }
+    
     //hookReceiverConfig() always returns (0,0)
     rule hookReceiverConfigAlwaysReturnsZero(env e, address _address){
         uint24 hooksBefore;
