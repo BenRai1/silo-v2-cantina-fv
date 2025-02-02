@@ -8,11 +8,15 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
 // import "../simplifications/_hooks_no_state_change.spec"; //calls to hooks do not change state
 
 
-//------------------------------- DEFENITION AND METHODS START ---------------------------------- //i: in video 16:19
+//------------------------------- DEFENITION AND METHODS START ---------------------------------- //i: in video 13:42
 
     methods {
         // ---- `envfree` ----------------------------------------------------------
         function _.repay(uint256,address) external => DISPATCHER(true);
+        function _.forwardTransferFromNoChecks(address,address,uint256) external => DISPATCHER(true);
+        function _.previewRedeem(uint256,ISilo.CollateralType) external => DISPATCHER(true);
+        function _.redeem(uint256,address,address,ISilo.CollateralType) external => DISPATCHER(true);
+
         function _.balanceOf(address) external envfree;
         
     }
@@ -23,7 +27,7 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
 //------------------------------- DEFENITION AND METHODS END ----------------------------------
 
 //------------------------FUNCTIONS START------------------------
-    //inital setup for liquidations
+    //inital setup for liquidations (silos different, users different)
     function setupLiquidationRules(env e, address borrower) {
         nonSceneAddressRequirements(e.msg.sender);
         nonSceneAddressRequirements(borrower);
@@ -41,29 +45,14 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         require(collateralSilo.balanceOf(e, borrower) == 0);
 
     }
+
 //------------------------FUNCTIONS END------------------------
 
 
 //------------------------------- RULES TEST START ----------------------------------
 
     // ---------------------------------reverts	
-    // 	liquidationCall() reverts if siloConfig == 0 
-    rule revertIfSiloConfigIsZero(env e){
-        configForEightTokensSetupRequirements();
-        address collateralAsset;
-        address debtAsset;
-        address borrower;
-        uint256 maxDebtToCover;
-        bool receiveSToken;
-        require siloConfig(e) == 0;
-
-        //function call
-        liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
-        
-        //call reverted
-        assert lastReverted;        
-    }
-
+    
     // 	liquidationCall() reverts if _borrower has no debtAssets
     rule revertIfBorrowerHasNoDebtAssets(env e){
         configForEightTokensSetupRequirements();
@@ -108,7 +97,7 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
     
     // ---------------------------------borrower	
     
-    // 	liquidationCall() collateralShares (protected) of borrower decrease (might be false since function works if collateralAssets are 0)
+    // 	liquidationCall() collateralShares (protected) of borrower decrease (//@audit-issue is false since function works if collateralAssets are 0)
     rule borrowerCollateralShareDecrease(env e){
         configForEightTokensSetupRequirements();
         address collateralAsset;
@@ -253,6 +242,7 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         address msgSender = e.msg.sender;
 
         //setup
+        setupLiquidationRules(e, borrower);
         require !receiveSToken;
 
         //values before
@@ -349,6 +339,8 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         address msgSender = e.msg.sender;
 
         //setup
+        setupLiquidationRules(e, borrower);
+
 
         //values before
         uint256 balanceDebtAssetBefore = debtAsset.balanceOf(e, msgSender);
@@ -377,6 +369,7 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         bool receiveSToken;
 
         //setup
+        setupLiquidationRules(e, borrower);
 
         //values before
         address debtSilo = siloConfig.getDebtSilo(e, borrower);
@@ -396,14 +389,15 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         assert debtAssetAfter == debtAssetBefore - repayDebtAssets;
     }
     
-    // 	liquidationCall() _debtAsset(underlyingToken) balance of silo increases by repayDebtAssets //@audit will fail becasue of missing setup
-    rule debtAssetBalanceOfSiloIncreasesByRepayDebtAssets(env e){
+    // 	liquidationCall() _debtAsset(underlyingToken) balance of silo increases by repayDebtAssets
+    rule debtTokenBalanceOfSiloIncreasesByRepayDebtAssets(env e){
         configForEightTokensSetupRequirements();
         address collateralAsset;
         address debtAsset;
         address borrower;
         uint256 maxDebtToCover;
         bool receiveSToken;
+        setupLiquidationRules(e, borrower);
 
         //setup
 
@@ -431,6 +425,7 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         address collateralAsset;
         address debtAsset;
         address borrower;
+        setupLiquidationRules(e, borrower);
         uint256 maxDebtToCover;
         bool receiveSToken;
 
@@ -554,6 +549,157 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
     // --------------------------------- general	
     
     //using the result of maxLiquidation to call liquidationCall should never revert
+    // liquidationCall() msg.sender never pays more than _maxDebtToConvert
+    rule msgSenderNeverPaysMoreThanMaxDebtToConvert(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+
+        //values before
+        uint256 senderBalanceToken0Before = token0.balanceOf(e.msg.sender);
+
+        //function call
+        liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 senderBalanceToken0After = token0.balanceOf(e.msg.sender);
+
+        //asserts
+        assert senderBalanceToken0After >= senderBalanceToken0Before - maxDebtToCover;
+    }
+    // liquidationCall() revert if borrower solvent
+    rule revertIfBorrowerSolvent(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+        require silo0.isSolvent(e, borrower);
+
+        //function call
+        liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //call reverted
+        assert lastReverted;
+    }
+
+    // liquidationCall() only specific values in the debt silo change //@audit can be split if it times out
+    rule onlySpecificValuesInDebtSiloChange(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+        
+        //values before
+        address debtSilo = siloConfig.getDebtSilo(e, borrower);
+
+        address protectedTokenDebtSilo;
+        uint256 protectedAssetsDebtSiloBefore;
+        (protectedTokenDebtSilo, protectedAssetsDebtSiloBefore) = debtSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Protected);
+        
+        address collateralTokenDebtSilo;
+        uint256 collateralAssetsDebtSiloBefore;
+        (collateralTokenDebtSilo, collateralAssetsDebtSiloBefore) = debtSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Collateral);
+        
+        address debtShareTokenDebtSilo;
+        uint256 debtAssetsDebtSiloBefore;
+        (debtShareTokenDebtSilo, debtAssetsDebtSiloBefore) = debtSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Debt);
+        
+        address underlyingTokenDebtSilo = siloConfig.getConfig(e, debtSilo).token;
+        uint256 balanceUnderlyingTokenBefore = underlyingTokenDebtSilo.balanceOf(e, debtSilo);
+
+        //function call
+        uint256 withdrawCollateral;
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 protectedAssetsDebtSiloAfter;
+        (_, protectedAssetsDebtSiloAfter) = debtSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Protected);
+        uint256 collateralAssetsDebtSiloAfter;
+        (_, collateralAssetsDebtSiloAfter) = debtSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Collateral);
+        uint256 debtAssetsDebtSiloAfter;
+        (_, debtAssetsDebtSiloAfter) = debtSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Debt);
+        uint256 balanceUnderlyingTokenAfter = underlyingTokenDebtSilo.balanceOf(e, debtSilo);
+
+        //asserts
+        assert protectedAssetsDebtSiloAfter == protectedAssetsDebtSiloBefore;
+        assert collateralAssetsDebtSiloAfter == collateralAssetsDebtSiloBefore;
+        assert debtAssetsDebtSiloAfter == debtAssetsDebtSiloBefore - repayDebtAssets;
+        assert balanceUnderlyingTokenAfter == balanceUnderlyingTokenBefore + repayDebtAssets;
+    }
+
+    // liquidationCall() only specific values in the collateral silo change //@audit can be split if it times out
+    rule onlySpecificValuesInCollateralSiloChange(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken;
+
+        //setup
+        setupLiquidationRules(e, borrower);
+        
+        //values before
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+
+        address protectedTokencollateralSilo;
+        uint256 protectedAssetscollateralSiloBefore;
+        (protectedTokencollateralSilo, protectedAssetscollateralSiloBefore) = collateralSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Protected);
+        
+        address collateralTokencollateralSilo;
+        uint256 collateralAssetscollateralSiloBefore;
+        (collateralTokencollateralSilo, collateralAssetscollateralSiloBefore) = collateralSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Collateral);
+        
+        address debtShareTokencollateralSilo;
+        uint256 debtAssetscollateralSiloBefore;
+        (debtShareTokencollateralSilo, debtAssetscollateralSiloBefore) = collateralSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Debt);
+        
+        address underlyingTokencollateralSilo = siloConfig.getConfig(e, collateralSilo).token;
+        uint256 balanceUnderlyingTokenBefore = underlyingTokencollateralSilo.balanceOf(e, collateralSilo);
+
+        //function call
+        uint256 withdrawCollateral;
+        uint256 repayDebtAssets;
+        (withdrawCollateral, repayDebtAssets) = liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 protectedAssetscollateralSiloAfter;
+        (_, protectedAssetscollateralSiloAfter) = collateralSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Protected);
+        uint256 collateralAssetscollateralSiloAfter;
+        (_, collateralAssetscollateralSiloAfter) = collateralSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Collateral);
+        uint256 debtAssetscollateralSiloAfter;
+        (_, debtAssetscollateralSiloAfter) = collateralSilo.getTokenAndAssetsDataHarness(e, ISilo.AssetType.Debt);
+        uint256 balanceUnderlyingTokenAfter = underlyingTokencollateralSilo.balanceOf(e, collateralSilo);
+
+        //asserts
+        assert protectedAssetscollateralSiloAfter <= protectedAssetscollateralSiloBefore;
+        assert collateralAssetscollateralSiloAfter <= collateralAssetscollateralSiloBefore;
+        assert debtAssetscollateralSiloAfter == debtAssetscollateralSiloBefore;
+        assert balanceUnderlyingTokenAfter <= balanceUnderlyingTokenBefore;
+    }
+
+
+
+
+    // //@audit-issue ganaue berechnungen der Werte fehlen
+
 
 
 

@@ -16,6 +16,7 @@ methods{
    function _.getFeesWithAsset(address _silo) external envfree;
    function hookCallActivatedHarness(uint256 action, bool before) external returns (bool) envfree;
    function hookReceiverHarness(address silo) external returns (address) envfree;
+   function getTokenAndAssetsDataHarness(ISilo.AssetType) external returns (address, uint256) envfree; 
 
 
    function _.getCollateralAndDebtTotalsStorage() external => DISPATCHER(true);
@@ -26,6 +27,8 @@ methods{
 
 ///////////////// DEFINITIONS START /////////////////////
    definition HARNESS_METHODS(method f) returns bool = 
+      f.selector == sig:getSiloStorageHarness().selector ||
+      f.selector == sig:getTokenAndAssetsDataHarness(ISilo.AssetType).selector ||
       f.selector == sig:hookReceiverHarness(address).selector ||
       f.selector == sig:hookCallActivatedHarness(uint256,bool).selector ||
       f.selector == sig:flashFeeHarness(address,uint256).selector ||

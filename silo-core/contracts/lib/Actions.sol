@@ -418,7 +418,7 @@ library Actions {
                 deployerRevenue = earnedFees - daoRevenue;
             }
 
-            IERC20(asset).safeTransfer(daoFeeReceiver, daoRevenue);
+            IERC20(asset).safeTransfer(daoFeeReceiver, daoRevenue); //@audit-issue !ISSUE! does saveTransfer also work for tokens which revert on transfer0? If not, if doeFee is set to 0 (all fees should go to the creater) it will not be possible to claim the fees minDAOFee can be set to 0 in the factory (e.g for promotional reasons) 
             IERC20(asset).safeTransfer(deployerFeeReceiver, deployerRevenue);
         }
 

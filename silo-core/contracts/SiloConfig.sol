@@ -88,7 +88,7 @@ contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
         SILO_ID = _siloId;
 
         // To make further computations in the Silo secure require DAO and deployer fees to be less than 100%
-        require(_configData0.daoFee + _configData0.deployerFee < 1e18, FeeTooHigh());
+        require(_configData0.daoFee + _configData0.deployerFee < 1e18, FeeTooHigh()); //@audit where are fhe fees used? shouldnt they be 100% in total?
 
         _DAO_FEE = _configData0.daoFee;
         _DEPLOYER_FEE = _configData0.deployerFee;

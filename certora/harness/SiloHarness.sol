@@ -101,8 +101,6 @@ contract SiloHarness is Silo {
         return $.transferWithChecks;
     }
     
-
-
     function getSiloFromStorage() external view returns (ISilo) {
         IShareToken.ShareTokenStorage storage $ = ShareTokenLib.getShareTokenStorage();
         return $.silo;
@@ -118,6 +116,16 @@ contract SiloHarness is Silo {
     function totalProtectedAssetsHarness() external view returns (uint256 protectedAssets) {
         ISilo.SiloStorage storage $ = SiloStorageLib.getSiloStorage();
         protectedAssets = $.totalAssets[ISilo.AssetType.Protected];
+    }
+
+    function totalDebtAssetsHarness() external view returns (uint256 debtAssets) {
+        ISilo.SiloStorage storage $ = SiloStorageLib.getSiloStorage();
+        debtAssets = $.totalAssets[ISilo.AssetType.Debt];
+    }
+
+    function totalCollateralAssetsHarness() external view returns (uint256 collateralAssets) {
+        ISilo.SiloStorage storage $ = SiloStorageLib.getSiloStorage();
+        collateralAssets = $.totalAssets[ISilo.AssetType.Collateral];
     }
 
     function borrowerCollateralSiloHarness(address borrower) external view returns (address collateralSilo){
@@ -232,6 +240,37 @@ contract SiloHarness is Silo {
     function hookReceiverHarness(address silo) external view returns (address) {
         ISiloConfig siloConfig = ShareTokenLib.siloConfig();
         return siloConfig.getConfig(silo).hookReceiver;
+    }
+
+    function getTokenAndAssetsDataHarness(ISilo.AssetType assetType) public view returns (
+        address token,
+        uint256 totalAssets
+    ) {
+        if (assetType == ISilo.AssetType.Protected) {
+            token = ShareTokenLib.siloConfig().getConfig(address(this)).protectedShareToken;
+            (, , totalAssets, , ) = getSiloStorageHarness();
+        } else if (assetType == ISilo.AssetType.Collateral) {
+            token = ShareTokenLib.siloConfig().getConfig(address(this)).collateralShareToken;
+            (, , , totalAssets, ) = getSiloStorageHarness();
+        } else if (assetType == ISilo.AssetType.Debt) {
+            token = ShareTokenLib.siloConfig().getConfig(address(this)).debtShareToken;
+            (, , , , totalAssets) = getSiloStorageHarness();
+        }
+    }
+
+    function getSiloStorageHarness()
+        public
+        view
+        virtual
+        returns (
+            uint192 daoAndDeployerRevenue,
+            uint64 interestRateTimestamp,
+            uint256 protectedAssets,
+            uint256 collateralAssets,
+            uint256 debtAssets
+        )
+    {
+        return Views.getSiloStorage();
     }
 
     

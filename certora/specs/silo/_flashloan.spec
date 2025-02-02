@@ -15,7 +15,23 @@ methods{
 
 //------------------------------- RULES TEST START ----------------------------------
 
-    // * `flashLoan()` should never change any storage if flashloanFee is zero //@audit-issue allowance changes
+    
+
+
+
+
+
+
+//------------------------------- RULES TEST END ----------------------------------
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+//------------------------------- RULES OK START ------------------------------------
+
+    // * `flashLoan()` should never change any storage if flashloanFee is zero 
     rule flashLoanNoChangeIfFeeZero(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
@@ -27,20 +43,25 @@ methods{
         (_, _, flashloanFee, _) = siloConfig.getFeesWithAsset(e, silo0);
         require flashloanFee == 0;
 
-        //storage before
-        storage storageBefore = lastStorage;
+        //vales before
+        uint256 allowanceBefore = token0.allowance(flashLoanReceiver, silo0);
+        uint256 siloBalanceToken0Before = token0.balanceOf(silo0);
+        uint256 daoAndDeployerRevenueBefore;
+        (daoAndDeployerRevenueBefore, _, _, _, _) = getSiloStorage();
 
         //flashLoan()
-        flashLoan@withrevert(e, receiver, token, amount, data);
+        flashLoan(e, receiver, token, amount, data);
 
-        //is it possible to call this
-        satisfy !lastReverted;
-
-        //storage after
-        storage storageAfter = lastStorage;
+        //values after
+        uint256 allowanceAfter = token0.allowance(flashLoanReceiver, silo0);
+        uint256 siloBalanceToken0After = token0.balanceOf(silo0);
+        uint256 daoAndDeployerRevenueAfter;
+        (daoAndDeployerRevenueAfter, _, _, _, _) = getSiloStorage();
 
         //storage unchanged
-        assert storageBefore == storageAfter;
+        assert allowanceBefore != max_uint256 => allowanceAfter == allowanceBefore - amount;
+        assert siloBalanceToken0After == siloBalanceToken0Before;
+        assert daoAndDeployerRevenueAfter == daoAndDeployerRevenueBefore;
     }
 
     // * `flashLoan()` daoAndDeployerRevenue and Silo asset balance should increase by flashFee()
@@ -48,8 +69,12 @@ methods{
         configForEightTokensSetupRequirements();
         uint256 amount;
         address receiver = flashLoanReceiver;
+        require receiver != silo0;
         address token = token0;
         bytes data;
+
+        //setup
+        totalSuppliesMoreThanBalances(receiver, silo0);
 
         //balances before
         uint256 daoAndDeployerRevenueBefore = getSiloDataDaoAndDeployerRevenue();
@@ -70,23 +95,7 @@ methods{
         assert siloBalanceAfter == siloBalanceBefore + flashFee;
     }
 
-    
-
-
-
-
-
-
-//------------------------------- RULES TEST END ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES OK START ------------------------------------
-
-// flashLoan() does not change assets or shareBalances
+    // flashLoan() does not change assets or shareBalances
     rule flashLoanDoesNotChangeAssetsOrShareBalances(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;

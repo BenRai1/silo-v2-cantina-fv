@@ -11,10 +11,11 @@ import "../simplifications/_flashloan_no_state_changes.spec";
 //------------------------------- RULES TEST START ----------------------------------
 
 
+
     //--------------------- Definitions ---------------------
 
     definition FUNCTIONS_TO_EXCLUDE(method f) returns bool =
-        f.selector == sig:Silo0.flashLoan(address,address,uint256,bytes).selector ||
+        f.selector == sig:Silo0.flashLoan(address,address,uint256,bytes).selector || 
         f.selector == sig:Silo0.callOnBehalfOfSilo(address,uint256,ISilo.CallType,bytes).selector ||
         f.selector == sig:updateHooks().selector ||
         f.selector == sig:ShareDebtToken0.callOnBehalfOfShareToken(address,uint256,ISilo.CallType,bytes).selector ||
