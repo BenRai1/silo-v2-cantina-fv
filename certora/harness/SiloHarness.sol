@@ -100,6 +100,7 @@ contract SiloHarness is Silo {
         IShareToken.ShareTokenStorage storage $ = ShareTokenLib.getShareTokenStorage();
         return $.transferWithChecks;
     }
+
     
     function getSiloFromStorage() external view returns (ISilo) {
         IShareToken.ShareTokenStorage storage $ = ShareTokenLib.getShareTokenStorage();
@@ -271,6 +272,50 @@ contract SiloHarness is Silo {
         )
     {
         return Views.getSiloStorage();
+    }
+
+    function assetsBorrowerForLTVHarness(
+        ISiloConfig.ConfigData memory _collateralConfig,
+        ISiloConfig.ConfigData memory _debtConfig,
+        address _borrower,
+        ISilo.OracleType _oracleType,
+        ISilo.AccrueInterestInMemory _accrueInMemory
+    ) public returns (uint256 protectedAssets, uint256 collateralAssets, uint256 debtAssets) {
+            SiloSolvencyLib.LtvData memory ltvData = SiloSolvencyLib.getAssetsDataForLtvCalculations(
+                _collateralConfig, _debtConfig, _borrower, _oracleType, _accrueInMemory, 0
+            );
+            protectedAssets = ltvData.borrowerProtectedAssets;
+            collateralAssets = ltvData.borrowerCollateralAssets;
+            debtAssets = ltvData.borrowerDebtAssets;
+    }
+
+    function isSolventHarness(
+        address _borrower,
+        ISilo.AccrueInterestInMemory _accrueInMemory
+    ) public returns (bool isSolvent) {
+        address collateralSilo = ShareTokenLib.siloConfig().borrowerCollateralSilo(_borrower);
+        address debtSilo = ShareTokenLib.siloConfig().getDebtSilo(_borrower);
+        ISiloConfig.ConfigData memory _collateralConfig = ShareTokenLib.siloConfig().getConfig(collateralSilo);
+        ISiloConfig.ConfigData memory _debtConfig = ShareTokenLib.siloConfig().getConfig(debtSilo);
+        isSolvent = SiloSolvencyLib.isSolvent(
+            _collateralConfig, _debtConfig, _borrower, _accrueInMemory
+        );
+    }
+
+    function userLTVHarness(uint256 debtAssets, uint256 collateralAssets) public view returns (uint256 ltv) {
+        return SiloSolvencyLib.ltvMath(debtAssets, collateralAssets);
+    }
+
+    function sumHarness(uint256 a, uint256 b) public view returns (uint256) {
+        return a + b;
+    }
+
+    function hooksBeforeHarness() public view returns (uint256) {
+        return ShareTokenLib.getShareTokenStorage().hookSetup.hooksBefore;
+    }
+
+    function hooksAfterHarness() public view returns (uint256) {
+        return ShareTokenLib.getShareTokenStorage().hookSetup.hooksAfter;
     }
 
     

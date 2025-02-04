@@ -14,12 +14,92 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         // ---- `envfree` ----------------------------------------------------------
         function _.repay(uint256,address) external => DISPATCHER(true);
         function _.forwardTransferFromNoChecks(address,address,uint256) external => DISPATCHER(true);
-        function _.previewRedeem(uint256,ISilo.CollateralType) external => DISPATCHER(true);
+        // function _.previewRedeem(uint256,ISilo.CollateralType) external => DISPATCHER(true);
         function _.redeem(uint256,address,address,ISilo.CollateralType) external => DISPATCHER(true);
 
         function _.balanceOf(address) external envfree;
-        
+
+        //nothing should happen
+        // function _.turnOnReentrancyProtection() external => nothingHappens() expect void;
+        // function _.turnOffReentrancyProtection() external => nothingHappens()  expect void;
+        // function _.accrueInterest() external => nothingHappens() expect void;
+        //@audit-issue commented out
+        // function _.previewRedeem(uint256,ISilo.CollateralType) external => nothingHappensReturnValue() expect uint256; //@audit-issue not sure if not used somewhere else
+        // function _.callSolvencyOracleBeforeQuote() internal => nothingHappens() expect void;
+        // function _.splitReceiveCollateralToLiquidate(uint256 _collateralToLiquidate, uint256 _borrowerProtectedAssets) internal => splitReceiveCollateralToLiquidate(_collateralToLiquidate) expect (uint256, uint256);        
     }
+
+    //setup: collateral silo is silo0, debt silo is silo1, user has no protected collateral, only normal collateral
+    function setupFewerPaths(env e, address borrower) returns (address, address){
+        //collateral silo is silo0
+        address collateralSilo = siloConfig.borrowerCollateralSilo(e, borrower);
+        require(collateralSilo == silo0);
+        //only normal collateral
+        address protectedShateToken = siloConfig.getConfig(e, collateralSilo).protectedShareToken;
+        require(protectedShateToken.balanceOf(e, borrower) == 0);
+        //debt silo is silo1
+        address debtSilo = siloConfig.getDebtSilo(e, borrower);
+        require(debtSilo == silo1);
+
+        //oracles not set => no quote
+        address silo0MaxLTVOracle = siloConfig.getConfig(e, silo0).maxLtvOracle;
+        require(silo0MaxLTVOracle == 0);
+        address silo0SolvencyOracle = siloConfig.getConfig(e, silo0).solvencyOracle;
+        require(silo0SolvencyOracle == 0);
+        address silo1MaxLTVOracle = siloConfig.getConfig(e, silo1).maxLtvOracle;
+        require(silo1MaxLTVOracle == 0);
+        address silo1SolvencyOracle = siloConfig.getConfig(e, silo1).solvencyOracle;
+        require(silo1SolvencyOracle == 0);
+
+        //callBeforeQuote = false => no calls
+        bool silo0CallBeforeQuote = siloConfig.getConfig(e, silo0).callBeforeQuote;
+        require(!silo0CallBeforeQuote);
+        bool silo1CallBeforeQuote = siloConfig.getConfig(e, silo1).callBeforeQuote;
+        require(!silo1CallBeforeQuote);
+
+        totalSuppliesMoreThanBalance(borrower);
+
+        //assets and shares are 1 to 1 for silo0
+        address protectedShareTokenSilo0 = siloConfig.getConfig(e, silo0).protectedShareToken;
+        address debtShareTokenSilo0 = siloConfig.getConfig(e, silo0).debtShareToken;
+        uint256 protectedShareTokenSilo0TotalSupply = protectedShareTokenSilo0.totalSupply(e);
+        uint256 collateralShareTokenSilo0TotalSupply = silo0.totalSupply(e);
+        uint256 debtShareTokenSilo0TotalSupply = debtShareTokenSilo0.totalSupply(e);
+        uint256 protectedAssetsSilo0;
+        uint256 collateralAssetsSilo0;
+        uint256 debtAssetsSilo0;
+        (_, _, protectedAssetsSilo0, collateralAssetsSilo0, debtAssetsSilo0) = silo0.getSiloStorage(e);
+        require protectedShareTokenSilo0TotalSupply == protectedAssetsSilo0;
+        require collateralShareTokenSilo0TotalSupply == collateralAssetsSilo0;
+        require debtShareTokenSilo0TotalSupply == debtAssetsSilo0;
+
+        //assets and shares are 1 to 1 for silo1
+        address protectedShareTokenSilo1 = siloConfig.getConfig(e, silo1).protectedShareToken;
+        address debtShareTokenSilo1 = siloConfig.getConfig(e, silo1).debtShareToken;
+        uint256 protectedShareTokenSilo1TotalSupply = protectedShareTokenSilo1.totalSupply(e);
+        uint256 collateralShareTokenSilo1TotalSupply = silo1.totalSupply(e);
+        uint256 debtShareTokenSilo1TotalSupply = debtShareTokenSilo1.totalSupply(e);
+        uint256 protectedAssetsSilo1;
+        uint256 collateralAssetsSilo1;
+        uint256 debtAssetsSilo1;
+        (_, _, protectedAssetsSilo1, collateralAssetsSilo1, debtAssetsSilo1) = silo1.getSiloStorage(e);
+        require protectedShareTokenSilo1TotalSupply == protectedAssetsSilo1;
+        require collateralShareTokenSilo1TotalSupply == collateralAssetsSilo1;
+        require debtShareTokenSilo1TotalSupply == debtAssetsSilo1;
+
+        //hooksBefore == 0 and hooksAfter == 0 => hooks are not called
+        uint256 hooksBeforeSilo0 = silo0.hooksBeforeHarness(e);
+        require hooksBeforeSilo0 == 0;
+        uint256 hooksAfterSilo0 = silo0.hooksAfterHarness(e);
+        require hooksAfterSilo0 == 0;
+        uint256 hooksBeforeSilo1 = silo1.hooksBeforeHarness(e);
+        require hooksBeforeSilo1 == 0;
+        uint256 hooksAfterSilo1 = silo1.hooksAfterHarness(e);
+        require hooksAfterSilo1 == 0;
+
+        return (collateralSilo, debtSilo);
+    }
+  
 
     definition ignoredMethod(method f) returns bool =
         f.selector == sig:PartialLiquidationHarness.initialize(address, bytes).selector;
@@ -27,6 +107,22 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
 //------------------------------- DEFENITION AND METHODS END ----------------------------------
 
 //------------------------FUNCTIONS START------------------------
+
+    function nothingHappens(){
+    }
+    
+    function nothingHappensReturnValue() returns uint256{
+        return 0;
+    }
+
+    function splitReceiveCollateralToLiquidate(uint256 _collateralToLiquidate) returns (uint256, uint256) {
+        //split collateral to liquidate
+        //return values
+        return (_collateralToLiquidate, 0);
+    }
+
+
+
     //inital setup for liquidations (silos different, users different)
     function setupLiquidationRules(env e, address borrower) {
         nonSceneAddressRequirements(e.msg.sender);
@@ -51,24 +147,32 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
 
 //------------------------------- RULES TEST START ----------------------------------
 
+    // -------------------------------- ISSUE --------------------
+
     // ---------------------------------reverts	
     
-    // 	liquidationCall() reverts if _borrower has no debtAssets
+    // 	liquidationCall() reverts if _borrower has no debtShares
     rule revertIfBorrowerHasNoDebtAssets(env e){
         configForEightTokensSetupRequirements();
         address collateralAsset;
+        require collateralAsset == token0; //@audit-issue added to reduce runtime
         address debtAsset;
+        require debtAsset == token1; //@audit-issue added to reduce runtime
         address borrower;
         uint256 maxDebtToCover;
+        require maxDebtToCover != 0; //@audit-issue added to reduce runtime
         bool receiveSToken;
+        setupFewerPaths(e, borrower);
 
         //setup
-        require siloConfig.getDebtSilo(e, borrower).balanceOf(e, borrower) == 0;
+        address debtSilo = siloConfig.getDebtSilo(e, borrower);
+        address debtShareToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
+        require debtShareToken.balanceOf(e, borrower) == 0;
 
         //function call
         liquidationCall@withrevert(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
         
-        //call reverted
+        //call reverted becasue borrower does not have debtShares
         assert lastReverted;        
     }
     

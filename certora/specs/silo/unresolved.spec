@@ -5,7 +5,7 @@ import "../setup/two_silos_methods.spec";
 methods {
     function _.reentrancyGuardEntered() external => DISPATCHER(true);
     function _.synchronizeHooks(uint24,uint24) external => NONDET;
-    function _.getCollateralAndDebtTotalsStorage() external => DISPATCHER(true);
+    // function _.getCollateralAndDebtTotalsStorage() external => DISPATCHER(true);
     function _.onFlashLoan(address _initiator, address _token, uint256 _amount, uint256 _fee, bytes  _data) external => NONDET;
 
     // ---- `IInterestRateModel` -----------------------------------------------

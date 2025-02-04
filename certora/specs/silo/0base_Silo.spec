@@ -17,6 +17,7 @@ methods{
    function hookCallActivatedHarness(uint256 action, bool before) external returns (bool) envfree;
    function hookReceiverHarness(address silo) external returns (address) envfree;
    function getTokenAndAssetsDataHarness(ISilo.AssetType) external returns (address, uint256) envfree; 
+   function sumHarness(uint256 a, uint256 b) external returns (uint256) envfree;
 
 
    function _.getCollateralAndDebtTotalsStorage() external => DISPATCHER(true);
@@ -27,6 +28,12 @@ methods{
 
 ///////////////// DEFINITIONS START /////////////////////
    definition HARNESS_METHODS(method f) returns bool = 
+      f.selector == sig:hooksBeforeHarness().selector ||
+      f.selector == sig:hooksAfterHarness().selector ||
+      f.selector == sig:sumHarness(uint256, uint256).selector ||
+      f.selector == sig:userLTVHarness(uint256,uint256).selector ||
+      f.selector == sig:isSolventHarness(address,ISilo.AccrueInterestInMemory).selector ||
+      f.selector == sig:assetsBorrowerForLTVHarness(ISiloConfig.ConfigData,ISiloConfig.ConfigData,address,ISilo.OracleType,ISilo.AccrueInterestInMemory).selector ||
       f.selector == sig:getSiloStorageHarness().selector ||
       f.selector == sig:getTokenAndAssetsDataHarness(ISilo.AssetType).selector ||
       f.selector == sig:hookReceiverHarness(address).selector ||

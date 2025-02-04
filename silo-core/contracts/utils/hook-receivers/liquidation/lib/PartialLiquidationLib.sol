@@ -324,7 +324,7 @@ library PartialLiquidationLib {
     /// @notice must stay private because this is not for general LTV, only for ltv after
     function _ltvAfter(uint256 _collateral, uint256 _debt) private pure returns (uint256 ltv) {
         // previous calculation of LTV
-        ltv = _debt * _PRECISION_DECIMALS; //@audit why is this devided by 1e18? doesn`t this breake stuff? (Rounding down)
+        ltv = _debt * _PRECISION_DECIMALS; 
         ltv = Math.ceilDiv(ltv, _collateral); // Rounding.LTV is up/ceil
     }
 }
