@@ -18,6 +18,11 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         function _.redeem(uint256,address,address,ISilo.CollateralType) external => DISPATCHER(true);
 
         function _.balanceOf(address) external envfree;
+        function SiloConfig.getConfig(address) external returns (ISiloConfig.ConfigData memory) envfree;
+
+        function PartialLiquidation._fetchConfigs(address, address, address, address) internal 
+        returns (ISiloConfig.ConfigData memory, ISiloConfig.ConfigData memory) 
+        => fetchConfigsSummary();
 
         //nothing should happen
         // function _.turnOnReentrancyProtection() external => nothingHappens() expect void;
@@ -27,6 +32,12 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         // function _.previewRedeem(uint256,ISilo.CollateralType) external => nothingHappensReturnValue() expect uint256; //@audit-issue not sure if not used somewhere else
         // function _.callSolvencyOracleBeforeQuote() internal => nothingHappens() expect void;
         // function _.splitReceiveCollateralToLiquidate(uint256 _collateralToLiquidate, uint256 _borrowerProtectedAssets) internal => splitReceiveCollateralToLiquidate(_collateralToLiquidate) expect (uint256, uint256);        
+    }
+
+    function fetchConfigsSummary() returns (ISiloConfig.ConfigData, ISiloConfig.ConfigData){
+        ISiloConfig.ConfigData collateralConfig = siloConfig.getConfig(silo0);
+        ISiloConfig.ConfigData debtConfig = siloConfig.getConfig(silo1);
+        return (collateralConfig, debtConfig);
     }
 
     //setup: collateral silo is silo0, debt silo is silo1, user has no protected collateral, only normal collateral
@@ -99,6 +110,8 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
 
         return (collateralSilo, debtSilo);
     }
+
+    //try to remove if statements
   
 
     definition ignoredMethod(method f) returns bool =
@@ -148,6 +161,35 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
 //------------------------------- RULES TEST START ----------------------------------
 
     // -------------------------------- ISSUE --------------------
+    // msg.sender should always get _collateralAsset tokens after liquidationCall if receiveSToken == false
+    rule msgSenderGetsCollateralAssetTokens(env e){
+        configForEightTokensSetupRequirements();
+        address collateralAsset;
+        address debtAsset;
+        address borrower;
+        uint256 maxDebtToCover;
+        bool receiveSToken = false;
+        address msgSender = e.msg.sender;
+
+        //setup
+        address collateralSilo;
+        address debtSilo;
+        (collateralSilo, debtSilo) = setupFewerPaths(e, borrower);
+
+        //values before
+        uint256 balanceOfCollateralShareTokensBorrower = collateralSilo.balanceOf(e, borrower);
+        require balanceOfCollateralShareTokensBorrower == 0; //no collateral to give to the caller
+        uint256 balanceCollateralTokenBefore = collateralAsset.balanceOf(e, msgSender);
+
+        //function call
+        liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
+
+        //values after
+        uint256 balanceCollateralTokenAfter = collateralAsset.balanceOf(e, msgSender);
+
+        //asserts
+        assert balanceCollateralTokenAfter > balanceCollateralTokenBefore;
+    }
 
     // ---------------------------------reverts	
     
