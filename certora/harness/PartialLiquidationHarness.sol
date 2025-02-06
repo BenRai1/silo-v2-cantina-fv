@@ -5,6 +5,8 @@ import {PartialLiquidation} from "silo-core/contracts/utils/hook-receivers/liqui
 import {PartialLiquidationLib} from "silo-core/contracts/utils/hook-receivers/liquidation/lib/PartialLiquidationLib.sol";
 import {PartialLiquidationExecLib} from "silo-core/contracts/utils/hook-receivers/liquidation/lib/PartialLiquidationExecLib.sol";
 import {SiloSolvencyLib} from "silo-core/contracts/lib/SiloSolvencyLib.sol";
+import {ISiloConfig} from "silo-core/contracts/interfaces/ISiloConfig.sol";
+import {ISilo} from "silo-core/contracts/interfaces/ISilo.sol";
 
 
 contract PartialLiquidationHarness is PartialLiquidation {
@@ -85,21 +87,53 @@ contract PartialLiquidationHarness is PartialLiquidation {
     }
 
     function _fetchConfigsHarness(
-    ISiloConfig _siloConfigCached,
-    address _collateralAsset,
-    address _debtAsset,
-    address _borrower
+        ISiloConfig _siloConfigCached,
+        address _collateralAsset,
+        address _debtAsset,
+        address _borrower
     )
-        internal
+        public
         virtual
     returns (
         ISiloConfig.ConfigData memory collateralConfig,
         ISiloConfig.ConfigData memory debtConfig
     ){
-        return PartialLiquidation._fetchConfigs(_siloConfigCached, _collateralAsset, _debtAsset, _borrower);
+        return _fetchConfigs(_siloConfigCached, _collateralAsset, _debtAsset, _borrower);
+    }
+
+    function _callShareTokenForwardTransferNoChecksHarness(
+        address _silo,
+        address _borrower,
+        address _receiver,
+        uint256 _withdrawAssets,
+        address _shareToken,
+        ISilo.AssetType _assetType
+    ) public virtual returns (uint256 shares) {
+        return _callShareTokenForwardTransferNoChecks(_silo, _borrower, _receiver, _withdrawAssets, _shareToken, _assetType);
+    }
+
+    function getExactLiquidationAmountsHarness(
+        ISiloConfig.ConfigData memory _collateralConfig,
+        ISiloConfig.ConfigData memory _debtConfig, address _user,
+        uint256 _maxDebtToCover,
+        uint256 _liquidationFee
+    )
+        external
+        view
+        returns (
+            uint256 withdrawAssetsFromCollateral,
+            uint256 withdrawAssetsFromProtected,
+            uint256 repayDebtAssets,
+            bytes4 customError
+        )
+    {
+        return PartialLiquidationExecLib.getExactLiquidationAmounts(_collateralConfig, _debtConfig, _user, _maxDebtToCover, _liquidationFee);
     }
 
 
+
+
+    
 
 
 
