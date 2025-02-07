@@ -87,10 +87,11 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
 
         RevertLib.revertIfError(params.customError);
 
-        // we do not allow dust so full liquidation is required //@audit-issue can this be used to prevent liquidation?
+        // we do not allow dust so full liquidation is required //i: can not be used to prevent liquidations because total repay is always possible
+        //@audit-issue is dust a fixed value or only less than 90% of the debt?
         require(repayDebtAssets <= _maxDebtToCover, FullLiquidationRequired());
 
-        IERC20(debtConfig.token).safeTransferFrom(msg.sender, address(this), repayDebtAssets); //@audit why is the debt token used both times, check closer
+        IERC20(debtConfig.token).safeTransferFrom(msg.sender, address(this), repayDebtAssets); //i: debt token used both times, becasue first is moving it to this contract, 2nd: increase allowance for the silo to be able to call repay
         IERC20(debtConfig.token).safeIncreaseAllowance(debtConfig.silo, repayDebtAssets);
 
         address shareTokenReceiver = _receiveSToken ? msg.sender : address(this);

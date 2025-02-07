@@ -1,23 +1,23 @@
 import "../setup/CompleteSiloSetup.spec";
 
 //----------------------------SETUP---------------------------------
-methods{
-    function _._accrueInterest() internal => accrueInterestCVL(calledContract) expect void;
-    function _.callSolvencyOracleBeforeQuote(ISiloConfig.ConfigData memory _config) internal => callSolvencyOracleBeforeQuoteCVL(_config) expect void;
-}
+    methods{
+        function _._accrueInterest() internal => accrueInterestCVL(calledContract) expect void;
+        function _.callSolvencyOracleBeforeQuote(ISiloConfig.ConfigData memory _config) internal => callSolvencyOracleBeforeQuoteCVL(_config) expect void;
+    }
 
-//contract to times called
-ghost mapping (address => mathint) interestAccrued;
-ghost mapping (address => mathint) solvencyOracleCalls;
+    //contract to times called
+    ghost mapping (address => mathint) interestAccrued;
+    ghost mapping (address => mathint) solvencyOracleCalls;
 
-function accrueInterestCVL(address contract) {
-    interestAccrued[contract] = interestAccrued[contract] + 1;
-}
+    function accrueInterestCVL(address contract) {
+        interestAccrued[contract] = interestAccrued[contract] + 1;
+    }
 
-function callSolvencyOracleBeforeQuoteCVL(ISiloConfig.ConfigData _config) {
-    address solvencyOracle = _config.solvencyOracle;
-    solvencyOracleCalls[solvencyOracle] = solvencyOracleCalls[solvencyOracle] + 1;
-}
+    function callSolvencyOracleBeforeQuoteCVL(ISiloConfig.ConfigData _config) {
+        address solvencyOracle = _config.solvencyOracle;
+        solvencyOracleCalls[solvencyOracle] = solvencyOracleCalls[solvencyOracle] + 1;
+    }
 
 
 

@@ -32,7 +32,7 @@ library PartialLiquidationLib {
     /// _DEBT_DUST_LEVEL threshold, a full liquidation is triggered.
     /// For example, if the total debt value is 51 and the dust level is set at 98%, 
     /// then we are unable to liquidate 50, we must proceed to liquidate the entire 51.
-    uint256 internal constant _DEBT_DUST_LEVEL = 0.9e18; // 90%
+    uint256 internal constant _DEBT_DUST_LEVEL = 0.9e18; // 90% //@audit-issue !ISSUE! debt dust level does not protect against dust becasue it is no fixed value but % of total debt
 
     /// @dev debt keeps growing over time, so when dApp use this view to calculate max, tx should never revert
     /// because actual max can be only higher
