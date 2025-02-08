@@ -22,7 +22,7 @@ import "../simplifications/_accrueInteres_fixed_UNSAFE.spec"; // accrueInterest 
         nonSceneAddressRequirements(dao);
         nonSceneAddressRequirements(deployer);
         return (dao, deployer);
-}
+    }
 //----------------------------- METHODES AND FUNCTIONS END --------------------------  
 
 

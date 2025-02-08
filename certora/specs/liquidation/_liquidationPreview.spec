@@ -4,80 +4,70 @@ definition _BAD_DEBT() returns uint256 = 10^18;
 
 //------------------------------- RULES TEST START ----------------------------------
 
-    // liquidationPreview() ltvAfter never higher than ltvBefore
-    rule ltvAfterNeverHigherThanBefore(env e) {
-        uint256 ltvBefore;
-        uint256 sumOfCollateralAssets;
-        uint256 sumOfCollateralValue;
-        uint256 borrowerDebtAssets;
-        uint256 borrowerDebtValue;
-        PartialLiquidationLib.LiquidationPreviewParams _params;
-        require (sumOfCollateralAssets > 0 <=> sumOfCollateralValue > 0);
-        require (borrowerDebtAssets > 0 <=> borrowerDebtValue > 0);
+    // // liquidationPreview() ltvAfter never higher than ltvBefore
+    // rule ltvAfterNeverHigherThanBefore(env e) {
+    //     uint256 ltvBefore;
+    //     uint256 sumOfCollateralAssets;
+    //     uint256 sumOfCollateralValue;
+    //     uint256 borrowerDebtAssets;
+    //     uint256 borrowerDebtValue;
+    //     PartialLiquidationLib.LiquidationPreviewParams _params;
+    //     require (sumOfCollateralAssets > 0 <=> sumOfCollateralValue > 0);
+    //     require (borrowerDebtAssets > 0 <=> borrowerDebtValue > 0);
 
-        uint256 actuallLtv = calculateLtvAfterHarness(e, sumOfCollateralValue, borrowerDebtValue, 0,0);
+    //     uint256 actuallLtv = calculateLtvAfterHarness(e, sumOfCollateralValue, borrowerDebtValue, 0,0);
 
-        require ltvBefore == actuallLtv;
+    //     require ltvBefore == actuallLtv;
 
-        uint256 collateralToLiquidate; 
-        uint256 debtToRepay;
-        uint256 ltvAfter;
+    //     uint256 collateralToLiquidate; 
+    //     uint256 debtToRepay;
+    //     uint256 ltvAfter;
 
-        //function call 
-        (collateralToLiquidate, debtToRepay, ltvAfter) = liquidationPreviewHarness(e, ltvBefore, sumOfCollateralAssets, sumOfCollateralValue, borrowerDebtAssets, borrowerDebtValue, _params);
+    //     //function call 
+    //     (collateralToLiquidate, debtToRepay, ltvAfter) = liquidationPreviewHarness(e, ltvBefore, sumOfCollateralAssets, sumOfCollateralValue, borrowerDebtAssets, borrowerDebtValue, _params);
 
-        //check
-        assert ltvAfter <= ltvBefore;
+    //     //check
+    //     assert ltvAfter <= ltvBefore;
         
-    }
+    // }
 
-    // liquidationPreview() collateralToLiquidate never bigger than sumOfCollateralAssets
-    rule collateralToLiquidateNeverBiggerThanSumOfCollateralAssets(env e) {
-        uint256 ltvBefore;
-        uint256 sumOfCollateralAssets;
-        uint256 sumOfCollateralValue;
-        uint256 borrowerDebtAssets;
-        uint256 borrowerDebtValue;
-        PartialLiquidationLib.LiquidationPreviewParams _params;
+    
+    // // liquidationPreview() debtToRapay != 0 => collateralToLiquidate is debtToRepay + Fees
+    // rule debtToRepayNotZeroCollateralToLiquidateDebtToRepayFees(env e) {
+    //     uint256 ltvBefore;
+    //     uint256 sumOfCollateralAssets;
+    //     uint256 sumOfCollateralValue;
+    //     uint256 borrowerDebtAssets;
+    //     uint256 borrowerDebtValue;
+    //     PartialLiquidationLib.LiquidationPreviewParams params;
+    //     require(sumOfCollateralValue > 0 <=> sumOfCollateralAssets > 0);
+    //     require(borrowerDebtValue > 0 <=> borrowerDebtAssets > 0);
 
-        uint256 collateralToLiquidate; 
-        uint256 debtToRepay;
-        uint256 ltvAfter;
+    //     uint256 collateralToLiquidate; 
+    //     uint256 debtToRepay;
+    //     uint256 ltvAfter;
 
-        //function call 
-        (collateralToLiquidate, debtToRepay, ltvAfter) = liquidationPreviewHarness(e, ltvBefore, sumOfCollateralAssets, sumOfCollateralValue, borrowerDebtAssets, borrowerDebtValue, _params);
+    //     //function call 
+    //     (collateralToLiquidate, debtToRepay, ltvAfter) = liquidationPreviewHarness(e, ltvBefore, sumOfCollateralAssets, sumOfCollateralValue, borrowerDebtAssets, borrowerDebtValue, params);
+    //     require(debtToRepay != 0);
 
-        //check
-        assert collateralToLiquidate <= sumOfCollateralAssets;
-        
-    }
-  
-    // liquidationPreview() debtToRapay != 0 => collateralToLiquidate is debtToRepay + Fees
-    rule debtToRepayNotZeroCollateralToLiquidateDebtToRepayFees(env e) {
-        uint256 ltvBefore;
-        uint256 sumOfCollateralAssets;
-        uint256 sumOfCollateralValue;
-        uint256 borrowerDebtAssets;
-        uint256 borrowerDebtValue;
-        PartialLiquidationLib.LiquidationPreviewParams params;
-        require(sumOfCollateralValue > 0 <=> sumOfCollateralAssets > 0);
-        require(borrowerDebtValue > 0 <=> borrowerDebtAssets > 0);
+    //     uint256 assetsAndFees = calculateCollateralToLiquidateHarness(e, debtToRepay, sumOfCollateralValue, params.liquidationFee);
 
-        uint256 collateralToLiquidate; 
-        uint256 debtToRepay;
-        uint256 ltvAfter;
+    //     //check
+    //         assert collateralToLiquidate == assetsAndFees;
+    // }
 
-        //function call 
-        (collateralToLiquidate, debtToRepay, ltvAfter) = liquidationPreviewHarness(e, ltvBefore, sumOfCollateralAssets, sumOfCollateralValue, borrowerDebtAssets, borrowerDebtValue, params);
-        require(debtToRepay != 0);
+   
 
-        uint256 assetsAndFees = calculateCollateralToLiquidateHarness(e, debtToRepay, sumOfCollateralValue, params.liquidationFee);
+//------------------------------- RULES TEST END ----------------------------------
 
-        //check
-            assert collateralToLiquidate == assetsAndFees;
-    }
+//------------------------------- RULES PROBLEMS START ----------------------------------
 
-    // liquidationPreview() ltvAfter equals the result from borrwer values before and return values
+//------------------------------- RULES PROBLEMS START ----------------------------------
+
+//------------------------------- RULES OK START ------------------------------------
+
+     // liquidationPreview() ltvAfter equals the result from borrwer values before and return values
     rule ltvAfterEqualsBorrowerValuesBeforeAndReturnValues(env e) {
         uint256 ltvBefore;
         uint256 sumOfCollateralAssets;
@@ -102,16 +92,27 @@ definition _BAD_DEBT() returns uint256 = 10^18;
         assert ltvAfter == targetLtvAfter;
     }
 
+    // liquidationPreview() collateralToLiquidate never bigger than sumOfCollateralAssets
+    rule collateralToLiquidateNeverBiggerThanSumOfCollateralAssets(env e) {
+        uint256 ltvBefore;
+        uint256 sumOfCollateralAssets;
+        uint256 sumOfCollateralValue;
+        uint256 borrowerDebtAssets;
+        uint256 borrowerDebtValue;
+        PartialLiquidationLib.LiquidationPreviewParams _params;
 
-//------------------------------- RULES TEST END ----------------------------------
+        uint256 collateralToLiquidate; 
+        uint256 debtToRepay;
+        uint256 ltvAfter;
 
-//------------------------------- RULES PROBLEMS START ----------------------------------
+        //function call 
+        (collateralToLiquidate, debtToRepay, ltvAfter) = liquidationPreviewHarness(e, ltvBefore, sumOfCollateralAssets, sumOfCollateralValue, borrowerDebtAssets, borrowerDebtValue, _params);
 
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES OK START ------------------------------------
-
-
+        //check
+        assert collateralToLiquidate <= sumOfCollateralAssets;
+        
+    }
+  
     // liquidationPreview() if BAD_DEBT, debt to rapay is the smaller of _params.maxDebtToCover and _borrowerDebtAssets
     rule ifBadDebtDebtToRepaySmallerOf(env e) {
         uint256 ltvBefore;

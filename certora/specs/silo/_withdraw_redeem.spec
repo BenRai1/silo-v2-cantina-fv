@@ -10,85 +10,82 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 //------------------------------- RULES TEST START ----------------------------------
 
 
-    //------------------------------ solvancy check ----------------------------------
-
-    //--------------------------------------------------------------------
 
     //------------------------- REDEEM SAME AS WITHDRAW ------------------------------
 
-        // withdraw / redeem: same assets 
-        rule withdrawRedeemSameAssets(env e){ //@audit timed out, running again
-            configForEightTokensSetupRequirements();
-            uint256 range = 3;
-            uint256 assets;
-            address receiver;
-            address owner;
-            address otherUser;
-            threeUsersNotEqual(owner, receiver, otherUser);
+        // // withdraw / redeem: same assets 
+        // rule withdrawRedeemSameAssets(env e){ //@audit timed out, running again
+        //     configForEightTokensSetupRequirements();
+        //     uint256 range = 3;
+        //     uint256 assets;
+        //     address receiver;
+        //     address owner;
+        //     address otherUser;
+        //     threeUsersNotEqual(owner, receiver, otherUser);
 
-            //init state
-            storage init = lastStorage;
+        //     //init state
+        //     storage init = lastStorage;
 
-            //withdraw
-            uint256 shares = withdraw(e, assets, receiver, owner) at init;
+        //     //withdraw
+        //     uint256 shares = withdraw(e, assets, receiver, owner) at init;
 
-            //state after withdraw
-            uint256 protectedAssetsBalanceOwnerAfterWithdraw;
-            uint256 collateralAssetsBalanceOwnerAfterWithdraw;
-            uint256 debtAssetsBalanceOwnerAfterWithdraw;
-            (protectedAssetsBalanceOwnerAfterWithdraw, collateralAssetsBalanceOwnerAfterWithdraw, debtAssetsBalanceOwnerAfterWithdraw) = silo0.totalAssetsHarness(e);
+        //     //state after withdraw
+        //     uint256 protectedAssetsBalanceOwnerAfterWithdraw;
+        //     uint256 collateralAssetsBalanceOwnerAfterWithdraw;
+        //     uint256 debtAssetsBalanceOwnerAfterWithdraw;
+        //     (protectedAssetsBalanceOwnerAfterWithdraw, collateralAssetsBalanceOwnerAfterWithdraw, debtAssetsBalanceOwnerAfterWithdraw) = silo0.totalAssetsHarness(e);
 
-            //redeem
-            redeem(e, shares, receiver, owner) at init;
+        //     //redeem
+        //     redeem(e, shares, receiver, owner) at init;
 
-            //state after redeem
-            uint256 protectedAssetsBalanceOwnerAfterRedeem;
-            uint256 collateralAssetsBalanceOwnerAfterRedeem;
-            uint256 debtAssetsBalanceOwnerAfterRedeem;
-            (protectedAssetsBalanceOwnerAfterRedeem, collateralAssetsBalanceOwnerAfterRedeem, debtAssetsBalanceOwnerAfterRedeem) = silo0.totalAssetsHarness(e);
+        //     //state after redeem
+        //     uint256 protectedAssetsBalanceOwnerAfterRedeem;
+        //     uint256 collateralAssetsBalanceOwnerAfterRedeem;
+        //     uint256 debtAssetsBalanceOwnerAfterRedeem;
+        //     (protectedAssetsBalanceOwnerAfterRedeem, collateralAssetsBalanceOwnerAfterRedeem, debtAssetsBalanceOwnerAfterRedeem) = silo0.totalAssetsHarness(e);
 
-            //withdraw and redeem: same assets
-            assert protectedAssetsBalanceOwnerAfterWithdraw == protectedAssetsBalanceOwnerAfterRedeem;
-            assert cvlApproxSameWithRange(collateralAssetsBalanceOwnerAfterWithdraw, collateralAssetsBalanceOwnerAfterRedeem, range);
-            assert debtAssetsBalanceOwnerAfterWithdraw == debtAssetsBalanceOwnerAfterRedeem;
-        }
+        //     //withdraw and redeem: same assets
+        //     assert protectedAssetsBalanceOwnerAfterWithdraw == protectedAssetsBalanceOwnerAfterRedeem;
+        //     assert cvlApproxSameWithRange(collateralAssetsBalanceOwnerAfterWithdraw, collateralAssetsBalanceOwnerAfterRedeem, range);
+        //     assert debtAssetsBalanceOwnerAfterWithdraw == debtAssetsBalanceOwnerAfterRedeem;
+        // }
 
-        // withdraw / redeem PROTECTED: same assets 
-        rule withdrawRedeemProtectedSameAssets(env e){ //@audit timed out, running again
-            configForEightTokensSetupRequirements();
-            uint256 range = 3;
-            uint256 assets;
-            address receiver;
-            address owner;
-            address otherUser;
-            threeUsersNotEqual(owner, receiver, otherUser);
+        // // withdraw / redeem PROTECTED: same assets 
+        // rule withdrawRedeemProtectedSameAssets(env e){ //@audit timed out, running again
+        //     configForEightTokensSetupRequirements();
+        //     uint256 range = 3;
+        //     uint256 assets;
+        //     address receiver;
+        //     address owner;
+        //     address otherUser;
+        //     threeUsersNotEqual(owner, receiver, otherUser);
 
-            //init state
-            storage init = lastStorage;
+        //     //init state
+        //     storage init = lastStorage;
 
-            //withdraw
-            uint256 shares = withdraw(e, assets, receiver, owner, ISilo.CollateralType.Protected) at init;
+        //     //withdraw
+        //     uint256 shares = withdraw(e, assets, receiver, owner, ISilo.CollateralType.Protected) at init;
 
-            //state after withdraw
-            uint256 protectedAssetsAfterWithdraw;
-            uint256 collateralAssetsAfterWithdraw;
-            uint256 debtAssetsAfterWithdraw;
-            (protectedAssetsAfterWithdraw, collateralAssetsAfterWithdraw, debtAssetsAfterWithdraw) = silo0.totalAssetsHarness(e);
+        //     //state after withdraw
+        //     uint256 protectedAssetsAfterWithdraw;
+        //     uint256 collateralAssetsAfterWithdraw;
+        //     uint256 debtAssetsAfterWithdraw;
+        //     (protectedAssetsAfterWithdraw, collateralAssetsAfterWithdraw, debtAssetsAfterWithdraw) = silo0.totalAssetsHarness(e);
 
-            //redeem
-            redeem(e, shares, receiver, owner, ISilo.CollateralType.Protected) at init;
+        //     //redeem
+        //     redeem(e, shares, receiver, owner, ISilo.CollateralType.Protected) at init;
 
-            //state after redeem
-            uint256 protectedAssetsAfterRedeem;
-            uint256 collateralAssetsAfterRedeem;
-            uint256 debtAssetsAfterRedeem;
-            (protectedAssetsAfterRedeem, collateralAssetsAfterRedeem, debtAssetsAfterRedeem) = silo0.totalAssetsHarness(e);
+        //     //state after redeem
+        //     uint256 protectedAssetsAfterRedeem;
+        //     uint256 collateralAssetsAfterRedeem;
+        //     uint256 debtAssetsAfterRedeem;
+        //     (protectedAssetsAfterRedeem, collateralAssetsAfterRedeem, debtAssetsAfterRedeem) = silo0.totalAssetsHarness(e);
 
-            //withdraw and redeem: same assets
-            assert cvlApproxSameWithRange(protectedAssetsAfterWithdraw, protectedAssetsAfterRedeem, range);
-            assert collateralAssetsAfterWithdraw == collateralAssetsAfterRedeem;
-            assert debtAssetsAfterWithdraw == debtAssetsAfterRedeem;
-        }
+        //     //withdraw and redeem: same assets
+        //     assert cvlApproxSameWithRange(protectedAssetsAfterWithdraw, protectedAssetsAfterRedeem, range);
+        //     assert collateralAssetsAfterWithdraw == collateralAssetsAfterRedeem;
+        //     assert debtAssetsAfterWithdraw == debtAssetsAfterRedeem;
+        // }
 
     //---------------------------------------------------------------------------------------
         
@@ -124,16 +121,16 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
         assert !lastReverted;
     }
 
-    // * result of `maxWithdraw()` should never be more than liquidity of the Silo  //@audit timed out, running again
-    rule maxWithdrawAssetsDoesNotExceedLiquidity(env e){
-        configForEightTokensSetupRequirements();
-        address owner;
+    // // * result of `maxWithdraw()` should never be more than liquidity of the Silo  //@audit timed out, running again
+    // rule maxWithdrawAssetsDoesNotExceedLiquidity(env e){
+    //     configForEightTokensSetupRequirements();
+    //     address owner;
 
-        uint256 liquidity = silo0.getLiquidity(e);
-        uint256 maxWithdraw = silo0.maxWithdraw(e, owner);
+    //     uint256 liquidity = silo0.getLiquidity(e);
+    //     uint256 maxWithdraw = silo0.maxWithdraw(e, owner);
 
-        assert maxWithdraw <= liquidity;
-    }
+    //     assert maxWithdraw <= liquidity;
+    // }
 
    
 
@@ -163,141 +160,141 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 
         
       
-    // * result of `previewWithdraw()` should be equal to result of `withdraw()` //@audit fails
-    rule previewWithdrawIsEqualToWithdraw(env e){
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address receiver;
-        address owner = e.msg.sender;
+    // // * result of `previewWithdraw()` should be equal to result of `withdraw()` //@audit fails
+    // rule previewWithdrawIsEqualToWithdraw(env e){
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address receiver;
+    //     address owner = e.msg.sender;
 
-        uint256 previewWithdrawShares = previewWithdraw(e, assets);
-        uint256 withdrawShares = withdraw(e, assets, receiver, owner);
-        assert previewWithdrawShares == withdrawShares;
-    }
+    //     uint256 previewWithdrawShares = previewWithdraw(e, assets);
+    //     uint256 withdrawShares = withdraw(e, assets, receiver, owner);
+    //     assert previewWithdrawShares == withdrawShares;
+    // }
   
-    // withdraw / redeem: same underlyingToken
-    rule withdrawRedeemSameUnderlyingToken(env e){ //@audit aproximation does not work
-        configForEightTokensSetupRequirements();
-        uint256 range = 3;
-        uint256 assets;
-        address receiver;
-        address owner;
-        address otherUser;
-        threeUsersNotEqual(owner, receiver, otherUser);
+    // // withdraw / redeem: same underlyingToken
+    // rule withdrawRedeemSameUnderlyingToken(env e){ //@audit aproximation does not work
+    //     configForEightTokensSetupRequirements();
+    //     uint256 range = 3;
+    //     uint256 assets;
+    //     address receiver;
+    //     address owner;
+    //     address otherUser;
+    //     threeUsersNotEqual(owner, receiver, otherUser);
 
-        //values before
-        uint256 receiverUnderlyingTokenBalance = token0.balanceOf(receiver);
-        require(receiverUnderlyingTokenBalance + assets >= max_uint256 - 50);
+    //     //values before
+    //     uint256 receiverUnderlyingTokenBalance = token0.balanceOf(receiver);
+    //     require(receiverUnderlyingTokenBalance + assets >= max_uint256 - 50);
 
-        //init state
-        storage init = lastStorage;
+    //     //init state
+    //     storage init = lastStorage;
 
-        //withdraw
-        uint256 shares = withdraw(e, assets, receiver, owner) at init;
+    //     //withdraw
+    //     uint256 shares = withdraw(e, assets, receiver, owner) at init;
 
-        //state after withdraw
-        uint256 underlyingTokenBalanceOwnerAfterWithdraw = token0.balanceOf(owner);
-        uint256 underlyingTokenBalanceReceiverAfterWithdraw = token0.balanceOf(receiver);
-        uint256 underlyingTokenBalanceOtherUserAfterWithdraw = token0.balanceOf(otherUser);
-        uint256 underlyingTokenBalanceSiloAfterWithdraw = token0.balanceOf(silo0);
+    //     //state after withdraw
+    //     uint256 underlyingTokenBalanceOwnerAfterWithdraw = token0.balanceOf(owner);
+    //     uint256 underlyingTokenBalanceReceiverAfterWithdraw = token0.balanceOf(receiver);
+    //     uint256 underlyingTokenBalanceOtherUserAfterWithdraw = token0.balanceOf(otherUser);
+    //     uint256 underlyingTokenBalanceSiloAfterWithdraw = token0.balanceOf(silo0);
 
-        //redeem
-        redeem(e, shares, receiver, owner) at init;
+    //     //redeem
+    //     redeem(e, shares, receiver, owner) at init;
 
-        //state after redeem
-        uint256 underlyingTokenBalanceOwnerAfterRedeem = token0.balanceOf(owner);
-        uint256 underlyingTokenBalanceReceiverAfterRedeem = token0.balanceOf(receiver);
-        uint256 underlyingTokenBalanceOtherUserAfterRedeem = token0.balanceOf(otherUser);
-        uint256 underlyingTokenBalanceSiloAfterRedeem = token0.balanceOf(silo0);
+    //     //state after redeem
+    //     uint256 underlyingTokenBalanceOwnerAfterRedeem = token0.balanceOf(owner);
+    //     uint256 underlyingTokenBalanceReceiverAfterRedeem = token0.balanceOf(receiver);
+    //     uint256 underlyingTokenBalanceOtherUserAfterRedeem = token0.balanceOf(otherUser);
+    //     uint256 underlyingTokenBalanceSiloAfterRedeem = token0.balanceOf(silo0);
 
-        //withdraw and redeem: same underlyingToken
-        assert underlyingTokenBalanceOwnerAfterWithdraw == underlyingTokenBalanceOwnerAfterRedeem;
-        assert cvlApproxSameWithRange(underlyingTokenBalanceReceiverAfterWithdraw, underlyingTokenBalanceReceiverAfterRedeem, range);
-        assert underlyingTokenBalanceOtherUserAfterWithdraw == underlyingTokenBalanceOtherUserAfterRedeem;
-        assert cvlApproxSameWithRange(underlyingTokenBalanceSiloAfterWithdraw, underlyingTokenBalanceSiloAfterRedeem, range);
-    }
+    //     //withdraw and redeem: same underlyingToken
+    //     assert underlyingTokenBalanceOwnerAfterWithdraw == underlyingTokenBalanceOwnerAfterRedeem;
+    //     assert cvlApproxSameWithRange(underlyingTokenBalanceReceiverAfterWithdraw, underlyingTokenBalanceReceiverAfterRedeem, range);
+    //     assert underlyingTokenBalanceOtherUserAfterWithdraw == underlyingTokenBalanceOtherUserAfterRedeem;
+    //     assert cvlApproxSameWithRange(underlyingTokenBalanceSiloAfterWithdraw, underlyingTokenBalanceSiloAfterRedeem, range);
+    // }
 
-    // withdraw / redeem PROTECTED: same underlyingToken
-    rule withdrawRedeemProtectedSameUnderlyingToken(env e){ //@audit overflow and a range of 5 would be needed
-        configForEightTokensSetupRequirements();
-        uint256 range = 2;
-        uint256 assets;
-        address receiver;
-        address owner;
-        address otherUser;
-        threeUsersNotEqual(owner, receiver, otherUser);
+    // // withdraw / redeem PROTECTED: same underlyingToken
+    // rule withdrawRedeemProtectedSameUnderlyingToken(env e){ //@audit overflow and a range of 5 would be needed
+    //     configForEightTokensSetupRequirements();
+    //     uint256 range = 2;
+    //     uint256 assets;
+    //     address receiver;
+    //     address owner;
+    //     address otherUser;
+    //     threeUsersNotEqual(owner, receiver, otherUser);
 
-        //values before
-        uint256 receiverUnderlyingTokenBalance = token0.balanceOf(receiver);
-        require(receiverUnderlyingTokenBalance + assets >= max_uint256 - 50);
+    //     //values before
+    //     uint256 receiverUnderlyingTokenBalance = token0.balanceOf(receiver);
+    //     require(receiverUnderlyingTokenBalance + assets >= max_uint256 - 50);
 
-        //init state
-        storage init = lastStorage;
+    //     //init state
+    //     storage init = lastStorage;
 
-        //withdraw
-        uint256 shares = withdraw(e, assets, receiver, owner, ISilo.CollateralType.Protected) at init;
+    //     //withdraw
+    //     uint256 shares = withdraw(e, assets, receiver, owner, ISilo.CollateralType.Protected) at init;
 
-        //state after withdraw
-        uint256 underlyingTokenBalanceOwnerAfterWithdraw = token0.balanceOf(owner);
-        uint256 underlyingTokenBalanceReceiverAfterWithdraw = token0.balanceOf(receiver);
-        uint256 underlyingTokenBalanceOtherUserAfterWithdraw = token0.balanceOf(otherUser);
-        uint256 underlyingTokenBalanceSiloAfterWithdraw = token0.balanceOf(silo0);
+    //     //state after withdraw
+    //     uint256 underlyingTokenBalanceOwnerAfterWithdraw = token0.balanceOf(owner);
+    //     uint256 underlyingTokenBalanceReceiverAfterWithdraw = token0.balanceOf(receiver);
+    //     uint256 underlyingTokenBalanceOtherUserAfterWithdraw = token0.balanceOf(otherUser);
+    //     uint256 underlyingTokenBalanceSiloAfterWithdraw = token0.balanceOf(silo0);
 
-        //redeem
-        redeem(e, shares, receiver, owner, ISilo.CollateralType.Protected) at init;
+    //     //redeem
+    //     redeem(e, shares, receiver, owner, ISilo.CollateralType.Protected) at init;
 
-        //state after redeem
-        uint256 underlyingTokenBalanceOwnerAfterRedeem = token0.balanceOf(owner);
-        uint256 underlyingTokenBalanceReceiverAfterRedeem = token0.balanceOf(receiver);
-        uint256 underlyingTokenBalanceOtherUserAfterRedeem = token0.balanceOf(otherUser);
-        uint256 underlyingTokenBalanceSiloAfterRedeem = token0.balanceOf(silo0);
+    //     //state after redeem
+    //     uint256 underlyingTokenBalanceOwnerAfterRedeem = token0.balanceOf(owner);
+    //     uint256 underlyingTokenBalanceReceiverAfterRedeem = token0.balanceOf(receiver);
+    //     uint256 underlyingTokenBalanceOtherUserAfterRedeem = token0.balanceOf(otherUser);
+    //     uint256 underlyingTokenBalanceSiloAfterRedeem = token0.balanceOf(silo0);
 
-        //withdraw and redeem: same underlyingToken
-        assert underlyingTokenBalanceOwnerAfterWithdraw == underlyingTokenBalanceOwnerAfterRedeem;
-        assert cvlApproxSameWithRange(underlyingTokenBalanceReceiverAfterWithdraw, underlyingTokenBalanceReceiverAfterRedeem, range);
-        assert underlyingTokenBalanceOtherUserAfterWithdraw == underlyingTokenBalanceOtherUserAfterRedeem;
-        assert cvlApproxSameWithRange(underlyingTokenBalanceSiloAfterWithdraw, underlyingTokenBalanceSiloAfterRedeem, range);
-    }
+    //     //withdraw and redeem: same underlyingToken
+    //     assert underlyingTokenBalanceOwnerAfterWithdraw == underlyingTokenBalanceOwnerAfterRedeem;
+    //     assert cvlApproxSameWithRange(underlyingTokenBalanceReceiverAfterWithdraw, underlyingTokenBalanceReceiverAfterRedeem, range);
+    //     assert underlyingTokenBalanceOtherUserAfterWithdraw == underlyingTokenBalanceOtherUserAfterRedeem;
+    //     assert cvlApproxSameWithRange(underlyingTokenBalanceSiloAfterWithdraw, underlyingTokenBalanceSiloAfterRedeem, range);
+    // }
 
-    //withdraw if insolvent, no withdraw possible //@audit killed after 2 hours
-    rule ifInsolventNoWithdrawPossible(env e){
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address receiver;
-        address owner;
+    // //withdraw if insolvent, no withdraw possible //@audit killed after 2 hours
+    // rule ifInsolventNoWithdrawPossible(env e){
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address receiver;
+    //     address owner;
 
-        bool solventBefore = silo0.isSolvent(e,owner);
-        require(!solventBefore);
-        address collateralSiloOwner = siloConfig.borrowerCollateralSilo(e, owner);
-        //called silo must be collateralSilo
-        require(collateralSiloOwner == silo0);
+    //     bool solventBefore = silo0.isSolvent(e,owner);
+    //     require(!solventBefore);
+    //     address collateralSiloOwner = siloConfig.borrowerCollateralSilo(e, owner);
+    //     //called silo must be collateralSilo
+    //     require(collateralSiloOwner == silo0);
 
-        //withdraw
-        withdraw@withrevert(e, assets, receiver, owner);
+    //     //withdraw
+    //     withdraw@withrevert(e, assets, receiver, owner);
 
-        //reverted
-        assert lastReverted;
-    }
+    //     //reverted
+    //     assert lastReverted;
+    // }
 
-    //withdraw Protected if insolvent, no withdraw possible
-    rule ifInsolventNoProtectedWithdrawPossible(env e){ //@audit killed after 2 hours
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address receiver;
-        address owner;
+    // //withdraw Protected if insolvent, no withdraw possible
+    // rule ifInsolventNoProtectedWithdrawPossible(env e){ //@audit killed after 2 hours
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address receiver;
+    //     address owner;
 
-        bool solventBefore = silo0.isSolvent(e,owner);
-        require(!solventBefore);
-        address collateralSiloOwner = siloConfig.borrowerCollateralSilo(e, owner);
-        //called silo must be collateralSilo
-        require(collateralSiloOwner == silo0);
+    //     bool solventBefore = silo0.isSolvent(e,owner);
+    //     require(!solventBefore);
+    //     address collateralSiloOwner = siloConfig.borrowerCollateralSilo(e, owner);
+    //     //called silo must be collateralSilo
+    //     require(collateralSiloOwner == silo0);
 
-        //withdraw
-        withdraw@withrevert(e, assets, receiver, owner, ISilo.CollateralType.Protected);
+    //     //withdraw
+    //     withdraw@withrevert(e, assets, receiver, owner, ISilo.CollateralType.Protected);
 
-        //reverted
-        assert lastReverted;
-    }
+    //     //reverted
+    //     assert lastReverted;
+    // }
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 

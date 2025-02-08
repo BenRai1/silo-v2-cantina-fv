@@ -56,6 +56,7 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
         address _borrower,
         uint256 _maxDebtToCover,
         bool _receiveSToken
+        //bool _repayBadDebt //@audit-issue added
     )
         external
         virtual
@@ -86,6 +87,13 @@ contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
         );
 
         RevertLib.revertIfError(params.customError);
+
+        //@audit-issue added START
+        // revert if no bad debt should be payed
+        // if (!_repayBadDebt) {
+        //     require(params.withdrawAssetsFromCollateral + params.withdrawAssetsFromProtected > 0, "Bad Debt");
+        // }
+        //@audit-issue added END
 
         // we do not allow dust so full liquidation is required //i: can not be used to prevent liquidations because total repay is always possible
         //@audit-issue is dust a fixed value or only less than 90% of the debt?

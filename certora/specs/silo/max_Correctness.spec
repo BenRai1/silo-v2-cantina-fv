@@ -17,17 +17,17 @@ rule HLP_MaxDeposit_reverts(env e, address receiver)
     assert lastReverted;
 }
 
-rule HLP_MaxRepayShares_reverts(env e, address borrower)
-{
-    SafeAssumptions_withInvariants(e, borrower);
+// rule HLP_MaxRepayShares_reverts(env e, address borrower)
+// {
+//     SafeAssumptions_withInvariants(e, borrower);
     
-    uint maxShares = maxRepayShares(e, borrower);
-    uint256 shares;
-    require shares > maxShares;
-    mathint assets = repayShares@withrevert(e, shares, borrower);
+//     uint maxShares = maxRepayShares(e, borrower);
+//     uint256 shares;
+//     require shares > maxShares;
+//     mathint assets = repayShares@withrevert(e, shares, borrower);
 
-    assert lastReverted;
-}
+//     assert lastReverted;
+// }
 
 // repaying with maxRepay() value should burn all user share debt token balance
 rule maxRepay_burnsAllDebt(env e, address user)

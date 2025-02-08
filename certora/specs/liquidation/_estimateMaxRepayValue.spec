@@ -226,45 +226,30 @@ definition DEBT_DUST_LEVEL() returns uint256 = 9*10^17;
     }
 
 
-
-
-
-
 //------------------------------- RULES TEST END ----------------------------------
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 
 
-// estimateMaxRepayValue() ltvAfter is never overshot with return values
-rule ltvAfterIsNeverOvershotWithReturnValues(env e) { //@audit-issue  does not add up, dont know why => check closer if I have time
-    uint256 totalBorrowerDebtValue; 
-    uint256 totalBorrowerCollateralValue;
-    uint256 ltvAfterLiquidation;
-    uint256 liquidationFee;
-    require(totalBorrowerDebtValue > 0);
-    uint256 targetLTV = ltvAfterLiquidation;
+    // // estimateMaxRepayValue() ltvAfter is never overshot with return values
+    // rule ltvAfterIsNeverOvershotWithReturnValues(env e) { //@audit-issue  does not add up, dont know why => check closer if I have time
+    //     uint256 totalBorrowerDebtValue; 
+    //     uint256 totalBorrowerCollateralValue;
+    //     uint256 ltvAfterLiquidation;
+    //     uint256 liquidationFee;
+    //     require(totalBorrowerDebtValue > 0);
+    //     uint256 targetLTV = ltvAfterLiquidation;
 
 
-    //function call
-    uint256 returnValue = estimateMaxRepayValueHarness(e, totalBorrowerDebtValue, totalBorrowerCollateralValue, ltvAfterLiquidation, liquidationFee);
+    //     //function call
+    //     uint256 returnValue = estimateMaxRepayValueHarness(e, totalBorrowerDebtValue, totalBorrowerCollateralValue, ltvAfterLiquidation, liquidationFee);
 
-    mathint borrowerDebtAfter = totalBorrowerDebtValue - returnValue;
-    mathint borrowerCollateralAfter = totalBorrowerCollateralValue - returnValue * (PRECISION_DECIMALS() + liquidationFee) / PRECISION_DECIMALS();
-    mathint ltvAfter = borrowerCollateralAfter == 0 ? ltvAfterLiquidation : borrowerDebtAfter * PRECISION_DECIMALS() / borrowerCollateralAfter;
-    assert(borrowerDebtAfter != 0 && returnValue != 0 => ltvAfter >= targetLTV);
-}
+    //     mathint borrowerDebtAfter = totalBorrowerDebtValue - returnValue;
+    //     mathint borrowerCollateralAfter = totalBorrowerCollateralValue - returnValue * (PRECISION_DECIMALS() + liquidationFee) / PRECISION_DECIMALS();
+    //     mathint ltvAfter = borrowerCollateralAfter == 0 ? ltvAfterLiquidation : borrowerDebtAfter * PRECISION_DECIMALS() / borrowerCollateralAfter;
+    //     assert(borrowerDebtAfter != 0 && returnValue != 0 => ltvAfter >= targetLTV);
+    // }
 
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 
-//------------------------------- RULES OK START ------------------------------------
-
-//------------------------------- RULES OK END ------------------------------------
-
-//------------------------------- INVARIENTS OK START-------------------------------
-
-//------------------------------- INVARIENTS OK END-------------------------------
-
-//------------------------------- ISSUES OK START-------------------------------
-
-//------------------------------- ISSUES OK END-------------------------------

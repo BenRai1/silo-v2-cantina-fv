@@ -120,8 +120,7 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
 
     
     
-// shares to assets  1 to 1
-// fix collateralSilo to silo0 and debtSilo to silo1
+
 
   
 

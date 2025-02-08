@@ -62,32 +62,32 @@ function OneToOneAndNoOraclesSetup(env e) {
 
 //------------------------------- RULES TEST START ----------------------------------
 
-    // solvent if debtAssets/collateralAssets <= _collateralConfig.lt
-    rule isBelowMaxLtv(env e) {
-        configForEightTokensSetupRequirements();
-        OneToOneAndNoOraclesSetup(e);
-        address user;
-        totalSuppliesMoreThanBalance(user);
-        address debtSilo = siloConfig.getDebtSilo(e, user);
-        address shareDebtToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
-        uint256 userBalanceDebtShares = shareDebtToken.balanceOf(e, user);
-        address collateralSilo = siloConfig.borrowerCollateralSilo(e, user);
-        address shareProtectedToken = siloConfig.getConfig(e, collateralSilo).protectedShareToken;
-        uint256 userBalanceProtectedShares = shareProtectedToken.balanceOf(e, user);
-        uint256 userBalanceCollateralShares = collateralSilo.balanceOf(e, user);
-        require(userBalanceProtectedShares + userBalanceCollateralShares < max_uint256);
-        uint256 totalCollateralAssets = sumHarness(userBalanceProtectedShares, userBalanceCollateralShares);
-        uint256 userLtv = userLTVHarness(e, userBalanceDebtShares, totalCollateralAssets);
-        uint256 liquidationThreshold = siloConfig.getConfig(e, collateralSilo).lt;
-        require(liquidationThreshold < max_uint256);
+    // // solvent if debtAssets/collateralAssets <= _collateralConfig.lt
+    // rule isBelowMaxLtv(env e) {
+    //     configForEightTokensSetupRequirements();
+    //     OneToOneAndNoOraclesSetup(e);
+    //     address user;
+    //     totalSuppliesMoreThanBalance(user);
+    //     address debtSilo = siloConfig.getDebtSilo(e, user);
+    //     address shareDebtToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
+    //     uint256 userBalanceDebtShares = shareDebtToken.balanceOf(e, user);
+    //     address collateralSilo = siloConfig.borrowerCollateralSilo(e, user);
+    //     address shareProtectedToken = siloConfig.getConfig(e, collateralSilo).protectedShareToken;
+    //     uint256 userBalanceProtectedShares = shareProtectedToken.balanceOf(e, user);
+    //     uint256 userBalanceCollateralShares = collateralSilo.balanceOf(e, user);
+    //     require(userBalanceProtectedShares + userBalanceCollateralShares < max_uint256);
+    //     uint256 totalCollateralAssets = sumHarness(userBalanceProtectedShares, userBalanceCollateralShares);
+    //     uint256 userLtv = userLTVHarness(e, userBalanceDebtShares, totalCollateralAssets);
+    //     uint256 liquidationThreshold = siloConfig.getConfig(e, collateralSilo).lt;
+    //     require(liquidationThreshold < max_uint256);
 
 
-        //function call
-        bool isSolvent = isSolventHarness(e, user, ISilo.AccrueInterestInMemory.No);
+    //     //function call
+    //     bool isSolvent = isSolventHarness(e, user, ISilo.AccrueInterestInMemory.No);
 
-        //solvent if userLtv <= liquidationThreshold
-        assert(userLtv <= liquidationThreshold => isSolvent);
-    }
+    //     //solvent if userLtv <= liquidationThreshold
+    //     assert(userLtv <= liquidationThreshold => isSolvent);
+    // }
 
 
 

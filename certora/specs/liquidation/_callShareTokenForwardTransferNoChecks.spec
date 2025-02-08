@@ -1,16 +1,16 @@
 import "../setup/CompleteSiloSetup.spec";
 
 //----------------------------SETUP---------------------------------
-methods{
-    function _.convertToShares(uint256 _assets, uint256 _totalAssets, uint256 _totalShares, Math.Rounding _rounding, ISilo.AssetType _assetType) internal => convertToSharesCVL(_assets) expect uint256;
-    function _.forwardTransferFromNoChecks(address, address,uint256) external => DISPATCHER(true);
-}
+    methods{
+        function _.convertToShares(uint256 _assets, uint256 _totalAssets, uint256 _totalShares, Math.Rounding _rounding, ISilo.AssetType _assetType) internal => convertToSharesCVL(_assets) expect uint256;
+        function _.forwardTransferFromNoChecks(address, address,uint256) external => DISPATCHER(true);
+    }
 
-function convertToSharesCVL(uint256 _assets) returns uint256 {
-    return require_uint256(_assets - 1); // to be able to test shares
-}
+    function convertToSharesCVL(uint256 _assets) returns uint256 {
+        return require_uint256(_assets - 1); // to be able to test shares
+    }
 
-//------------------------------- RULES TEST START ----------------------------------
+//------------------------------- RULES ----------------------------------
 
 // _callShareTokenForwardTransferNoChecks() returns 0 if shares are 0 and nothing changes
 rule returnsZeroIfSharesAreZero(env e) {
@@ -121,20 +121,3 @@ rule transferWithChecksAfterIsTrue(env e) {
 
 
 
-//------------------------------- RULES TEST END ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES OK START ------------------------------------
-
-//------------------------------- RULES OK END ------------------------------------
-
-//------------------------------- INVARIENTS OK START-------------------------------
-
-//------------------------------- INVARIENTS OK END-------------------------------
-
-//------------------------------- ISSUES OK START-------------------------------
-
-//------------------------------- ISSUES OK END-------------------------------

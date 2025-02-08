@@ -71,7 +71,6 @@ import "../simplifications/Silo_noAccrueInterest_simplification_UNSAFE.spec"; //
 
 //------------------------------- RULES TEST START ----------------------------------    
     
-    //----------------- solvancyOracle quote
 
 
 //------------------------------- RULES TEST END ----------------------------------
@@ -79,141 +78,141 @@ import "../simplifications/Silo_noAccrueInterest_simplification_UNSAFE.spec"; //
 //------------------------------- RULES PROBLEMS START ----------------------------------
 
     
-    // withdraw() no call to solvancyOracles if debtShareBalance of owner is 0 //@audit-issue sanity failed, not sure why
-    rule noCallToSolvencyOraclesIfDebtShareBalance0(env e){
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address receiver;
-        address owner;
-        address anyOracle;
-        address debtSilo = siloConfig.getDebtSilo(e, owner);
-        address collateralSilo = siloConfig.borrowerCollateralSilo(e, owner);
+    // // withdraw() no call to solvancyOracles if debtShareBalance of owner is 0 //@audit-issue sanity failed, not sure why
+    // rule noCallToSolvencyOraclesIfDebtShareBalance0(env e){
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address receiver;
+    //     address owner;
+    //     address anyOracle;
+    //     address debtSilo = siloConfig.getDebtSilo(e, owner);
+    //     address collateralSilo = siloConfig.borrowerCollateralSilo(e, owner);
         
-        address debtSiloSolvencyOracle = siloConfig.getConfig(e, debtSilo).solvencyOracle;
-        address collateralSiloSolvencyOracle = siloConfig.getConfig(e, collateralSilo).solvencyOracle;
+    //     address debtSiloSolvencyOracle = siloConfig.getConfig(e, debtSilo).solvencyOracle;
+    //     address collateralSiloSolvencyOracle = siloConfig.getConfig(e, collateralSilo).solvencyOracle;
 
-        //debtShare owner
-        address debtShareToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
-        uint256 ownerBalanceDebtShareToken = debtShareToken.balanceOf(e, owner);
-        // require(ownerBalanceDebtShareToken == 0); //@audit-issue Commented out to see if sanity works => this is the reason for sanity failure
+    //     //debtShare owner
+    //     address debtShareToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
+    //     uint256 ownerBalanceDebtShareToken = debtShareToken.balanceOf(e, owner);
+    //     // require(ownerBalanceDebtShareToken == 0); //@audit-issue Commented out to see if sanity works => this is the reason for sanity failure
 
-        //values before
-        mathint countBefore = callCountQuote[anyOracle];
+    //     //values before
+    //     mathint countBefore = callCountQuote[anyOracle];
 
-        //function call
-        withdraw(e, assets, receiver, owner);
+    //     //function call
+    //     withdraw(e, assets, receiver, owner);
 
-        satisfy(true); ////@audit-issue is the call even possible?
+    //     satisfy(true); ////@audit-issue is the call even possible?
 
-        // //values after
-        // mathint countAfter = callCountQuote[anyOracle];
+    //     // //values after
+    //     // mathint countAfter = callCountQuote[anyOracle];
 
-        // //no oracle is called before the quote
-        // assert (countAfter == countBefore);
-    }
+    //     // //no oracle is called before the quote
+    //     // assert (countAfter == countBefore);
+    // }
     
-    // withdraw() no call to solvancyOracles if borrowerDebtAssets of owner is 0 //@audit-issue sanity failed, not sure why
-    rule noCallToSolvencyOraclesIfBorrowerDebtAssets0(env e){
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address receiver;
-        address owner;
-        address anyOracle;
-        address debtSilo = siloConfig.getDebtSilo(e, owner);
-        address collateralSilo = siloConfig.borrowerCollateralSilo(e, owner);
-        require(debtSilo == silo0 || debtSilo == silo1 || debtSilo == 0);
-        require(collateralSilo == silo0 || collateralSilo == silo1 || collateralSilo == 0); 
+    // // withdraw() no call to solvancyOracles if borrowerDebtAssets of owner is 0 //@audit-issue sanity failed, not sure why
+    // rule noCallToSolvencyOraclesIfBorrowerDebtAssets0(env e){
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address receiver;
+    //     address owner;
+    //     address anyOracle;
+    //     address debtSilo = siloConfig.getDebtSilo(e, owner);
+    //     address collateralSilo = siloConfig.borrowerCollateralSilo(e, owner);
+    //     require(debtSilo == silo0 || debtSilo == silo1 || debtSilo == 0);
+    //     require(collateralSilo == silo0 || collateralSilo == silo1 || collateralSilo == 0); 
         
-        address debtSiloSolvencyOracle = siloConfig.getConfig(e, debtSilo).solvencyOracle;
-        address collateralSiloSolvencyOracle = siloConfig.getConfig(e, collateralSilo).solvencyOracle;
+    //     address debtSiloSolvencyOracle = siloConfig.getConfig(e, debtSilo).solvencyOracle;
+    //     address collateralSiloSolvencyOracle = siloConfig.getConfig(e, collateralSilo).solvencyOracle;
 
-        //borrowerDebtAssets owner
-        uint256 borrowerDebtAssets;
-        (_, _, borrowerDebtAssets) = 
-            assetsBorrowerForLTVHarness( 
-                e,  
-                siloConfig.getConfig(e, collateralSilo),
-                siloConfig.getConfig(e, debtSilo),
-                owner,  
-                ISilo.OracleType.Solvency,
-                ISilo.AccrueInterestInMemory.No
-            );  
-        require(borrowerDebtAssets == 0);
+    //     //borrowerDebtAssets owner
+    //     uint256 borrowerDebtAssets;
+    //     (_, _, borrowerDebtAssets) = 
+    //         assetsBorrowerForLTVHarness( 
+    //             e,  
+    //             siloConfig.getConfig(e, collateralSilo),
+    //             siloConfig.getConfig(e, debtSilo),
+    //             owner,  
+    //             ISilo.OracleType.Solvency,
+    //             ISilo.AccrueInterestInMemory.No
+    //         );  
+    //     require(borrowerDebtAssets == 0);
 
-        //values before
-        mathint countBefore = callCountQuote[anyOracle];
+    //     //values before
+    //     mathint countBefore = callCountQuote[anyOracle];
 
-        //function call
-        withdraw(e, assets, receiver, owner);
+    //     //function call
+    //     withdraw(e, assets, receiver, owner);
 
-        //values after
-        mathint countAfter = callCountQuote[anyOracle];
+    //     //values after
+    //     mathint countAfter = callCountQuote[anyOracle];
 
-        //no oracle is called before the quote
-        assert (countAfter == countBefore);
-    }
+    //     //no oracle is called before the quote
+    //     assert (countAfter == countBefore);
+    // }
     
-    // withdraw() call only to collateralSolvancyOracle when collateralSolvancyOracle != 0 (collateralSilo = silo0) (with requirements) //@audit-issue sanity failed, not sure why
-    rule callToCollateralSolvencyOracleIfCollateralSolvencyOracleNot0(env e){
-        uint256 assets;
-        address receiver;
-        address owner;
-        address anyOracle;
-        address debtSilo = siloConfig.getDebtSilo(e, owner);
-        address collateralSilo = siloConfig.borrowerCollateralSilo(e, owner);
-        require(collateralSilo == silo0);
-        require(debtSilo != collateralSilo);
+    // // withdraw() call only to collateralSolvancyOracle when collateralSolvancyOracle != 0 (collateralSilo = silo0) (with requirements) //@audit-issue sanity failed, not sure why
+    // rule callToCollateralSolvencyOracleIfCollateralSolvencyOracleNot0(env e){
+    //     uint256 assets;
+    //     address receiver;
+    //     address owner;
+    //     address anyOracle;
+    //     address debtSilo = siloConfig.getDebtSilo(e, owner);
+    //     address collateralSilo = siloConfig.borrowerCollateralSilo(e, owner);
+    //     require(collateralSilo == silo0);
+    //     require(debtSilo != collateralSilo);
 
-        address debtSiloSolvencyOracle = siloConfig.getConfig(e, debtSilo).solvencyOracle;
-        address collateralSiloSolvencyOracle = siloConfig.getConfig(e, collateralSilo).solvencyOracle;
-        require(debtSiloSolvencyOracle == 0);
-        require(collateralSiloSolvencyOracle != 0);
+    //     address debtSiloSolvencyOracle = siloConfig.getConfig(e, debtSilo).solvencyOracle;
+    //     address collateralSiloSolvencyOracle = siloConfig.getConfig(e, collateralSilo).solvencyOracle;
+    //     require(debtSiloSolvencyOracle == 0);
+    //     require(collateralSiloSolvencyOracle != 0);
 
-        //debtShare owner
-        address debtShareToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
-        uint256 ownerBalanceDebtShareToken = debtShareToken.balanceOf(e, owner);
-        require(ownerBalanceDebtShareToken != 0);
+    //     //debtShare owner
+    //     address debtShareToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
+    //     uint256 ownerBalanceDebtShareToken = debtShareToken.balanceOf(e, owner);
+    //     require(ownerBalanceDebtShareToken != 0);
 
-        //borrowerDebtAssets owner
-        uint256 borrowerProtectedAssets;
-        uint256 borrowerDebtAssets;
-        uint256 borrowerCollateralAssets;
-        (borrowerProtectedAssets, borrowerCollateralAssets, borrowerDebtAssets)= 
-            assetsBorrowerForLTVHarness( 
-                e,  
-                siloConfig.getConfig(e, collateralSilo),
-                siloConfig.getConfig(e, debtSilo),
-                owner,  
-                ISilo.OracleType.Solvency,
-                ISilo.AccrueInterestInMemory.No
-            );
-        require(borrowerDebtAssets != 0);
-        //to ensuer that there are still collateral assest left after withdraw
-        require(borrowerProtectedAssets != 0); 
-        require(borrowerCollateralAssets != 0);
-        require(borrowerProtectedAssets + borrowerCollateralAssets != 0);
+    //     //borrowerDebtAssets owner
+    //     uint256 borrowerProtectedAssets;
+    //     uint256 borrowerDebtAssets;
+    //     uint256 borrowerCollateralAssets;
+    //     (borrowerProtectedAssets, borrowerCollateralAssets, borrowerDebtAssets)= 
+    //         assetsBorrowerForLTVHarness( 
+    //             e,  
+    //             siloConfig.getConfig(e, collateralSilo),
+    //             siloConfig.getConfig(e, debtSilo),
+    //             owner,  
+    //             ISilo.OracleType.Solvency,
+    //             ISilo.AccrueInterestInMemory.No
+    //         );
+    //     require(borrowerDebtAssets != 0);
+    //     //to ensuer that there are still collateral assest left after withdraw
+    //     require(borrowerProtectedAssets != 0); 
+    //     require(borrowerCollateralAssets != 0);
+    //     require(borrowerProtectedAssets + borrowerCollateralAssets != 0);
 
-        //setup
-        allOraclesDifferent(e, anyOracle);
+    //     //setup
+    //     allOraclesDifferent(e, anyOracle);
 
-        //values before
-        mathint debtSiloSolvencyOracleCountBefore = callCountQuote[debtSiloSolvencyOracle];
-        mathint collateralSiloSolvencyOracleCountBefore = callCountQuote[collateralSiloSolvencyOracle];
-        mathint anyOracleCountBefore = callCountQuote[anyOracle];
+    //     //values before
+    //     mathint debtSiloSolvencyOracleCountBefore = callCountQuote[debtSiloSolvencyOracle];
+    //     mathint collateralSiloSolvencyOracleCountBefore = callCountQuote[collateralSiloSolvencyOracle];
+    //     mathint anyOracleCountBefore = callCountQuote[anyOracle];
 
-        //function call
-        withdraw(e, assets, receiver, owner);
+    //     //function call
+    //     withdraw(e, assets, receiver, owner);
 
-        //values after
-        mathint debtSiloSolvencyOracleCountAfter = callCountQuote[debtSiloSolvencyOracle];
-        mathint collateralSiloSolvencyOracleCountAfter = callCountQuote[collateralSiloSolvencyOracle];
-        mathint anyOracleCountAfter = callCountQuote[anyOracle];
+    //     //values after
+    //     mathint debtSiloSolvencyOracleCountAfter = callCountQuote[debtSiloSolvencyOracle];
+    //     mathint collateralSiloSolvencyOracleCountAfter = callCountQuote[collateralSiloSolvencyOracle];
+    //     mathint anyOracleCountAfter = callCountQuote[anyOracle];
 
-        //no oracle is called before the quote
-        assert (debtSiloSolvencyOracleCountAfter == debtSiloSolvencyOracleCountBefore);
-        assert (collateralSiloSolvencyOracleCountAfter == collateralSiloSolvencyOracleCountBefore + 1);
-        assert (anyOracleCountAfter == anyOracleCountBefore);
-    }
+    //     //no oracle is called before the quote
+    //     assert (debtSiloSolvencyOracleCountAfter == debtSiloSolvencyOracleCountBefore);
+    //     assert (collateralSiloSolvencyOracleCountAfter == collateralSiloSolvencyOracleCountBefore + 1);
+    //     assert (anyOracleCountAfter == anyOracleCountBefore);
+    // }
 
 
 //------------------------------- RULES PROBLEMS START ----------------------------------

@@ -5,6 +5,7 @@ methods{
    function _.allowance(address owner, address spender) external envfree;
    function _.silo() external envfree;
    function silo1.totalAssetsHarness() external returns (uint256, uint256, uint256)envfree;
+   function silo0.totalAssetsHarness() external returns (uint256, uint256, uint256)envfree;
    function borrowerCollateralSiloHarness(address) external returns (address) envfree;
    function ltvBelowMaxLtvHarness(address) external returns (bool) envfree;
    function shareDebtToken0.receiveAllowance(address,address) external returns (uint256) envfree;

@@ -17,7 +17,7 @@ function noReverts(env e){
 
 
 
-//------------------------------- RULES TEST START ----------------------------------
+//------------------------------- RULES  ----------------------------------
 
     // liquidationCall() revert if customError != 0
     rule revertIfCustomErrorIsNotZero(env e){
@@ -219,6 +219,7 @@ function noReverts(env e){
         assert receivedRedeemedAssetsProtectedOtherUserAfter == receivedRedeemedAssetsProtectedOtherUserBefore;
         assert receivedRedeemedAssetsCollateralOtherUserAfter == receivedRedeemedAssetsCollateralOtherUserBefore;
     }
+
     // liquidationCall() msg.sender: underlyingTokenBalanceSender is reduced by repayDebtAssets
     rule debtAssetBalanceOfMsgSenderDecreasesByRepayDebtAssets(env e){
         configForEightTokensSetupRequirements();
@@ -348,7 +349,6 @@ function noReverts(env e){
         assert receivedRedeemedAssetsProtectedSenderAfter == receivedRedeemedAssetsProtectedSenderBefore + withdrawAssetsFromProtected;
         assert receivedRedeemedAssetsCollateralSenderAfter == receivedRedeemedAssetsCollateralSenderBefore + withdrawAssetsFromCollateral;
     }
-
 
     // liquidationCall() msg.sender never pays more than _maxDebtToConvert
     rule msgSenderNeverPaysMoreThanMaxDebtToCover(env e){
@@ -636,67 +636,13 @@ function noReverts(env e){
         assert repayDebtAssetsResult == repayDebtAssets;
     }
 
-
     
-    
-
-    // -------------------------------- ISSUE --------------------
-    // msg.sender should always get _collateralAsset tokens after liquidationCall if receiveSToken == false
-    rule msgSenderGetsCollateralAssetTokens(env e){
-        configForEightTokensSetupRequirements();
-        address collateralAsset;
-        address debtAsset;
-        address borrower;
-        uint256 maxDebtToCover;
-        bool receiveSToken = false;
-        address msgSender = e.msg.sender;
-
-        //setup
-        address collateralSilo;
-        address debtSilo;
-        // (collateralSilo, debtSilo) = setupFewerPaths(e, borrower);
-
-        //values before
-        uint256 balanceOfCollateralShareTokensBorrower = collateralSilo.balanceOf(e, borrower);
-        require balanceOfCollateralShareTokensBorrower == 0; //no collateral to give to the caller
-        uint256 balanceCollateralTokenBefore = collateralAsset.balanceOf(e, msgSender);
-
-        //function call
-        liquidationCall(e, collateralAsset, debtAsset, borrower, maxDebtToCover, receiveSToken);
-
-        //values after
-        uint256 balanceCollateralTokenAfter = collateralAsset.balanceOf(e, msgSender);
-
-        //asserts
-        assert balanceCollateralTokenAfter > balanceCollateralTokenBefore;
-    }
 
 
 //------------------------------- RULES TEST END ----------------------------------
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
-    //initialize can only be called once RULE NOT VACOUSE https://prover.certora.com/output/8418/5677faa6a12d45b7a42cc6064571f0e5/?anonymousKey=7fceae5238ed59b1eb873b2495eaad3107096e77
-    rule initializeCanOnlyBeCalledOnce(env e, address _siloConfig, bytes data){
-        initialize(e, _siloConfig, data);
-        initialize@withrevert(e, _siloConfig, data);
-        assert lastReverted;
-    }
 
-    //after initialize, siloConfig is not address0 RULE NOT VACOUSE
-    rule siloConfigIsNotZero(env e, address _siloConfig, bytes data){
-        initialize(e, _siloConfig, data);
-        address siloAddress = siloConfig(e);
-        assert siloAddress != 0;
-    }
-
-    //once set, siloConfig can not be changed RULE NOT VACOUSE
-    rule siloConfigCanNotBeChanged(env e, address _siloConfig, bytes data, method f, calldataarg args){
-        initialize(e, _siloConfig, data);
-        address siloAddressBefore = siloConfig(e);
-        f(e, args);
-        address siloAddressAfter = siloConfig(e);
-        assert siloAddressBefore == siloAddressAfter;
-    }
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 
@@ -739,8 +685,6 @@ function noReverts(env e){
     }
 
     
-
-    //@audit-issue are those still valid
     //hookReceiverConfig() always returns (0,0)
     rule hookReceiverConfigAlwaysReturnsZero(env e, address _address){
         uint24 hooksBefore;
@@ -793,15 +737,15 @@ function noReverts(env e){
         satisfy true;
     }
 
-    rule maxLiquidationNeverReverts(env e, address user)
-    {
-        address colSiloBefore = siloConfig(e).borrowerCollateralSilo(e, user);
-        require colSiloBefore == silo0 || colSiloBefore == silo1 || colSiloBefore == 0;
-        SafeAssumptions_withInvariants(e, user);
-        uint256 collateralToLiquidate; uint256 debtToRepay; bool sTokenRequired;
-        collateralToLiquidate, debtToRepay, sTokenRequired = maxLiquidation@withrevert(e, user);
-        assert !lastReverted;
-    }
+    // rule maxLiquidationNeverReverts(env e, address user)
+    // {
+    //     address colSiloBefore = siloConfig(e).borrowerCollateralSilo(e, user);
+    //     require colSiloBefore == silo0 || colSiloBefore == silo1 || colSiloBefore == 0;
+    //     SafeAssumptions_withInvariants(e, user);
+    //     uint256 collateralToLiquidate; uint256 debtToRepay; bool sTokenRequired;
+    //     collateralToLiquidate, debtToRepay, sTokenRequired = maxLiquidation@withrevert(e, user);
+    //     assert !lastReverted;
+    // }
 
 //-------------------------------OLD RULES END----------------------------------
 

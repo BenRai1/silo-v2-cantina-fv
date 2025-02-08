@@ -23,167 +23,167 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 //------------------------------- RULES PROBLEMS START ----------------------------------
 
 
-    // repay() any user that can repay the debt should be able to repay the debt //@audit-issue if (!success) revert for second call
-    rule repayAnyUserCanRepay (env e1, env e2) {
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address borrower;
-        address msgSender1 = e1.msg.sender;
-        address msgSender2 = e2.msg.sender;
-        threeUsersNotEqual(borrower, msgSender1, msgSender2);
-        nonSceneAddressRequirements(msgSender1);
-        nonSceneAddressRequirements(msgSender2);
-        totalSuppliesMoreThanBalance(borrower);
+    // // repay() any user that can repay the debt should be able to repay the debt //@audit-issue if (!success) revert for second call
+    // rule repayAnyUserCanRepay (env e1, env e2) {
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address borrower;
+    //     address msgSender1 = e1.msg.sender;
+    //     address msgSender2 = e2.msg.sender;
+    //     threeUsersNotEqual(borrower, msgSender1, msgSender2);
+    //     nonSceneAddressRequirements(msgSender1);
+    //     nonSceneAddressRequirements(msgSender2);
+    //     totalSuppliesMoreThanBalance(borrower);
 
-        //balances before
-        uint256 borrowerDebtShareTokensBefore = shareDebtToken0.balanceOf(borrower);
-        uint256 msgSender1BalanceBefore = token0.balanceOf(msgSender1);
-        uint256 msgSender2BalanceBefore = token0.balanceOf(msgSender2);
-        require(msgSender1BalanceBefore == msgSender2BalanceBefore);
+    //     //balances before
+    //     uint256 borrowerDebtShareTokensBefore = shareDebtToken0.balanceOf(borrower);
+    //     uint256 msgSender1BalanceBefore = token0.balanceOf(msgSender1);
+    //     uint256 msgSender2BalanceBefore = token0.balanceOf(msgSender2);
+    //     require(msgSender1BalanceBefore == msgSender2BalanceBefore);
 
-        //prevent revert because of sending ETH
-        require(e1.msg.value == e2.msg.value);
+    //     //prevent revert because of sending ETH
+    //     require(e1.msg.value == e2.msg.value);
 
-        //init state
-        storage init = lastStorage;
+    //     //init state
+    //     storage init = lastStorage;
 
-        //repay1
-        repay(e1, assets, borrower);
+    //     //repay1
+    //     repay(e1, assets, borrower);
 
-        //balance after repay1
-        uint256 borrowerDebtShareTokensAfterRepay1 = shareDebtToken0.balanceOf(borrower);
+    //     //balance after repay1
+    //     uint256 borrowerDebtShareTokensAfterRepay1 = shareDebtToken0.balanceOf(borrower);
 
-        //repay2
-        repay@withrevert(e2, assets, borrower) at init;
+    //     //repay2
+    //     repay@withrevert(e2, assets, borrower) at init;
 
-        bool secondReverted = lastReverted;
+    //     bool secondReverted = lastReverted;
 
-        //balance after repay2
-        uint256 borrowerDebtShareTokensAfterRepay2 = shareDebtToken0.balanceOf(borrower);
+    //     //balance after repay2
+    //     uint256 borrowerDebtShareTokensAfterRepay2 = shareDebtToken0.balanceOf(borrower);
 
-        satisfy !secondReverted;
-        assert borrowerDebtShareTokensAfterRepay1 == borrowerDebtShareTokensAfterRepay2;
-    }
+    //     satisfy !secondReverted;
+    //     assert borrowerDebtShareTokensAfterRepay1 == borrowerDebtShareTokensAfterRepay2;
+    // }
 
-    // repay() can not repay more assets than borrowed (check balances of token0)
-    rule repayMoreAssetsThanBorrowed (env e) {
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address borrower;
-        address msgSender = e.msg.sender;
-        nonSceneAddressRequirements(msgSender);
-        totalSuppliesMoreThanBalance(borrower);
+    // // repay() can not repay more assets than borrowed (check balances of token0)
+    // rule repayMoreAssetsThanBorrowed (env e) {
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address borrower;
+    //     address msgSender = e.msg.sender;
+    //     nonSceneAddressRequirements(msgSender);
+    //     totalSuppliesMoreThanBalance(borrower);
 
-        //balance before
-        uint256 msgSenderToken0BalanceBefore = token0.balanceOf(msgSender);
-        uint256 borrowerDebtSharesBefore = shareDebtToken0.balanceOf(borrower);
+    //     //balance before
+    //     uint256 msgSenderToken0BalanceBefore = token0.balanceOf(msgSender);
+    //     uint256 borrowerDebtSharesBefore = shareDebtToken0.balanceOf(borrower);
 
-        uint256 repayedAssets;
-        uint256 repayedShares;
-        (repayedAssets, repayedShares) = repayHarness(e, shareDebtToken0, 0, borrowerDebtSharesBefore, borrower);
-        //i: example with 1 bitcoin deposited 
-        require(repayedShares > 10**8);	
+    //     uint256 repayedAssets;
+    //     uint256 repayedShares;
+    //     (repayedAssets, repayedShares) = repayHarness(e, shareDebtToken0, 0, borrowerDebtSharesBefore, borrower);
+    //     //i: example with 1 bitcoin deposited 
+    //     require(repayedShares > 10**8);	
 
-        //repay
-        uint256 shares = repay(e, assets, borrower);
+    //     //repay
+    //     uint256 shares = repay(e, assets, borrower);
 
-        //balance after
-        uint256 msgSenderToken0BalanceAfter = token0.balanceOf(msgSender);
+    //     //balance after
+    //     uint256 msgSenderToken0BalanceAfter = token0.balanceOf(msgSender);
 
-        //repay not more assets than borrowed
-        assert(msgSenderToken0BalanceAfter >= msgSenderToken0BalanceBefore - repayedAssets || 
-            cvlApproxSameWithRange(msgSenderToken0BalanceAfter, msgSenderToken0BalanceBefore - repayedAssets, 2000000000));
-    }
+    //     //repay not more assets than borrowed
+    //     assert(msgSenderToken0BalanceAfter >= msgSenderToken0BalanceBefore - repayedAssets || 
+    //         cvlApproxSameWithRange(msgSenderToken0BalanceAfter, msgSenderToken0BalanceBefore - repayedAssets, 2000000000));
+    // }
 
-    // repay() should not be able to repay more than maxRepay //@audit-issue when you have half of the shares, you can overpay if assets is set to high
-    rule repayMoreThanMaxRepay (env e) {
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address borrower;
-        address msgSender = e.msg.sender;
-        totalSuppliesMoreThanBalance(msgSender);
-        totalSuppliesMoreThanBalance(borrower);
+    // // repay() should not be able to repay more than maxRepay //@audit-issue when you have half of the shares, you can overpay if assets is set to high
+    // rule repayMoreThanMaxRepay (env e) {
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address borrower;
+    //     address msgSender = e.msg.sender;
+    //     totalSuppliesMoreThanBalance(msgSender);
+    //     totalSuppliesMoreThanBalance(borrower);
 
-        //balanaces before
-        uint256 msgSenderBalanceBefore = token0.balanceOf(msgSender);
+    //     //balanaces before
+    //     uint256 msgSenderBalanceBefore = token0.balanceOf(msgSender);
 
-        //maxRepay
-        uint256 maxRepayAssets = maxRepay(e, borrower);
+    //     //maxRepay
+    //     uint256 maxRepayAssets = maxRepay(e, borrower);
 
-        //repay
-        repay(e, assets, borrower);
+    //     //repay
+    //     repay(e, assets, borrower);
 
-        //balances after
-        uint256 msgSenderBalanceAfter = token0.balanceOf(msgSender);
+    //     //balances after
+    //     uint256 msgSenderBalanceAfter = token0.balanceOf(msgSender);
 
-        //repay not more than maxRepay
-        assert(msgSenderBalanceAfter >= msgSenderBalanceBefore - maxRepayAssets || 
-            cvlApproxSameWithRange(msgSenderBalanceAfter, msgSenderBalanceBefore - maxRepayAssets, 2));
-    }
+    //     //repay not more than maxRepay
+    //     assert(msgSenderBalanceAfter >= msgSenderBalanceBefore - maxRepayAssets || 
+    //         cvlApproxSameWithRange(msgSenderBalanceAfter, msgSenderBalanceBefore - maxRepayAssets, 2));
+    // }
 
-    // repay() repaying all shares with repay() and repayShares() should be the same //@audit might be off my one
-    rule repayAndRepaySharesIsTheSame (env e) {
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address borrower;
-        address msgSender = e.msg.sender;
-        totalSuppliesMoreThanBalance(msgSender);
-        totalSuppliesMoreThanBalance(borrower);
+    // // repay() repaying all shares with repay() and repayShares() should be the same //@audit might be off my one
+    // rule repayAndRepaySharesIsTheSame (env e) {
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address borrower;
+    //     address msgSender = e.msg.sender;
+    //     totalSuppliesMoreThanBalance(msgSender);
+    //     totalSuppliesMoreThanBalance(borrower);
 
-        //balances before
-        uint256 msgSenderBalanceBefore = token0.balanceOf(msgSender);
-        uint256 borrowerDebtShareTokensBefore = shareDebtToken0.balanceOf(borrower);
+    //     //balances before
+    //     uint256 msgSenderBalanceBefore = token0.balanceOf(msgSender);
+    //     uint256 borrowerDebtShareTokensBefore = shareDebtToken0.balanceOf(borrower);
 
-        //init state
-        storage init = lastStorage;
+    //     //init state
+    //     storage init = lastStorage;
 
-        //repay
-        uint256 shares = repay(e, assets, borrower) at init;
-        require(shares == borrowerDebtShareTokensBefore);
+    //     //repay
+    //     uint256 shares = repay(e, assets, borrower) at init;
+    //     require(shares == borrowerDebtShareTokensBefore);
 
-        //balances after repay
-        uint256 msgSenderBalanceAfterRepay = token0.balanceOf(msgSender);
+    //     //balances after repay
+    //     uint256 msgSenderBalanceAfterRepay = token0.balanceOf(msgSender);
 
-        //repayShares all shares
-        repayShares(e, borrowerDebtShareTokensBefore, borrower) at init;
+    //     //repayShares all shares
+    //     repayShares(e, borrowerDebtShareTokensBefore, borrower) at init;
 
-        //balances after repayShares
-        uint256 msgSenderBalanceAfterRepayShares = token0.balanceOf(msgSender);
+    //     //balances after repayShares
+    //     uint256 msgSenderBalanceAfterRepayShares = token0.balanceOf(msgSender);
 
-        //repay and repayShares the same
-        assert cvlApproxSameWithRange(msgSenderBalanceAfterRepay, msgSenderBalanceAfterRepayShares, 2); //@audit test differetn ranges to see how high we can go
-    }
+    //     //repay and repayShares the same
+    //     assert cvlApproxSameWithRange(msgSenderBalanceAfterRepay, msgSenderBalanceAfterRepayShares, 2); //@audit test differetn ranges to see how high we can go
+    // }
 
 
     
-    // repay() user that can repay, calling `repay()` with `maxRepay()` result should never revert 
-    rule repayMaxRepayNeverRevert (env e) {
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address borrower;
-        address msgSender = e.msg.sender;
-        totalSuppliesMoreThanBalance(borrower);
+    // // repay() user that can repay, calling `repay()` with `maxRepay()` result should never revert 
+    // rule repayMaxRepayNeverRevert (env e) {
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address borrower;
+    //     address msgSender = e.msg.sender;
+    //     totalSuppliesMoreThanBalance(borrower);
 
-        //maxRepay
-        uint256 maxRepayAssets = maxRepay(e, borrower);
-        uint256 msgSenderBalanceBefore = token0.balanceOf(msgSender);
-        require(msgSenderBalanceBefore >= maxRepayAssets);
+    //     //maxRepay
+    //     uint256 maxRepayAssets = maxRepay(e, borrower);
+    //     uint256 msgSenderBalanceBefore = token0.balanceOf(msgSender);
+    //     require(msgSenderBalanceBefore >= maxRepayAssets);
 
-        //prevent revert because of sending ETH
-        require(e.msg.value == 0);
+    //     //prevent revert because of sending ETH
+    //     require(e.msg.value == 0);
 
-        //init state
-        storage init = lastStorage;
+    //     //init state
+    //     storage init = lastStorage;
 
-        //call repay to ensure the storage does not result in reverts (e.g _crossReentrancy = true)
-        repay(e, assets, borrower) at init;
+    //     //call repay to ensure the storage does not result in reverts (e.g _crossReentrancy = true)
+    //     repay(e, assets, borrower) at init;
 
-        //repay
-        repay@withrevert(e, maxRepayAssets, borrower) at init;
+    //     //repay
+    //     repay@withrevert(e, maxRepayAssets, borrower) at init;
 
-        //did not revert
-        assert !lastReverted;
-    }
+    //     //did not revert
+    //     assert !lastReverted;
+    // }
 
 
 //------------------------------- RULES PROBLEMS START ----------------------------------

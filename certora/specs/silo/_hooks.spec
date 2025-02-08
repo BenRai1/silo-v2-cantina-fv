@@ -69,21 +69,6 @@ methods{
 //----------------------------- DEFINITIONS END----------------------------------
 
 
-//------------------------------- RULES TEST START ----------------------------------
-
-    // liquidation() should call beforeAction() and afterAction() hooks if activated //@audit-issue not called anywhere
-
-
-//------------------------------- RULES TEST END ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES PROBLEMS START ----------------------------------
-
-//------------------------------- RULES OK START ------------------------------------
-
-
-
     //INVARIANT: hookSetup (hooksBefore, hooksAfter) for all tokens is the same
     invariant sameHookSetupSameForAllTokens(env e) 
         silo0.hookSetup(e).hooksBefore == shareProtectedCollateralToken0.hookSetup(e).hooksBefore &&
@@ -1086,12 +1071,3 @@ methods{
     }
 
 
-//------------------------------- RULES OK END ------------------------------------
-
-//------------------------------- INVARIENTS OK START-------------------------------
-
-//------------------------------- INVARIENTS OK END-------------------------------
-
-//------------------------------- ISSUES OK START-------------------------------
-
-//------------------------------- ISSUES OK END-------------------------------

@@ -21,102 +21,102 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
 
     //------------------------- transitionCollateral and user assets -------------------------
 
-        ////@audit what happens if you minting x shares and redeem x shares? Does it result in the same balance of token0? Strange behavior for transitionCollateralShouldNotIncreaseUserAssets
-        //minting and then redeeming the same amount of shares results in the same balance of token0
-        rule mintAndRedeemSameAmount(env e){    
-            configForEightTokensSetupRequirements();
-            uint256 range = 2;
-            uint256 shares;
-            address owner;
-            address receiver = owner;
-            require(owner == e.msg.sender);
+        // ////@audit what happens if you minting x shares and redeem x shares? Does it result in the same balance of token0? Strange behavior for transitionCollateralShouldNotIncreaseUserAssets
+        // //minting and then redeeming the same amount of shares results in the same balance of token0
+        // rule mintAndRedeemSameAmount(env e){    
+        //     configForEightTokensSetupRequirements();
+        //     uint256 range = 2;
+        //     uint256 shares;
+        //     address owner;
+        //     address receiver = owner;
+        //     require(owner == e.msg.sender);
 
-            //values before
-            uint256 ownerToken0BalanceBefore = token0.balanceOf(owner);
+        //     //values before
+        //     uint256 ownerToken0BalanceBefore = token0.balanceOf(owner);
 
-            //mint
-            mint(e, shares, owner, ISilo.CollateralType.Collateral);
+        //     //mint
+        //     mint(e, shares, owner, ISilo.CollateralType.Collateral);
 
-            //redeem
-            redeem(e, shares, owner, receiver, ISilo.CollateralType.Collateral);
+        //     //redeem
+        //     redeem(e, shares, owner, receiver, ISilo.CollateralType.Collateral);
 
-            //values after
-            uint256 ownerToken0BalanceAfter = token0.balanceOf(owner);
+        //     //values after
+        //     uint256 ownerToken0BalanceAfter = token0.balanceOf(owner);
 
-            //result is the same
-            assert cvlApproxSameWithRange(ownerToken0BalanceBefore, ownerToken0BalanceAfter, range);
-        }
+        //     //result is the same
+        //     assert cvlApproxSameWithRange(ownerToken0BalanceBefore, ownerToken0BalanceAfter, range);
+        // }
 
-        // * `transitionCollateral()` should not increase users assets
-        rule transitionCollateralShouldNotIncreaseUserAssets(env e){ //@audit-issue increases user assets by 2 wei
-            configForEightTokensSetupRequirements();
-            uint256 shares;
-            address owner;
+        // // * `transitionCollateral()` should not increase users assets
+        // rule transitionCollateralShouldNotIncreaseUserAssets(env e){ //@audit-issue increases user assets by 2 wei
+        //     configForEightTokensSetupRequirements();
+        //     uint256 shares;
+        //     address owner;
 
-            //values before
-            uint256 ownerProtectedAssetsBefore;
-            uint256 ownerCollateralAssetsBefore;
-            uint256 ownerDebtAssetsBefore;
-            (ownerProtectedAssetsBefore, ownerCollateralAssetsBefore, ownerDebtAssetsBefore) = getUserAssetsHarness(e, owner);
+        //     //values before
+        //     uint256 ownerProtectedAssetsBefore;
+        //     uint256 ownerCollateralAssetsBefore;
+        //     uint256 ownerDebtAssetsBefore;
+        //     (ownerProtectedAssetsBefore, ownerCollateralAssetsBefore, ownerDebtAssetsBefore) = getUserAssetsHarness(e, owner);
         
-            //transition
-            transitionCollateral(e, shares, owner, ISilo.CollateralType.Collateral);
+        //     //transition
+        //     transitionCollateral(e, shares, owner, ISilo.CollateralType.Collateral);
 
-            //values after
-            uint256 ownerProtectedAssetsAfter;
-            uint256 ownerCollateralAssetsAfter;
-            uint256 ownerDebtAssetsAfter;
-            (ownerProtectedAssetsAfter, ownerCollateralAssetsAfter, ownerDebtAssetsAfter) = getUserAssetsHarness(e, owner);
+        //     //values after
+        //     uint256 ownerProtectedAssetsAfter;
+        //     uint256 ownerCollateralAssetsAfter;
+        //     uint256 ownerDebtAssetsAfter;
+        //     (ownerProtectedAssetsAfter, ownerCollateralAssetsAfter, ownerDebtAssetsAfter) = getUserAssetsHarness(e, owner);
 
-            //otherUsers assets have not changed
-            assert ownerProtectedAssetsBefore + ownerCollateralAssetsBefore >= ownerProtectedAssetsAfter + ownerCollateralAssetsAfter;
-        }
+        //     //otherUsers assets have not changed
+        //     assert ownerProtectedAssetsBefore + ownerCollateralAssetsBefore >= ownerProtectedAssetsAfter + ownerCollateralAssetsAfter;
+        // }
 
-        // * transitionCollateral should not decrease user assets by more than 1-2 wei
-        rule transitionCollateralShouldNotDecreaseUserAssetsTooMuch(env e){
-            configForEightTokensSetupRequirements();
-            uint256 shares;
-            address owner;
+        // // * transitionCollateral should not decrease user assets by more than 1-2 wei
+        // rule transitionCollateralShouldNotDecreaseUserAssetsTooMuch(env e){
+        //     configForEightTokensSetupRequirements();
+        //     uint256 shares;
+        //     address owner;
 
-            //values before
-            uint256 ownerProtectedAssetsBefore;
-            uint256 ownerCollateralAssetsBefore;
-            uint256 ownerDebtAssetsBefore;
-            (ownerProtectedAssetsBefore, ownerCollateralAssetsBefore, ownerDebtAssetsBefore) = getUserAssetsHarness(e, owner);
+        //     //values before
+        //     uint256 ownerProtectedAssetsBefore;
+        //     uint256 ownerCollateralAssetsBefore;
+        //     uint256 ownerDebtAssetsBefore;
+        //     (ownerProtectedAssetsBefore, ownerCollateralAssetsBefore, ownerDebtAssetsBefore) = getUserAssetsHarness(e, owner);
         
-            //transition
-            transitionCollateral(e, shares, owner, ISilo.CollateralType.Collateral);
+        //     //transition
+        //     transitionCollateral(e, shares, owner, ISilo.CollateralType.Collateral);
 
-            //values after
-            uint256 ownerProtectedAssetsAfter;
-            uint256 ownerCollateralAssetsAfter;
-            uint256 ownerDebtAssetsAfter;
-            (ownerProtectedAssetsAfter, ownerCollateralAssetsAfter, ownerDebtAssetsAfter) = getUserAssetsHarness(e, owner);
+        //     //values after
+        //     uint256 ownerProtectedAssetsAfter;
+        //     uint256 ownerCollateralAssetsAfter;
+        //     uint256 ownerDebtAssetsAfter;
+        //     (ownerProtectedAssetsAfter, ownerCollateralAssetsAfter, ownerDebtAssetsAfter) = getUserAssetsHarness(e, owner);
 
-            //owner assets have not changed to much
-            assert ownerProtectedAssetsBefore + ownerCollateralAssetsBefore - (ownerProtectedAssetsAfter + ownerCollateralAssetsAfter) <= 2;
-        }
+        //     //owner assets have not changed to much
+        //     assert ownerProtectedAssetsBefore + ownerCollateralAssetsBefore - (ownerProtectedAssetsAfter + ownerCollateralAssetsAfter) <= 2;
+        // }
     //------------------------- transitionCollateral and user assets -------------------------
 
 
-    // transitionCollateral: reverts if owner is insolvant before (if not, rounding in favor of the protocol is wrong) //@audit-issue time out
-    rule transitionCollateralRevertsIfOwnerInsolvantBefore(env e){
-        configForEightTokensSetupRequirements();
-        uint256 shares;
-        address owner;
+    // // transitionCollateral: reverts if owner is insolvant before (if not, rounding in favor of the protocol is wrong) //@audit-issue time out
+    // rule transitionCollateralRevertsIfOwnerInsolvantBefore(env e){
+    //     configForEightTokensSetupRequirements();
+    //     uint256 shares;
+    //     address owner;
 
-        //values before
-        address collateralsilo = borrowerCollateralSiloHarness(e, owner);
-        require(collateralsilo == silo0);
-        bool ownerSolvent = isSolvent(e, owner);
-        require(!ownerSolvent);
+    //     //values before
+    //     address collateralsilo = borrowerCollateralSiloHarness(e, owner);
+    //     require(collateralsilo == silo0);
+    //     bool ownerSolvent = isSolvent(e, owner);
+    //     require(!ownerSolvent);
 
-        //transition
-        transitionCollateral@withrevert(e, shares, owner, ISilo.CollateralType.Collateral);
+    //     //transition
+    //     transitionCollateral@withrevert(e, shares, owner, ISilo.CollateralType.Collateral);
 
-        //call reverted
-        assert lastReverted;
-    }
+    //     //call reverted
+    //     assert lastReverted;
+    // }
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 

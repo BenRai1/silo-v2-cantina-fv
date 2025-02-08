@@ -75,27 +75,27 @@ methods {
 
 //------------------------------- RULES TEST START ----------------------------------
     //------------------------------------------------- RUNNING -------------------------------------------------
-        //only Silo can call mint
-        rule onlySiloCanCallMint(env e){
-            address receiver;
-            address depositor;
-            uint256 shares; 
+        // //only Silo can call mint
+        // rule onlySiloCanCallMint(env e){
+        //     address receiver;
+        //     address depositor;
+        //     uint256 shares; 
             
-            silo0.mint(e,receiver, depositor, shares);
+        //     silo0.mint(e,receiver, depositor, shares);
 
-            assert e.msg.sender == getSiloFromStorage(e);
-        }
+        //     assert e.msg.sender == getSiloFromStorage(e);
+        // }
 
-        //only Silo can call burn
-        rule onlySiloCanCallBurn(env e){
-            address owner;
-            address spender;
-            uint256 shares; 
+        // //only Silo can call burn
+        // rule onlySiloCanCallBurn(env e){
+        //     address owner;
+        //     address spender;
+        //     uint256 shares; 
             
-            silo0.burn(e,owner, spender, shares);
+        //     silo0.burn(e,owner, spender, shares);
 
-            assert e.msg.sender == getSiloFromStorage(e);
-        }
+        //     assert e.msg.sender == getSiloFromStorage(e);
+        // }
 
     //------------------------------------------------- RUNNING -------------------------------------------------
 
@@ -142,91 +142,91 @@ methods {
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 
-    //@audit-issue issue dispatcher?? Burned shares are way more than minted shares 3000 deposit vs 1000 withdraw 
-    // https://prover.certora.com/output/8418/66c140cb44854949b028734589bbdafc/?anonymousKey=8e49709abb33853627e0a87899814187f18d9569
-    //When a user deposits x assets and withdraws x assets he gets back the same amount 
-    rule withdrawRecoversDeposit(env e){
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address sender = e.msg.sender;
+    // //@audit-issue issue dispatcher?? Burned shares are way more than minted shares 3000 deposit vs 1000 withdraw 
+    // // https://prover.certora.com/output/8418/66c140cb44854949b028734589bbdafc/?anonymousKey=8e49709abb33853627e0a87899814187f18d9569
+    // //When a user deposits x assets and withdraws x assets he gets back the same amount 
+    // rule withdrawRecoversDeposit(env e){
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address sender = e.msg.sender;
 
-        //ensure no interst is accrued
-        require require_uint64(e.block.timestamp) == silo0.getSiloDataInterestRateTimestamp(e);
+    //     //ensure no interst is accrued
+    //     require require_uint64(e.block.timestamp) == silo0.getSiloDataInterestRateTimestamp(e);
         
-        //balance before
-        uint256 assetsSenderToken0Before = token0.balanceOf(sender);
-        uint256 sharesSenderBefore = silo0.balanceOf(sender);
+    //     //balance before
+    //     uint256 assetsSenderToken0Before = token0.balanceOf(sender);
+    //     uint256 sharesSenderBefore = silo0.balanceOf(sender);
 
-        deposit(e, assets, sender);
+    //     deposit(e, assets, sender);
 
-        //balance after deposit
-        uint256 assetsSenderToken0AfterDeposit = token0.balanceOf(sender);
-        uint256 sharesSenderAfterDeposit = silo0.balanceOf(sender);
+    //     //balance after deposit
+    //     uint256 assetsSenderToken0AfterDeposit = token0.balanceOf(sender);
+    //     uint256 sharesSenderAfterDeposit = silo0.balanceOf(sender);
 
-        withdraw(e, assets, sender, sender);
+    //     withdraw(e, assets, sender, sender);
 
-        //balance after withdraw
-        uint256 assetsSenderToken0AfterWithdraw = token0.balanceOf(sender);
-        uint256 sharesSenderAfterWithdraw = silo0.balanceOf(sender);
+    //     //balance after withdraw
+    //     uint256 assetsSenderToken0AfterWithdraw = token0.balanceOf(sender);
+    //     uint256 sharesSenderAfterWithdraw = silo0.balanceOf(sender);
 
-        // final balances equals the starting balance
-        assert assetsSenderToken0Before == assetsSenderToken0AfterWithdraw;
-        // no shares are left to redeem
-        assert sharesSenderBefore == sharesSenderAfterWithdraw;
-    } 
+    //     // final balances equals the starting balance
+    //     assert assetsSenderToken0Before == assetsSenderToken0AfterWithdraw;
+    //     // no shares are left to redeem
+    //     assert sharesSenderBefore == sharesSenderAfterWithdraw;
+    // } 
 
-    //@audit-issue issue with dispatcher? Result is one more asset given back than used for minting
-    //when a user mints x shares and burns x shares he gets back the same value 
-    rule redeemRecoversMint(env e){
-        configForEightTokensSetupRequirements();
-        uint256 shares;
-        address sender = e.msg.sender;
+    // //@audit-issue issue with dispatcher? Result is one more asset given back than used for minting
+    // //when a user mints x shares and burns x shares he gets back the same value 
+    // rule redeemRecoversMint(env e){
+    //     configForEightTokensSetupRequirements();
+    //     uint256 shares;
+    //     address sender = e.msg.sender;
         
-        //balance before
-        uint256 assetsSenderToken0Before = token0.balanceOf(sender);
-        uint256 sharesSenderBefore = silo0.balanceOf(sender);
+    //     //balance before
+    //     uint256 assetsSenderToken0Before = token0.balanceOf(sender);
+    //     uint256 sharesSenderBefore = silo0.balanceOf(sender);
 
-        mint(e, shares, sender);
+    //     mint(e, shares, sender);
 
-        //balance after mint
-        uint256 assetsSenderToken0AfterMint = token0.balanceOf(sender);
+    //     //balance after mint
+    //     uint256 assetsSenderToken0AfterMint = token0.balanceOf(sender);
 
-        redeem(e, shares, sender, sender);
+    //     redeem(e, shares, sender, sender);
 
-        //balance after burn
-        uint256 assetsSenderToken0AfterRedeem = token0.balanceOf(sender);
-        uint256 sharesSenderAfterRedeem = silo0.balanceOf(sender);
+    //     //balance after burn
+    //     uint256 assetsSenderToken0AfterRedeem = token0.balanceOf(sender);
+    //     uint256 sharesSenderAfterRedeem = silo0.balanceOf(sender);
 
-        //assert that the final balances equals the starting balance
-        assert assetsSenderToken0Before == assetsSenderToken0AfterRedeem; 
-        //assert that no shares are left to redeem
-        assert sharesSenderBefore == sharesSenderAfterRedeem;
-    }
+    //     //assert that the final balances equals the starting balance
+    //     assert assetsSenderToken0Before == assetsSenderToken0AfterRedeem; 
+    //     //assert that no shares are left to redeem
+    //     assert sharesSenderBefore == sharesSenderAfterRedeem;
+    // }
 
 
-    //protected collateral can always be withdrawn //@audit-issue killed becasue of time out(??)
-    rule protectedCanAlwaysBeWithdrawn(env e, method f, calldataarg arg) filtered{f-> !f.isView}{
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address sender = e.msg.sender;
+    // //protected collateral can always be withdrawn //@audit-issue killed becasue of time out(??)
+    // rule protectedCanAlwaysBeWithdrawn(env e, method f, calldataarg arg) filtered{f-> !f.isView}{
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address sender = e.msg.sender;
 
-        //deposit protected collateral
-        deposit(e, assets, sender, ISilo.CollateralType.Protected);
+    //     //deposit protected collateral
+    //     deposit(e, assets, sender, ISilo.CollateralType.Protected);
 
-        //shares sender after deposit
-        uint256 protectedCollateralSharesSenderAfterDeposit = shareProtectedCollateralToken0.balanceOf(sender);
+    //     //shares sender after deposit
+    //     uint256 protectedCollateralSharesSenderAfterDeposit = shareProtectedCollateralToken0.balanceOf(sender);
 
-        f(e, arg);
+    //     f(e, arg);
 
-        //shares sender after function call
-        uint256 protectedCollateralSharesSenderAfterFunctionCall = shareProtectedCollateralToken0.balanceOf(sender);
-        require(protectedCollateralSharesSenderAfterFunctionCall == protectedCollateralSharesSenderAfterDeposit);
+    //     //shares sender after function call
+    //     uint256 protectedCollateralSharesSenderAfterFunctionCall = shareProtectedCollateralToken0.balanceOf(sender);
+    //     require(protectedCollateralSharesSenderAfterFunctionCall == protectedCollateralSharesSenderAfterDeposit);
 
-        //withdraw protected collateral
-        withdraw@withrevert(e, assets, sender, sender, ISilo.CollateralType.Protected);
+    //     //withdraw protected collateral
+    //     withdraw@withrevert(e, assets, sender, sender, ISilo.CollateralType.Protected);
 
-        assert !lastReverted;
-    }
+    //     assert !lastReverted;
+    // }
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 

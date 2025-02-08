@@ -7,7 +7,7 @@ import "../setup/summaries/silo0_summaries.spec";
 import "../setup/summaries/siloconfig_dispatchers.spec";
 import "../setup/summaries/config_for_one_in_cvl.spec";
 import "../setup/summaries/safe-approximations.spec";
-import "./0base_Silo.spec";
+import "./0base_Silo_single_silo.spec";
 
 methods {
     // ---- `SiloConfig` -------------------------------------------------------

@@ -69,6 +69,7 @@ interface IPartialLiquidation {
         address _user,
         uint256 _maxDebtToCover,
         bool _receiveSToken
+        // bool _repayBedDebt //@audit-issue added
     )
         external
         returns (uint256 withdrawCollateral, uint256 repayDebtAssets);

@@ -2,7 +2,7 @@
 
 import "../setup/CompleteSiloSetup.spec";
 import "../setup/summaries/interest_rate_model_v2.spec";
-import "./0base_Silo.spec";
+import "./0base_Silo_conf.spec";
 
 
 //------------------------------- RULES TEST START ----------------------------------
