@@ -360,7 +360,7 @@ contract SiloConfig is ISiloConfig, CrossReentrancyGuard {
         } else {
             revert WrongSilo();
         }
-     }
+    }
 
     /// @inheritdoc ISiloConfig
     function getDebtSilo(address _borrower) public view virtual returns (address debtSilo) {

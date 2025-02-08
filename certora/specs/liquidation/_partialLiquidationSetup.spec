@@ -19,7 +19,7 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         //redeem (silo0 or silo1)
         function _.redeem(uint256 _shares, address _receiver, address _owner, ISilo.CollateralType _collateralType) external => redeemCVL(_shares, _receiver, _owner, _collateralType ,calledContract) expect (uint256);
         function _._callShareTokenForwardTransferNoChecks(address silo, address borrower, address receiver, uint256 withdrawAssets, address _shareToken, ISilo.AssetType _assetType) internal => _callShareTokenForwardTransferNoChecksCVL(borrower, receiver, withdrawAssets, _shareToken, _assetType) expect uint256;
-        function _.safeTransferFrom(address _calledContract, address from, address to, uint256 amount) external => saveTransferFromCVL(from, to, amount, _calledContract) expect bool;
+        function _.safeTransferFrom(address _calledContract, address from, address to, uint256 amount) internal => saveTransferFromCVL(from, to, amount, _calledContract) expect bool;
         function _._fetchConfigs(address _siloConfigCached, address _collateralAsset, address _debtAsset, address _borrower) internal => fetchConfigsCVL(_siloConfigCached, _collateralAsset, _debtAsset, _borrower ) expect (ISiloConfig.ConfigData memory, ISiloConfig.ConfigData memory);
         function _.previewRedeem(uint256 shares, ISilo.CollateralType) external => previewRedeemCVL(shares) expect (uint256);
                
@@ -99,7 +99,7 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
         function repayCVL(uint256 amount, address borrower, address _calledContract) returns uint256{
             repayedAssets[_calledContract][borrower] = require_uint256(repayedAssets[_calledContract][borrower] + amount);
             repayedAssetsToSilo[_calledContract] = require_uint256(repayedAssetsToSilo[_calledContract] + amount);
-            return 0;
+            return amount;
         }
         ghost mapping (address => uint256) repayedAssetsToSilo;
     ghost mapping (address => mapping (address => uint256)) repayedAssets;  
@@ -110,7 +110,7 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec"; //to avoide D
             redeemedAssetsFromSilo[_calledContract] = require_uint256(redeemedAssetsFromSilo[_calledContract] + shares);
             redeemedAssets[_calledContract][collateralType][owner] = require_uint256(redeemedAssets[_calledContract][collateralType][owner] + shares);
             receivedRedeemedAssets[_calledContract][collateralType][receiver] = require_uint256(receivedRedeemedAssets[_calledContract][collateralType][receiver] + shares);
-            return 0;
+            return shares;
         }
 
         ghost mapping (address => uint256) redeemedAssetsFromSilo;
