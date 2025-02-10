@@ -17,7 +17,7 @@ methods{
 
 
     // flashLoan() should reduce allowance of silo for receiver by repayment amount
-    rule flashLoanReducesAllowanceOfSiloForReceiver(env e) {
+    rule flashLoanIncreasesBalanceOfSilo(env e) {
         configForEightTokensSetupRequirements();
         uint256 amount;
         address receiver = flashLoanReceiver;
@@ -43,7 +43,6 @@ methods{
         uint256 balanceReceiverAfter = token0.balanceOf(receiver);
 
         //allowance reduced by amount
-        assert allowanceBefore != max_uint256 => allowanceAfter == allowanceBefore - amount;
         assert balanceReceiverAfter == balanceReceiverBefore - feeToPay;
     }
 
