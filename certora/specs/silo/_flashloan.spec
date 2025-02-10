@@ -16,6 +16,33 @@ methods{
 //------------------------------- RULES  ----------------------------------
 
 
+    // flashLoan() should reduce allowance of silo for receiver by repayment amount
+    rule flashLoanReducesAllowanceOfSiloForReceiver(env e) {
+        configForEightTokensSetupRequirements();
+        uint256 amount;
+        address receiver = flashLoanReceiver;
+        address token = token0;
+        bytes data;
+
+        //setup
+        uint256 flashloanFee;
+        (_, _, flashloanFee, _) = siloConfig.getFeesWithAsset(e, silo0);
+        require flashloanFee == 0; 
+
+        //values before
+        uint256 allowanceBefore = token0.allowance(flashLoanReceiver, silo0);
+
+        //flashLoan()
+        flashLoan(e, receiver, token, amount, data);
+
+        //values after
+        uint256 allowanceAfter = token0.allowance(flashLoanReceiver, silo0);
+
+        //allowance reduced by amount
+        assert allowanceBefore != max_uint256 => allowanceAfter == allowanceBefore - amount;
+    }
+
+
     // * `flashLoan()` should never change any storage if flashloanFee is zero 
     rule flashLoanNoChangeIfFeeZero(env e) {
         configForEightTokensSetupRequirements();

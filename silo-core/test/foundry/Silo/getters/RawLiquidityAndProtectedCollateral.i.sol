@@ -191,24 +191,22 @@ contract RawLiquidityAndProtectedCollateralTest is SiloLittleHelper, Test {
         _printSiloStats("\nValues after borrow 750 (Silo0)", silo0, token0);
 
 
-        vm.warp(block.timestamp + 120 days);
+        vm.warp(block.timestamp + 39 days);
         silo0.accrueInterest();
-
-        //debtAssets of borrower before liquidation
+     
+        // debtAssets of borrower before liquidation
         _printSiloStats("\nValues after accrue interest(Silo0)", silo0, token0);
-        (address protectedShareToken, address collateralShareToken, address debtShareToken) = _siloConfig.getShareTokens(address(silo1));
+        (, , address debtShareToken) = _siloConfig.getShareTokens(address(silo1));
         uint256 debtSharesBorrowerBefore = IERC20(debtShareToken).balanceOf(borrower);
         uint256 debtAssetsBorrowerBefore = silo1.convertToAssets(debtSharesBorrowerBefore, ISilo.AssetType.Debt);
-        emit log("debtAssetsBorrowerBefore");
-        emit log_named_uint("",debtAssetsBorrowerBefore);
+        emit log_named_uint("debtAssetsBorrowerBefore (in 1e17)",debtAssetsBorrowerBefore/1e17);
 
         //liquidator1: setup for liquidation
         token1.mint(address(this), debtAssetsBorrowerBefore); //(address(this) is the liquidator)
         token1.approve(address(partialLiquidation), debtAssetsBorrowerBefore);
 
-        uint256 assetsToLiquidate = 990 * debtAssetsBorrowerBefore / 1000; // 95% of the debt
-        emit log("assetsToLiquidate");
-        emit log_named_uint("",assetsToLiquidate);
+        uint256 assetsToLiquidate = 910 * debtAssetsBorrowerBefore / 1000; // 91% of the debt
+        emit log_named_uint("assetsToLiquidate (in 1e17)",assetsToLiquidate/1e17);
         
         //try to liquidate 95% of the borrower´s debt
         vm.expectRevert();
@@ -218,10 +216,8 @@ contract RawLiquidityAndProtectedCollateralTest is SiloLittleHelper, Test {
 
         //potential debtAssets of borrower after liquidation
         uint256 potentialDebtAssetsBorrowerAfter = debtAssetsBorrowerBefore - assetsToLiquidate;
-        emit log("dust");
-        emit log_named_uint("",dust);
-        emit log("potentialDebtAssetsBorrowerAfter:");
-        emit log_named_uint("",potentialDebtAssetsBorrowerAfter);
+        emit log_named_uint("dust (in 1e17)",dust/1e17);
+        emit log_named_uint("Potential DebtAssetsBorrower after liquidation (in 1e17)",potentialDebtAssetsBorrowerAfter/1e17);
         assertGt(potentialDebtAssetsBorrowerAfter, dust, "potentialDebtAssetsBorrowerAfter > dust");
     }
 

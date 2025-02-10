@@ -20,7 +20,7 @@ import {PartialLiquidationExecLib} from "./lib/PartialLiquidationExecLib.sol";
 
 /// @title PartialLiquidation module for executing liquidations
 /// @dev if we need additional hook functionality, this contract should be included as parent
-contract PartialLiquidation is IPartialLiquidation, IHookReceiver {
+contract PartialLiquidation is IPartialLiquidation, IHookReceiver { 
     using SafeERC20 for IERC20;
     using Hook for uint24;
     using CallBeforeQuoteLib for ISiloConfig.ConfigData;
