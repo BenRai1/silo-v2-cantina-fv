@@ -21,25 +21,30 @@ methods{
         configForEightTokensSetupRequirements();
         uint256 amount;
         address receiver = flashLoanReceiver;
+        require receiver != silo0;
         address token = token0;
         bytes data;
+
 
         //setup
         uint256 flashloanFee;
         (_, _, flashloanFee, _) = siloConfig.getFeesWithAsset(e, silo0);
-        require flashloanFee == 0; 
+        uint256 feeToPay = require_uint256(amount * flashloanFee / 10^18); 
 
         //values before
         uint256 allowanceBefore = token0.allowance(flashLoanReceiver, silo0);
+        uint256 balanceReceiverBefore = token0.balanceOf(receiver);
 
         //flashLoan()
         flashLoan(e, receiver, token, amount, data);
 
         //values after
         uint256 allowanceAfter = token0.allowance(flashLoanReceiver, silo0);
+        uint256 balanceReceiverAfter = token0.balanceOf(receiver);
 
         //allowance reduced by amount
         assert allowanceBefore != max_uint256 => allowanceAfter == allowanceBefore - amount;
+        assert balanceReceiverAfter == balanceReceiverBefore - feeToPay;
     }
 
 

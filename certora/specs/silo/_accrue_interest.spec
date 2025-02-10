@@ -1,10 +1,8 @@
 import "../setup/CompleteSiloSetup.spec";
 
-methods{
-    function _.getCompoundInterestRateAndUpdate(uint256 assets, uint256 time) -> uint256 {
-        return rate * time;
-    }
-}
+// methods{
+    
+// }
 
 
 //------------------------------- RULES TEST START ----------------------------------
@@ -15,7 +13,12 @@ methods{
     rule accrueInterestNeverRevert(env e) {
         configForEightTokensSetupRequirements();
 
+        uint256 daoFee;
+        uint256 deployerFee;
+        (daoFee, deployerFee, _, _) = siloConfig.getFeesWithAsset(e, silo0);
+
         require(e.msg.value == 0);
+        require(daoFee + deployerFee < 10^18); //less than 100%
         //function call
         accrueInterest@withrevert(e);
 

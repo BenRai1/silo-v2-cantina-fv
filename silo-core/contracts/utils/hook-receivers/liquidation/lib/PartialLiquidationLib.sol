@@ -274,7 +274,7 @@ library PartialLiquidationLib {
         // here is weird case, sometimes it is impossible to go down to target LTV, however math can calculate it
         // eg with negative numerator and denominator and result will be positive, that's why we simply return all
         // we also cover dust case here
-        return _totalBorrowerDebtValue - repayValue < _DEBT_DUST_LEVEL //@audit-issue changed for issue
+        return repayValue * _PRECISION_DECIMALS / _totalBorrowerDebtValue > _DEBT_DUST_LEVEL //@audit-issue changed for issue
             ? _totalBorrowerDebtValue
             : repayValue;
     }

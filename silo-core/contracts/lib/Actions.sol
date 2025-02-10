@@ -351,7 +351,8 @@ library Actions {
         // cast safe, because we checked `fee > type(uint192).max`
         SiloStorageLib.getSiloStorage().daoAndDeployerRevenue += uint192(fee); //@audit can this block the flash loan if there are to many fees accumulated? Is this ever reduced?
 
-        IERC20(_token).safeTransfer(address(_receiver), _amount);
+        // mutation: replace "_receiver" with "this"
+        IERC20(_token).safeTransfer(address(this), _amount);
 
         require(
             _receiver.onFlashLoan(msg.sender, _token, _amount, fee, _data) == _FLASHLOAN_CALLBACK,
