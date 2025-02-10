@@ -30,6 +30,7 @@ methods{
         uint256 flashloanFee;
         (_, _, flashloanFee, _) = siloConfig.getFeesWithAsset(e, silo0);
         uint256 feeToPay = require_uint256(amount * flashloanFee / 10^18); 
+        uint256 finalFee = feeToPay ==0 ? 1 : feeToPay;
 
         //values before
         uint256 allowanceBefore = token0.allowance(flashLoanReceiver, silo0);
@@ -43,7 +44,7 @@ methods{
         uint256 balanceReceiverAfter = token0.balanceOf(receiver);
 
         //allowance reduced by amount
-        assert balanceReceiverAfter == balanceReceiverBefore - feeToPay;
+        assert balanceReceiverAfter == balanceReceiverBefore - finalFee;
     }
 
 
