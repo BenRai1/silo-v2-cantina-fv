@@ -1,0 +1,455 @@
+{
+    "original": "https://prover.certora.com/output/8418/f4b7f1f27c304e67bd4c4a2cd26d6845?anonymousKey=3674789bb366de7aaf94964e3ed8a9798fd07484",
+    "mutants": [
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/1/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/1",
+                "id": "1",
+                "diff": "--- original\n+++ mutant\n@@ -66,7 +66,8 @@\n         // silo initialization\n         address hookReceiver = Actions.initialize(_config);\n         // silo (vault) share token initialization\n-        _shareTokenInitialize(this, hookReceiver, uint24(Hook.COLLATERAL_TOKEN));\n+        /// DeleteExpressionMutation(`_shareTokenInitialize(this, hookReceiver, uint24(Hook.COLLATERAL_TOKEN))` |==> `assert(true)`) of: `_shareTokenInitialize(this, hookReceiver, uint24(Hook.COLLATERAL_TOKEN));`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "DeleteExpressionMutation",
+                "name": "1_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/4135d66382254dfa86975a8242ea057e?anonymousKey=674f9dfda7a7262cd9892ae797c2ace4b2ffe3e6",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_294/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/4135d66382254dfa86975a8242ea057e?anonymousKey=674f9dfda7a7262cd9892ae797c2ace4b2ffe3e6"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/2/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/2",
+                "id": "2",
+                "diff": "--- original\n+++ mutant\n@@ -77,7 +77,8 @@\n \n     /// @inheritdoc ISilo\n     function config() external view virtual returns (ISiloConfig siloConfig) {\n-        siloConfig = ShareTokenLib.siloConfig();\n+        /// DeleteExpressionMutation(`siloConfig = ShareTokenLib.siloConfig()` |==> `assert(true)`) of: `siloConfig = ShareTokenLib.siloConfig();`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "DeleteExpressionMutation",
+                "name": "2_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/119b1b6673eb4acfa399b921c09da15e?anonymousKey=491813794ae930a6b760ac0bfd3c2f95ca8b5311",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_264/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/119b1b6673eb4acfa399b921c09da15e?anonymousKey=491813794ae930a6b760ac0bfd3c2f95ca8b5311"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/3/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/3",
+                "id": "3",
+                "diff": "--- original\n+++ mutant\n@@ -102,7 +102,8 @@\n         virtual\n         returns (uint256 totalAssetsByType)\n     {\n-        totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType];\n+        /// DeleteExpressionMutation(`totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType]` |==> `assert(true)`) of: `totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType];`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "DeleteExpressionMutation",
+                "name": "3_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/cb7ca10bd9d540cea002dff886a15544?anonymousKey=6e810fe9d5d306b270f1e3d454505fb4276c8f14",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_111/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/cb7ca10bd9d540cea002dff886a15544?anonymousKey=6e810fe9d5d306b270f1e3d454505fb4276c8f14"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/4/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/4",
+                "id": "4",
+                "diff": "--- original\n+++ mutant\n@@ -102,7 +102,8 @@\n         virtual\n         returns (uint256 totalAssetsByType)\n     {\n-        totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType];\n+        /// AssignmentMutation(`SiloStorageLib.getSiloStorage().totalAssets[_assetType]` |==> `1`) of: `totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType];`\n+        totalAssetsByType = 1;\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "AssignmentMutation",
+                "name": "4_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/060e58c97f9440cca4bb2bf18f33e5a0?anonymousKey=4e35d08441adb62b6fd071ba795dd03560a75d3e",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_292/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/060e58c97f9440cca4bb2bf18f33e5a0?anonymousKey=4e35d08441adb62b6fd071ba795dd03560a75d3e"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/5/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/5",
+                "id": "5",
+                "diff": "--- original\n+++ mutant\n@@ -124,7 +124,8 @@\n     /// @inheritdoc ISilo\n     // (borrowable) collateral assets\n     function getCollateralAssets() external view virtual returns (uint256 totalCollateralAssets) {\n-        totalCollateralAssets = _totalAssets();\n+        /// AssignmentMutation(`_totalAssets()` |==> `0`) of: `totalCollateralAssets = _totalAssets();`\n+        totalCollateralAssets = 0;\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "AssignmentMutation",
+                "name": "5_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/70638ad268d64e1aa6ae5f1ab3f672d3?anonymousKey=5a48f8b98ea100cd749178473bba5afbcac2f28c",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_001/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/70638ad268d64e1aa6ae5f1ab3f672d3?anonymousKey=5a48f8b98ea100cd749178473bba5afbcac2f28c"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/6/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/6",
+                "id": "6",
+                "diff": "--- original\n+++ mutant\n@@ -129,7 +129,8 @@\n \n     /// @inheritdoc ISilo\n     function getDebtAssets() external view virtual returns (uint256 totalDebtAssets) {\n-        totalDebtAssets = Views.getDebtAssets();\n+        /// AssignmentMutation(`Views.getDebtAssets()` |==> `1`) of: `totalDebtAssets = Views.getDebtAssets();`\n+        totalDebtAssets = 1;\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "AssignmentMutation",
+                "name": "6_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/0efe2b618bc14feda9af8d96e964b117?anonymousKey=e1b561f1debd6d55d483847b17b510092b65d3d6",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_602/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/0efe2b618bc14feda9af8d96e964b117?anonymousKey=e1b561f1debd6d55d483847b17b510092b65d3d6"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/7/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/7",
+                "id": "7",
+                "diff": "--- original\n+++ mutant\n@@ -139,7 +139,8 @@\n         virtual\n         returns (uint256 totalCollateralAssets, uint256 totalProtectedAssets)\n     {\n-        (totalCollateralAssets, totalProtectedAssets) = Views.getCollateralAndProtectedAssets();\n+        /// DeleteExpressionMutation(`(totalCollateralAssets, totalProtectedAssets) = Views.getCollateralAndProtectedAssets()` |==> `assert(true)`) of: `(totalCollateralAssets, totalProtectedAssets) = Views.getCollateralAndProtectedAssets();`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "DeleteExpressionMutation",
+                "name": "7_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/bad857c6a75e4a628eca4b1a96bf0e6a?anonymousKey=deaf59d4e67e4722e12fecfa8f8595cf0ccb69ac",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_308/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/bad857c6a75e4a628eca4b1a96bf0e6a?anonymousKey=deaf59d4e67e4722e12fecfa8f8595cf0ccb69ac"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/8/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/8",
+                "id": "8",
+                "diff": "--- original\n+++ mutant\n@@ -161,7 +161,8 @@\n \n     /// @inheritdoc IERC4626\n     function totalAssets() external view virtual returns (uint256 totalManagedAssets) {\n-        totalManagedAssets = _totalAssets();\n+        /// DeleteExpressionMutation(`totalManagedAssets = _totalAssets()` |==> `assert(true)`) of: `totalManagedAssets = _totalAssets();`\n+        assert(true);\n     }\n \n     /// @inheritdoc IERC4626\n",
+                "description": "DeleteExpressionMutation",
+                "name": "8_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/c1dee1e52eab419bb92f3aba69425cdd?anonymousKey=7343746b9165f7291602b56a1b0ef642f438fdef",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_026/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/c1dee1e52eab419bb92f3aba69425cdd?anonymousKey=7343746b9165f7291602b56a1b0ef642f438fdef"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/9/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/9",
+                "id": "9",
+                "diff": "--- original\n+++ mutant\n@@ -161,7 +161,8 @@\n \n     /// @inheritdoc IERC4626\n     function totalAssets() external view virtual returns (uint256 totalManagedAssets) {\n-        totalManagedAssets = _totalAssets();\n+        /// AssignmentMutation(`_totalAssets()` |==> `1`) of: `totalManagedAssets = _totalAssets();`\n+        totalManagedAssets = 1;\n     }\n \n     /// @inheritdoc IERC4626\n",
+                "description": "AssignmentMutation",
+                "name": "9_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/bf96d87d9ed74f0fb93908af53d348b0?anonymousKey=4340243e89f88ff60ce53d1a159997b9da373daf",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_185/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/bf96d87d9ed74f0fb93908af53d348b0?anonymousKey=4340243e89f88ff60ce53d1a159997b9da373daf"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/10/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/10",
+                "id": "10",
+                "diff": "--- original\n+++ mutant\n@@ -168,7 +168,8 @@\n     /// @dev For protected (non-borrowable) collateral and debt, use:\n     /// `convertToShares(uint256 _assets, AssetType _assetType)` with `AssetType.Protected` or `AssetType.Debt`\n     function convertToShares(uint256 _assets) external view virtual returns (uint256 shares) {\n-        shares = _convertToShares(_assets, AssetType.Collateral);\n+        /// AssignmentMutation(`_convertToShares(_assets, AssetType.Collateral)` |==> `0`) of: `shares = _convertToShares(_assets, AssetType.Collateral);`\n+        shares = 0;\n     }\n \n     /// @inheritdoc IERC4626\n",
+                "description": "AssignmentMutation",
+                "name": "10_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/21ee333bcfba48dbb33c7d9315f5f94b?anonymousKey=b8fec8b88b96c4eeb2b20d057ce46b388818a7b2",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_639/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/21ee333bcfba48dbb33c7d9315f5f94b?anonymousKey=b8fec8b88b96c4eeb2b20d057ce46b388818a7b2"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/11/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/11",
+                "id": "11",
+                "diff": "--- original\n+++ mutant\n@@ -175,7 +175,8 @@\n     /// @dev For protected (non-borrowable) collateral and debt, use:\n     /// `convertToAssets(uint256 _shares, AssetType _assetType)` with `AssetType.Protected` or `AssetType.Debt`\n     function convertToAssets(uint256 _shares) external view virtual returns (uint256 assets) {\n-        assets = _convertToAssets(_shares, AssetType.Collateral);\n+        /// DeleteExpressionMutation(`assets = _convertToAssets(_shares, AssetType.Collateral)` |==> `assert(true)`) of: `assets = _convertToAssets(_shares, AssetType.Collateral);`\n+        assert(true);\n     }\n \n     /// @inheritdoc IERC4626\n",
+                "description": "DeleteExpressionMutation",
+                "name": "11_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/fad9a727da354421b75f5e4d7b005678?anonymousKey=4cded33613c95013e10d5b4a8c637b7a64d3aab3",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_058/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/fad9a727da354421b75f5e4d7b005678?anonymousKey=4cded33613c95013e10d5b4a8c637b7a64d3aab3"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/12/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/12",
+                "id": "12",
+                "diff": "--- original\n+++ mutant\n@@ -245,7 +245,8 @@\n \n     /// @inheritdoc IERC4626\n     function maxRedeem(address _owner) external view virtual returns (uint256 maxShares) {\n-        (, maxShares) = _maxWithdraw(_owner, CollateralType.Collateral);\n+        /// DeleteExpressionMutation(`(, maxShares) = _maxWithdraw(_owner, CollateralType.Collateral)` |==> `assert(true)`) of: `(, maxShares) = _maxWithdraw(_owner, CollateralType.Collateral);`\n+        assert(true);\n     }\n \n     /// @inheritdoc IERC4626\n",
+                "description": "DeleteExpressionMutation",
+                "name": "12_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/d515430c6c284383b1ff25277d104f75?anonymousKey=3f455a8b4e24eef586161738b5fe8fca0efa74df",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_371/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/d515430c6c284383b1ff25277d104f75?anonymousKey=3f455a8b4e24eef586161738b5fe8fca0efa74df"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/13/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/13",
+                "id": "13",
+                "diff": "--- original\n+++ mutant\n@@ -271,7 +271,8 @@\n \n     /// @inheritdoc ISilo\n     function convertToShares(uint256 _assets, AssetType _assetType) external view virtual returns (uint256 shares) {\n-        shares = _convertToShares(_assets, _assetType);\n+        /// AssignmentMutation(`_convertToShares(_assets, _assetType)` |==> `1`) of: `shares = _convertToShares(_assets, _assetType);`\n+        shares = 1;\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "AssignmentMutation",
+                "name": "13_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/4e70728c30ca49898e8c7b571ba33a3f?anonymousKey=62eeeeb61a14ab94b065be0dbd76bf3381be96bd",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_435/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/4e70728c30ca49898e8c7b571ba33a3f?anonymousKey=62eeeeb61a14ab94b065be0dbd76bf3381be96bd"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/14/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/14",
+                "id": "14",
+                "diff": "--- original\n+++ mutant\n@@ -334,7 +334,8 @@\n         virtual\n         returns (uint256 maxAssets)\n     {\n-        (maxAssets,) = _maxWithdraw(_owner, _collateralType);\n+        /// DeleteExpressionMutation(`(maxAssets,) = _maxWithdraw(_owner, _collateralType)` |==> `assert(true)`) of: `(maxAssets,) = _maxWithdraw(_owner, _collateralType);`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "DeleteExpressionMutation",
+                "name": "14_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/e734187073f5483d9f485321ff90b673?anonymousKey=ff3638f4f912cc38cbc9d836c3b1cd9289bae15b",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_618/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/e734187073f5483d9f485321ff90b673?anonymousKey=ff3638f4f912cc38cbc9d836c3b1cd9289bae15b"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/15/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/15",
+                "id": "15",
+                "diff": "--- original\n+++ mutant\n@@ -370,7 +370,8 @@\n         virtual\n         returns (uint256 maxShares)\n     {\n-        (, maxShares) = _maxWithdraw(_owner, _collateralType);\n+        /// DeleteExpressionMutation(`(, maxShares) = _maxWithdraw(_owner, _collateralType)` |==> `assert(true)`) of: `(, maxShares) = _maxWithdraw(_owner, _collateralType);`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "DeleteExpressionMutation",
+                "name": "15_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/71add4ab0f9447c0b486ddd1a4195a51?anonymousKey=438b9966549e72bb3c37bf66e06c4fba0c411a9c",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_924/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/71add4ab0f9447c0b486ddd1a4195a51?anonymousKey=438b9966549e72bb3c37bf66e06c4fba0c411a9c"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/16/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/16",
+                "id": "16",
+                "diff": "--- original\n+++ mutant\n@@ -516,7 +516,8 @@\n             })\n         );\n \n-        if (_transitionFrom == CollateralType.Collateral) {\n+        /// IfStatementMutation(`_transitionFrom == CollateralType.Collateral` |==> `false`) of: `if (_transitionFrom == CollateralType.Collateral) {`\n+        if (false) {\n             emit Withdraw(msg.sender, _owner, _owner, assets, _shares);\n             emit DepositProtected(msg.sender, _owner, assets, toShares);\n         } else {\n",
+                "description": "IfStatementMutation",
+                "name": "16_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/b4321439ff364252b0599e2008edc650?anonymousKey=f3497fa43e43a441cc10c94c1f9f160a0b936828",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_09_54_380/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/b4321439ff364252b0599e2008edc650?anonymousKey=f3497fa43e43a441cc10c94c1f9f160a0b936828"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/17/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/17",
+                "id": "17",
+                "diff": "--- original\n+++ mutant\n@@ -568,7 +568,8 @@\n     /// @inheritdoc ISilo\n     function maxRepayShares(address _borrower) external view virtual returns (uint256 shares) {\n         (address debtShareToken,) = _getSiloConfig().getDebtShareTokenAndAsset(address(this));\n-        shares = IShareToken(debtShareToken).balanceOf(_borrower);\n+        /// DeleteExpressionMutation(`shares = IShareToken(debtShareToken).balanceOf(_borrower)` |==> `assert(true)`) of: `shares = IShareToken(debtShareToken).balanceOf(_borrower);`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+                "description": "DeleteExpressionMutation",
+                "name": "17_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/ee7b257453f44104b5b29984e9b5625f?anonymousKey=16c1fd5145eb875ad6203fd1955714fe8cd883ce",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_16_39_830/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/ee7b257453f44104b5b29984e9b5625f?anonymousKey=16c1fd5145eb875ad6203fd1955714fe8cd883ce"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/18/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/18",
+                "id": "18",
+                "diff": "--- original\n+++ mutant\n@@ -602,7 +602,8 @@\n \n     /// @inheritdoc IERC3156FlashLender\n     function maxFlashLoan(address _token) external view virtual returns (uint256 maxLoan) {\n-        maxLoan = Views.maxFlashLoan(_token);\n+        /// DeleteExpressionMutation(`maxLoan = Views.maxFlashLoan(_token)` |==> `assert(true)`) of: `maxLoan = Views.maxFlashLoan(_token);`\n+        assert(true);\n     }\n \n     /// @inheritdoc IERC3156FlashLender\n",
+                "description": "DeleteExpressionMutation",
+                "name": "18_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/67586321095741bcbb57c3e76adf3691?anonymousKey=23f1bb0172018cf7752ec5e9d01e7c9c5a51d1f6",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_16_39_696/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/67586321095741bcbb57c3e76adf3691?anonymousKey=23f1bb0172018cf7752ec5e9d01e7c9c5a51d1f6"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/19/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/19",
+                "id": "19",
+                "diff": "--- original\n+++ mutant\n@@ -602,7 +602,8 @@\n \n     /// @inheritdoc IERC3156FlashLender\n     function maxFlashLoan(address _token) external view virtual returns (uint256 maxLoan) {\n-        maxLoan = Views.maxFlashLoan(_token);\n+        /// AssignmentMutation(`Views.maxFlashLoan(_token)` |==> `1`) of: `maxLoan = Views.maxFlashLoan(_token);`\n+        maxLoan = 1;\n     }\n \n     /// @inheritdoc IERC3156FlashLender\n",
+                "description": "AssignmentMutation",
+                "name": "19_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/a3b5331cc3a949c1abe3eef672c919f0?anonymousKey=e7d56528ff3aa2de2ff69904cdae1105d351a00b",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_16_40_252/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/a3b5331cc3a949c1abe3eef672c919f0?anonymousKey=e7d56528ff3aa2de2ff69904cdae1105d351a00b"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/20/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/20",
+                "id": "20",
+                "diff": "--- original\n+++ mutant\n@@ -607,7 +607,8 @@\n \n     /// @inheritdoc IERC3156FlashLender\n     function flashFee(address _token, uint256 _amount) external view virtual returns (uint256 fee) {\n-        fee = Views.flashFee(_token, _amount);\n+        /// AssignmentMutation(`Views.flashFee(_token, _amount)` |==> `0`) of: `fee = Views.flashFee(_token, _amount);`\n+        fee = 0;\n     }\n \n     /// @inheritdoc IERC3156FlashLender\n",
+                "description": "AssignmentMutation",
+                "name": "20_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/f6851a71b0484c0580128505948ba911?anonymousKey=f98fd80e571e85d4a3f89c60528172cb792b5a2f",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_16_40_871/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/f6851a71b0484c0580128505948ba911?anonymousKey=f98fd80e571e85d4a3f89c60528172cb792b5a2f"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/21/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/21",
+                "id": "21",
+                "diff": "--- original\n+++ mutant\n@@ -616,7 +616,8 @@\n         virtual\n         returns (bool success)\n     {\n-        success = Actions.flashLoan(_receiver, _token, _amount, _data);\n+        /// DeleteExpressionMutation(`success = Actions.flashLoan(_receiver, _token, _amount, _data)` |==> `assert(true)`) of: `success = Actions.flashLoan(_receiver, _token, _amount, _data);`\n+        assert(true);\n         if (success) emit FlashLoan(_amount);\n     }\n \n",
+                "description": "DeleteExpressionMutation",
+                "name": "21_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/2a4f4d2178d5471180d8e2e431e37b64?anonymousKey=7287c08299e683ec92ba21d033f3f6845bd719a1",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_16_43_205/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/2a4f4d2178d5471180d8e2e431e37b64?anonymousKey=7287c08299e683ec92ba21d033f3f6845bd719a1"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/22/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/22",
+                "id": "22",
+                "diff": "--- original\n+++ mutant\n@@ -616,7 +616,8 @@\n         virtual\n         returns (bool success)\n     {\n-        success = Actions.flashLoan(_receiver, _token, _amount, _data);\n+        /// AssignmentMutation(`Actions.flashLoan(_receiver, _token, _amount, _data)` |==> `true`) of: `success = Actions.flashLoan(_receiver, _token, _amount, _data);`\n+        success = true;\n         if (success) emit FlashLoan(_amount);\n     }\n \n",
+                "description": "AssignmentMutation",
+                "name": "22_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/ca1ba71396fb40c6b5083f35e6db5a9e?anonymousKey=725b24e6178d79b147da45612cd2901c97e57465",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_16_59_166/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/ca1ba71396fb40c6b5083f35e6db5a9e?anonymousKey=725b24e6178d79b147da45612cd2901c97e57465"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/23/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/23",
+                "id": "23",
+                "diff": "--- original\n+++ mutant\n@@ -630,7 +630,8 @@\n         external\n         virtual\n     {\n-        require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig());\n+        /// DeleteExpressionMutation(`require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig())` |==> `assert(true)`) of: `require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig());`\n+        assert(true);\n \n         _accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n     }\n",
+                "description": "DeleteExpressionMutation",
+                "name": "23_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/0a8b622e51ed4e648b99e51a3cabf81f?anonymousKey=8124ba67121ddce5283b0d29ccf9c5126fcb218d",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_17_00_248/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/0a8b622e51ed4e648b99e51a3cabf81f?anonymousKey=8124ba67121ddce5283b0d29ccf9c5126fcb218d"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/24/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/24",
+                "id": "24",
+                "diff": "--- original\n+++ mutant\n@@ -630,7 +630,8 @@\n         external\n         virtual\n     {\n-        require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig());\n+        /// RequireMutation(`msg.sender == address(ShareTokenLib.siloConfig())` |==> `false`) of: `require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig());`\n+        require(false, OnlySiloConfig());\n \n         _accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n     }\n",
+                "description": "RequireMutation",
+                "name": "24_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/5c29f2adb7774702b04179a473b5337e?anonymousKey=878fa6b9853d67e124860992a456e787ddbf13cc",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_17_10_407/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/5c29f2adb7774702b04179a473b5337e?anonymousKey=878fa6b9853d67e124860992a456e787ddbf13cc"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/25/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/25",
+                "id": "25",
+                "diff": "--- original\n+++ mutant\n@@ -693,7 +693,8 @@\n             assets, shares\n         ) = Actions.deposit(_assets, _shares, _receiver, _collateralType);\n \n-        if (_collateralType == CollateralType.Collateral) {\n+        /// IfStatementMutation(`_collateralType == CollateralType.Collateral` |==> `true`) of: `if (_collateralType == CollateralType.Collateral) {`\n+        if (true) {\n             emit Deposit(msg.sender, _receiver, assets, shares);\n         } else {\n             emit DepositProtected(msg.sender, _receiver, assets, shares);\n",
+                "description": "IfStatementMutation",
+                "name": "25_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/0c3029e1ff354915b93e75750037fdbf?anonymousKey=3d53aea3ad70ffa300b2dcaa609e73ae35ca8375",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_17_20_531/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/0c3029e1ff354915b93e75750037fdbf?anonymousKey=3d53aea3ad70ffa300b2dcaa609e73ae35ca8375"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/26/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/26",
+                "id": "26",
+                "diff": "--- original\n+++ mutant\n@@ -693,7 +693,8 @@\n             assets, shares\n         ) = Actions.deposit(_assets, _shares, _receiver, _collateralType);\n \n-        if (_collateralType == CollateralType.Collateral) {\n+        /// IfStatementMutation(`_collateralType == CollateralType.Collateral` |==> `false`) of: `if (_collateralType == CollateralType.Collateral) {`\n+        if (false) {\n             emit Deposit(msg.sender, _receiver, assets, shares);\n         } else {\n             emit DepositProtected(msg.sender, _receiver, assets, shares);\n",
+                "description": "IfStatementMutation",
+                "name": "26_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/f2ca86c7de444c75a19f5c4eb2784460?anonymousKey=3a3a6cf31157bf934899e4480f095284a48d1c5b",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_17_35_249/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/f2ca86c7de444c75a19f5c4eb2784460?anonymousKey=3a3a6cf31157bf934899e4480f095284a48d1c5b"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/27/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/27",
+                "id": "27",
+                "diff": "--- original\n+++ mutant\n@@ -808,7 +808,8 @@\n \n     function _accrueInterest() internal virtual returns (uint256 accruedInterest) {\n         ISiloConfig.ConfigData memory cfg = ShareTokenLib.getConfig();\n-        accruedInterest = _accrueInterestForAsset(cfg.interestRateModel, cfg.daoFee, cfg.deployerFee);\n+        /// DeleteExpressionMutation(`accruedInterest = _accrueInterestForAsset(cfg.interestRateModel, cfg.daoFee, cfg.deployerFee)` |==> `assert(true)`) of: `accruedInterest = _accrueInterestForAsset(cfg.interestRateModel, cfg.daoFee, cfg.deployerFee);`\n+        assert(true);\n     }\n \n     function _accrueInterestForAsset(\n",
+                "description": "DeleteExpressionMutation",
+                "name": "27_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/9eab4f344bb842a7b244aa10043e9ebe?anonymousKey=a510de697e58e9fb7f99521d8dd57b72f6ce90d3",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_17_33_500/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/9eab4f344bb842a7b244aa10043e9ebe?anonymousKey=a510de697e58e9fb7f99521d8dd57b72f6ce90d3"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/28/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/28",
+                "id": "28",
+                "diff": "--- original\n+++ mutant\n@@ -816,7 +816,8 @@\n         uint256 _daoFee,\n         uint256 _deployerFee\n     ) internal virtual returns (uint256 accruedInterest) {\n-        accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n+        /// DeleteExpressionMutation(`accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee)` |==> `assert(true)`) of: `accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);`\n+        assert(true);\n         if (accruedInterest != 0) emit AccruedInterest(accruedInterest);\n     }\n }\n",
+                "description": "DeleteExpressionMutation",
+                "name": "28_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/1a58a3b17a124af58fd59e123872d79c?anonymousKey=6ef6a2ce73b1595570a854d4cf80fadbe1808fb9",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_17_39_564/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/1a58a3b17a124af58fd59e123872d79c?anonymousKey=6ef6a2ce73b1595570a854d4cf80fadbe1808fb9"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/29/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/29",
+                "id": "29",
+                "diff": "--- original\n+++ mutant\n@@ -816,7 +816,8 @@\n         uint256 _daoFee,\n         uint256 _deployerFee\n     ) internal virtual returns (uint256 accruedInterest) {\n-        accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n+        /// AssignmentMutation(`SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee)` |==> `1`) of: `accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);`\n+        accruedInterest = 1;\n         if (accruedInterest != 0) emit AccruedInterest(accruedInterest);\n     }\n }\n",
+                "description": "AssignmentMutation",
+                "name": "29_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/76019520d6174c44acd743cc6ffb7587?anonymousKey=a2e46602b43a657391728d815b0cb0ef114efaf4",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_17_59_450/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/76019520d6174c44acd743cc6ffb7587?anonymousKey=a2e46602b43a657391728d815b0cb0ef114efaf4"
+        },
+        {
+            "gambit_mutant": {
+                "filename": "gambit_out/mutants/30/silo-core/contracts/Silo.sol",
+                "original_filename": "silo-core/contracts/Silo.sol",
+                "directory": "gambit_out/mutants/30",
+                "id": "30",
+                "diff": "--- original\n+++ mutant\n@@ -817,6 +817,7 @@\n         uint256 _deployerFee\n     ) internal virtual returns (uint256 accruedInterest) {\n         accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n-        if (accruedInterest != 0) emit AccruedInterest(accruedInterest);\n+        /// IfStatementMutation(`accruedInterest != 0` |==> `false`) of: `if (accruedInterest != 0) emit AccruedInterest(accruedInterest);`\n+        if (false) emit AccruedInterest(accruedInterest);\n     }\n }\n",
+                "description": "IfStatementMutation",
+                "name": "30_Silo"
+            },
+            "link": "https://prover.certora.com/jobStatus/8418/84fb05bbc9d145c6bdbec66cfa9dd1da?anonymousKey=b0a9fdf001340b48c64164e8d8479b219af6021e",
+            "success": true,
+            "run_directory": ".certora_internal/25_02_10_18_18_35_357/.certora_sources",
+            "rule_report_link": "https://prover.certora.com/output/8418/84fb05bbc9d145c6bdbec66cfa9dd1da?anonymousKey=b0a9fdf001340b48c64164e8d8479b219af6021e"
+        }
+    ]
+}

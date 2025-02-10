@@ -17,7 +17,7 @@ methods{
 
 
     // flashLoan() should reduce allowance of silo for receiver by repayment amount
-    rule flashLoanIncreasesBalanceOfSilo(env e) {
+    rule flashLoanIncreasesBalanceOfSilo(env e) { //@audit-issue run this to see if it passes
         configForEightTokensSetupRequirements();
         uint256 amount;
         address receiver = flashLoanReceiver;
@@ -30,7 +30,7 @@ methods{
         uint256 flashloanFee;
         (_, _, flashloanFee, _) = siloConfig.getFeesWithAsset(e, silo0);
         uint256 feeToPay = require_uint256(amount * flashloanFee / 10^18); 
-        uint256 finalFee = feeToPay ==0 ? 1 : feeToPay;
+        uint256 finalFee = flashloanFee != 0 && feeToPay == 0 ? 1 : feeToPay;
 
         //values before
         uint256 allowanceBefore = token0.allowance(flashLoanReceiver, silo0);

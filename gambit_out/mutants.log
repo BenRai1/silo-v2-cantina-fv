@@ -1,0 +1,30 @@
+1,DeleteExpressionMutation,silo-core/contracts/Silo.sol,69:9,"_shareTokenInitialize(this, hookReceiver, uint24(Hook.COLLATERAL_TOKEN))",assert(true)
+2,DeleteExpressionMutation,silo-core/contracts/Silo.sol,80:9,siloConfig = ShareTokenLib.siloConfig(),assert(true)
+3,DeleteExpressionMutation,silo-core/contracts/Silo.sol,105:9,totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType],assert(true)
+4,AssignmentMutation,silo-core/contracts/Silo.sol,105:29,SiloStorageLib.getSiloStorage().totalAssets[_assetType],1
+5,AssignmentMutation,silo-core/contracts/Silo.sol,127:33,_totalAssets(),0
+6,AssignmentMutation,silo-core/contracts/Silo.sol,132:27,Views.getDebtAssets(),1
+7,DeleteExpressionMutation,silo-core/contracts/Silo.sol,142:9,"(totalCollateralAssets, totalProtectedAssets) = Views.getCollateralAndProtectedAssets()",assert(true)
+8,DeleteExpressionMutation,silo-core/contracts/Silo.sol,164:9,totalManagedAssets = _totalAssets(),assert(true)
+9,AssignmentMutation,silo-core/contracts/Silo.sol,164:30,_totalAssets(),1
+10,AssignmentMutation,silo-core/contracts/Silo.sol,171:18,"_convertToShares(_assets, AssetType.Collateral)",0
+11,DeleteExpressionMutation,silo-core/contracts/Silo.sol,178:9,"assets = _convertToAssets(_shares, AssetType.Collateral)",assert(true)
+12,DeleteExpressionMutation,silo-core/contracts/Silo.sol,248:9,"(, maxShares) = _maxWithdraw(_owner, CollateralType.Collateral)",assert(true)
+13,AssignmentMutation,silo-core/contracts/Silo.sol,274:18,"_convertToShares(_assets, _assetType)",1
+14,DeleteExpressionMutation,silo-core/contracts/Silo.sol,337:9,"(maxAssets,) = _maxWithdraw(_owner, _collateralType)",assert(true)
+15,DeleteExpressionMutation,silo-core/contracts/Silo.sol,373:9,"(, maxShares) = _maxWithdraw(_owner, _collateralType)",assert(true)
+16,IfStatementMutation,silo-core/contracts/Silo.sol,519:13,_transitionFrom == CollateralType.Collateral,false
+17,DeleteExpressionMutation,silo-core/contracts/Silo.sol,571:9,shares = IShareToken(debtShareToken).balanceOf(_borrower),assert(true)
+18,DeleteExpressionMutation,silo-core/contracts/Silo.sol,605:9,maxLoan = Views.maxFlashLoan(_token),assert(true)
+19,AssignmentMutation,silo-core/contracts/Silo.sol,605:19,Views.maxFlashLoan(_token),1
+20,AssignmentMutation,silo-core/contracts/Silo.sol,610:15,"Views.flashFee(_token, _amount)",0
+21,DeleteExpressionMutation,silo-core/contracts/Silo.sol,619:9,"success = Actions.flashLoan(_receiver, _token, _amount, _data)",assert(true)
+22,AssignmentMutation,silo-core/contracts/Silo.sol,619:19,"Actions.flashLoan(_receiver, _token, _amount, _data)",true
+23,DeleteExpressionMutation,silo-core/contracts/Silo.sol,633:9,"require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig())",assert(true)
+24,RequireMutation,silo-core/contracts/Silo.sol,633:17,msg.sender == address(ShareTokenLib.siloConfig()),false
+25,IfStatementMutation,silo-core/contracts/Silo.sol,696:13,_collateralType == CollateralType.Collateral,true
+26,IfStatementMutation,silo-core/contracts/Silo.sol,696:13,_collateralType == CollateralType.Collateral,false
+27,DeleteExpressionMutation,silo-core/contracts/Silo.sol,811:9,"accruedInterest = _accrueInterestForAsset(cfg.interestRateModel, cfg.daoFee, cfg.deployerFee)",assert(true)
+28,DeleteExpressionMutation,silo-core/contracts/Silo.sol,819:9,"accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee)",assert(true)
+29,AssignmentMutation,silo-core/contracts/Silo.sol,819:27,"SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee)",1
+30,IfStatementMutation,silo-core/contracts/Silo.sol,820:13,accruedInterest != 0,false

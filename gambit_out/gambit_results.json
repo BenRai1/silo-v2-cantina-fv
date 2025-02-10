@@ -1,0 +1,242 @@
+[
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -66,7 +66,8 @@\n         // silo initialization\n         address hookReceiver = Actions.initialize(_config);\n         // silo (vault) share token initialization\n-        _shareTokenInitialize(this, hookReceiver, uint24(Hook.COLLATERAL_TOKEN));\n+        /// DeleteExpressionMutation(`_shareTokenInitialize(this, hookReceiver, uint24(Hook.COLLATERAL_TOKEN))` |==> `assert(true)`) of: `_shareTokenInitialize(this, hookReceiver, uint24(Hook.COLLATERAL_TOKEN));`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "1",
+    "name": "mutants/1/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -77,7 +77,8 @@\n \n     /// @inheritdoc ISilo\n     function config() external view virtual returns (ISiloConfig siloConfig) {\n-        siloConfig = ShareTokenLib.siloConfig();\n+        /// DeleteExpressionMutation(`siloConfig = ShareTokenLib.siloConfig()` |==> `assert(true)`) of: `siloConfig = ShareTokenLib.siloConfig();`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "2",
+    "name": "mutants/2/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -102,7 +102,8 @@\n         virtual\n         returns (uint256 totalAssetsByType)\n     {\n-        totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType];\n+        /// DeleteExpressionMutation(`totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType]` |==> `assert(true)`) of: `totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType];`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "3",
+    "name": "mutants/3/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -102,7 +102,8 @@\n         virtual\n         returns (uint256 totalAssetsByType)\n     {\n-        totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType];\n+        /// AssignmentMutation(`SiloStorageLib.getSiloStorage().totalAssets[_assetType]` |==> `1`) of: `totalAssetsByType = SiloStorageLib.getSiloStorage().totalAssets[_assetType];`\n+        totalAssetsByType = 1;\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "4",
+    "name": "mutants/4/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -124,7 +124,8 @@\n     /// @inheritdoc ISilo\n     // (borrowable) collateral assets\n     function getCollateralAssets() external view virtual returns (uint256 totalCollateralAssets) {\n-        totalCollateralAssets = _totalAssets();\n+        /// AssignmentMutation(`_totalAssets()` |==> `0`) of: `totalCollateralAssets = _totalAssets();`\n+        totalCollateralAssets = 0;\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "5",
+    "name": "mutants/5/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -129,7 +129,8 @@\n \n     /// @inheritdoc ISilo\n     function getDebtAssets() external view virtual returns (uint256 totalDebtAssets) {\n-        totalDebtAssets = Views.getDebtAssets();\n+        /// AssignmentMutation(`Views.getDebtAssets()` |==> `1`) of: `totalDebtAssets = Views.getDebtAssets();`\n+        totalDebtAssets = 1;\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "6",
+    "name": "mutants/6/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -139,7 +139,8 @@\n         virtual\n         returns (uint256 totalCollateralAssets, uint256 totalProtectedAssets)\n     {\n-        (totalCollateralAssets, totalProtectedAssets) = Views.getCollateralAndProtectedAssets();\n+        /// DeleteExpressionMutation(`(totalCollateralAssets, totalProtectedAssets) = Views.getCollateralAndProtectedAssets()` |==> `assert(true)`) of: `(totalCollateralAssets, totalProtectedAssets) = Views.getCollateralAndProtectedAssets();`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "7",
+    "name": "mutants/7/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -161,7 +161,8 @@\n \n     /// @inheritdoc IERC4626\n     function totalAssets() external view virtual returns (uint256 totalManagedAssets) {\n-        totalManagedAssets = _totalAssets();\n+        /// DeleteExpressionMutation(`totalManagedAssets = _totalAssets()` |==> `assert(true)`) of: `totalManagedAssets = _totalAssets();`\n+        assert(true);\n     }\n \n     /// @inheritdoc IERC4626\n",
+    "id": "8",
+    "name": "mutants/8/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -161,7 +161,8 @@\n \n     /// @inheritdoc IERC4626\n     function totalAssets() external view virtual returns (uint256 totalManagedAssets) {\n-        totalManagedAssets = _totalAssets();\n+        /// AssignmentMutation(`_totalAssets()` |==> `1`) of: `totalManagedAssets = _totalAssets();`\n+        totalManagedAssets = 1;\n     }\n \n     /// @inheritdoc IERC4626\n",
+    "id": "9",
+    "name": "mutants/9/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -168,7 +168,8 @@\n     /// @dev For protected (non-borrowable) collateral and debt, use:\n     /// `convertToShares(uint256 _assets, AssetType _assetType)` with `AssetType.Protected` or `AssetType.Debt`\n     function convertToShares(uint256 _assets) external view virtual returns (uint256 shares) {\n-        shares = _convertToShares(_assets, AssetType.Collateral);\n+        /// AssignmentMutation(`_convertToShares(_assets, AssetType.Collateral)` |==> `0`) of: `shares = _convertToShares(_assets, AssetType.Collateral);`\n+        shares = 0;\n     }\n \n     /// @inheritdoc IERC4626\n",
+    "id": "10",
+    "name": "mutants/10/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -175,7 +175,8 @@\n     /// @dev For protected (non-borrowable) collateral and debt, use:\n     /// `convertToAssets(uint256 _shares, AssetType _assetType)` with `AssetType.Protected` or `AssetType.Debt`\n     function convertToAssets(uint256 _shares) external view virtual returns (uint256 assets) {\n-        assets = _convertToAssets(_shares, AssetType.Collateral);\n+        /// DeleteExpressionMutation(`assets = _convertToAssets(_shares, AssetType.Collateral)` |==> `assert(true)`) of: `assets = _convertToAssets(_shares, AssetType.Collateral);`\n+        assert(true);\n     }\n \n     /// @inheritdoc IERC4626\n",
+    "id": "11",
+    "name": "mutants/11/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -245,7 +245,8 @@\n \n     /// @inheritdoc IERC4626\n     function maxRedeem(address _owner) external view virtual returns (uint256 maxShares) {\n-        (, maxShares) = _maxWithdraw(_owner, CollateralType.Collateral);\n+        /// DeleteExpressionMutation(`(, maxShares) = _maxWithdraw(_owner, CollateralType.Collateral)` |==> `assert(true)`) of: `(, maxShares) = _maxWithdraw(_owner, CollateralType.Collateral);`\n+        assert(true);\n     }\n \n     /// @inheritdoc IERC4626\n",
+    "id": "12",
+    "name": "mutants/12/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -271,7 +271,8 @@\n \n     /// @inheritdoc ISilo\n     function convertToShares(uint256 _assets, AssetType _assetType) external view virtual returns (uint256 shares) {\n-        shares = _convertToShares(_assets, _assetType);\n+        /// AssignmentMutation(`_convertToShares(_assets, _assetType)` |==> `1`) of: `shares = _convertToShares(_assets, _assetType);`\n+        shares = 1;\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "13",
+    "name": "mutants/13/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -334,7 +334,8 @@\n         virtual\n         returns (uint256 maxAssets)\n     {\n-        (maxAssets,) = _maxWithdraw(_owner, _collateralType);\n+        /// DeleteExpressionMutation(`(maxAssets,) = _maxWithdraw(_owner, _collateralType)` |==> `assert(true)`) of: `(maxAssets,) = _maxWithdraw(_owner, _collateralType);`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "14",
+    "name": "mutants/14/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -370,7 +370,8 @@\n         virtual\n         returns (uint256 maxShares)\n     {\n-        (, maxShares) = _maxWithdraw(_owner, _collateralType);\n+        /// DeleteExpressionMutation(`(, maxShares) = _maxWithdraw(_owner, _collateralType)` |==> `assert(true)`) of: `(, maxShares) = _maxWithdraw(_owner, _collateralType);`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "15",
+    "name": "mutants/15/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "IfStatementMutation",
+    "diff": "--- original\n+++ mutant\n@@ -516,7 +516,8 @@\n             })\n         );\n \n-        if (_transitionFrom == CollateralType.Collateral) {\n+        /// IfStatementMutation(`_transitionFrom == CollateralType.Collateral` |==> `false`) of: `if (_transitionFrom == CollateralType.Collateral) {`\n+        if (false) {\n             emit Withdraw(msg.sender, _owner, _owner, assets, _shares);\n             emit DepositProtected(msg.sender, _owner, assets, toShares);\n         } else {\n",
+    "id": "16",
+    "name": "mutants/16/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -568,7 +568,8 @@\n     /// @inheritdoc ISilo\n     function maxRepayShares(address _borrower) external view virtual returns (uint256 shares) {\n         (address debtShareToken,) = _getSiloConfig().getDebtShareTokenAndAsset(address(this));\n-        shares = IShareToken(debtShareToken).balanceOf(_borrower);\n+        /// DeleteExpressionMutation(`shares = IShareToken(debtShareToken).balanceOf(_borrower)` |==> `assert(true)`) of: `shares = IShareToken(debtShareToken).balanceOf(_borrower);`\n+        assert(true);\n     }\n \n     /// @inheritdoc ISilo\n",
+    "id": "17",
+    "name": "mutants/17/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -602,7 +602,8 @@\n \n     /// @inheritdoc IERC3156FlashLender\n     function maxFlashLoan(address _token) external view virtual returns (uint256 maxLoan) {\n-        maxLoan = Views.maxFlashLoan(_token);\n+        /// DeleteExpressionMutation(`maxLoan = Views.maxFlashLoan(_token)` |==> `assert(true)`) of: `maxLoan = Views.maxFlashLoan(_token);`\n+        assert(true);\n     }\n \n     /// @inheritdoc IERC3156FlashLender\n",
+    "id": "18",
+    "name": "mutants/18/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -602,7 +602,8 @@\n \n     /// @inheritdoc IERC3156FlashLender\n     function maxFlashLoan(address _token) external view virtual returns (uint256 maxLoan) {\n-        maxLoan = Views.maxFlashLoan(_token);\n+        /// AssignmentMutation(`Views.maxFlashLoan(_token)` |==> `1`) of: `maxLoan = Views.maxFlashLoan(_token);`\n+        maxLoan = 1;\n     }\n \n     /// @inheritdoc IERC3156FlashLender\n",
+    "id": "19",
+    "name": "mutants/19/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -607,7 +607,8 @@\n \n     /// @inheritdoc IERC3156FlashLender\n     function flashFee(address _token, uint256 _amount) external view virtual returns (uint256 fee) {\n-        fee = Views.flashFee(_token, _amount);\n+        /// AssignmentMutation(`Views.flashFee(_token, _amount)` |==> `0`) of: `fee = Views.flashFee(_token, _amount);`\n+        fee = 0;\n     }\n \n     /// @inheritdoc IERC3156FlashLender\n",
+    "id": "20",
+    "name": "mutants/20/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -616,7 +616,8 @@\n         virtual\n         returns (bool success)\n     {\n-        success = Actions.flashLoan(_receiver, _token, _amount, _data);\n+        /// DeleteExpressionMutation(`success = Actions.flashLoan(_receiver, _token, _amount, _data)` |==> `assert(true)`) of: `success = Actions.flashLoan(_receiver, _token, _amount, _data);`\n+        assert(true);\n         if (success) emit FlashLoan(_amount);\n     }\n \n",
+    "id": "21",
+    "name": "mutants/21/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -616,7 +616,8 @@\n         virtual\n         returns (bool success)\n     {\n-        success = Actions.flashLoan(_receiver, _token, _amount, _data);\n+        /// AssignmentMutation(`Actions.flashLoan(_receiver, _token, _amount, _data)` |==> `true`) of: `success = Actions.flashLoan(_receiver, _token, _amount, _data);`\n+        success = true;\n         if (success) emit FlashLoan(_amount);\n     }\n \n",
+    "id": "22",
+    "name": "mutants/22/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -630,7 +630,8 @@\n         external\n         virtual\n     {\n-        require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig());\n+        /// DeleteExpressionMutation(`require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig())` |==> `assert(true)`) of: `require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig());`\n+        assert(true);\n \n         _accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n     }\n",
+    "id": "23",
+    "name": "mutants/23/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "RequireMutation",
+    "diff": "--- original\n+++ mutant\n@@ -630,7 +630,8 @@\n         external\n         virtual\n     {\n-        require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig());\n+        /// RequireMutation(`msg.sender == address(ShareTokenLib.siloConfig())` |==> `false`) of: `require(msg.sender == address(ShareTokenLib.siloConfig()), OnlySiloConfig());`\n+        require(false, OnlySiloConfig());\n \n         _accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n     }\n",
+    "id": "24",
+    "name": "mutants/24/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "IfStatementMutation",
+    "diff": "--- original\n+++ mutant\n@@ -693,7 +693,8 @@\n             assets, shares\n         ) = Actions.deposit(_assets, _shares, _receiver, _collateralType);\n \n-        if (_collateralType == CollateralType.Collateral) {\n+        /// IfStatementMutation(`_collateralType == CollateralType.Collateral` |==> `true`) of: `if (_collateralType == CollateralType.Collateral) {`\n+        if (true) {\n             emit Deposit(msg.sender, _receiver, assets, shares);\n         } else {\n             emit DepositProtected(msg.sender, _receiver, assets, shares);\n",
+    "id": "25",
+    "name": "mutants/25/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "IfStatementMutation",
+    "diff": "--- original\n+++ mutant\n@@ -693,7 +693,8 @@\n             assets, shares\n         ) = Actions.deposit(_assets, _shares, _receiver, _collateralType);\n \n-        if (_collateralType == CollateralType.Collateral) {\n+        /// IfStatementMutation(`_collateralType == CollateralType.Collateral` |==> `false`) of: `if (_collateralType == CollateralType.Collateral) {`\n+        if (false) {\n             emit Deposit(msg.sender, _receiver, assets, shares);\n         } else {\n             emit DepositProtected(msg.sender, _receiver, assets, shares);\n",
+    "id": "26",
+    "name": "mutants/26/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -808,7 +808,8 @@\n \n     function _accrueInterest() internal virtual returns (uint256 accruedInterest) {\n         ISiloConfig.ConfigData memory cfg = ShareTokenLib.getConfig();\n-        accruedInterest = _accrueInterestForAsset(cfg.interestRateModel, cfg.daoFee, cfg.deployerFee);\n+        /// DeleteExpressionMutation(`accruedInterest = _accrueInterestForAsset(cfg.interestRateModel, cfg.daoFee, cfg.deployerFee)` |==> `assert(true)`) of: `accruedInterest = _accrueInterestForAsset(cfg.interestRateModel, cfg.daoFee, cfg.deployerFee);`\n+        assert(true);\n     }\n \n     function _accrueInterestForAsset(\n",
+    "id": "27",
+    "name": "mutants/27/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "DeleteExpressionMutation",
+    "diff": "--- original\n+++ mutant\n@@ -816,7 +816,8 @@\n         uint256 _daoFee,\n         uint256 _deployerFee\n     ) internal virtual returns (uint256 accruedInterest) {\n-        accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n+        /// DeleteExpressionMutation(`accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee)` |==> `assert(true)`) of: `accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);`\n+        assert(true);\n         if (accruedInterest != 0) emit AccruedInterest(accruedInterest);\n     }\n }\n",
+    "id": "28",
+    "name": "mutants/28/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "AssignmentMutation",
+    "diff": "--- original\n+++ mutant\n@@ -816,7 +816,8 @@\n         uint256 _daoFee,\n         uint256 _deployerFee\n     ) internal virtual returns (uint256 accruedInterest) {\n-        accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n+        /// AssignmentMutation(`SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee)` |==> `1`) of: `accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);`\n+        accruedInterest = 1;\n         if (accruedInterest != 0) emit AccruedInterest(accruedInterest);\n     }\n }\n",
+    "id": "29",
+    "name": "mutants/29/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  },
+  {
+    "description": "IfStatementMutation",
+    "diff": "--- original\n+++ mutant\n@@ -817,6 +817,7 @@\n         uint256 _deployerFee\n     ) internal virtual returns (uint256 accruedInterest) {\n         accruedInterest = SiloLendingLib.accrueInterestForAsset(_interestRateModel, _daoFee, _deployerFee);\n-        if (accruedInterest != 0) emit AccruedInterest(accruedInterest);\n+        /// IfStatementMutation(`accruedInterest != 0` |==> `false`) of: `if (accruedInterest != 0) emit AccruedInterest(accruedInterest);`\n+        if (false) emit AccruedInterest(accruedInterest);\n     }\n }\n",
+    "id": "30",
+    "name": "mutants/30/silo-core/contracts/Silo.sol",
+    "original": "silo-core/contracts/Silo.sol",
+    "sourceroot": "/home/benrai/folder/Audits Code/2025-01-14 silo-v2-cantina-fv_ISSUE"
+  }
+]
