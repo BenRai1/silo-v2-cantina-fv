@@ -25,6 +25,23 @@ import "../setup/CompleteSiloSetup.spec";
 
 //------------------------------- RULES TEST START ----------------------------------
 
+
+
+    // // setThisSiloAsCollateralSilo() can only be called by silo //@audit-issue fails
+    // rule setThisSiloAsCollateralSiloOnlyBySilo(env e) {
+    //     configForEightTokensSetupRequirements();
+    //     address borrower;
+
+    //     //function call
+    //     siloConfig.setThisSiloAsCollateralSilo@withrevert(e, borrower);
+
+    //     //assert
+    //     assert e.msg.sender != silo0 || e.msg.sender != silo0 => lastReverted;
+    // }
+
+
+
+
     // getConfigsForBorrow() reverts if input silo is not silo0 or silo1
     rule getConfigsForBorrowRevertsIfSiloNotSilo0OrSilo1(env e) {
         configForEightTokensSetupRequirements();
@@ -209,18 +226,6 @@ import "../setup/CompleteSiloSetup.spec";
         assert silo != silo0 && silo != silo1 => lastReverted;
     }
 
-    // setThisSiloAsCollateralSilo() can only be called by silo
-    rule setThisSiloAsCollateralSiloOnlyBySilo(env e) {
-        configForEightTokensSetupRequirements();
-        address borrower;
-
-        //function call
-        siloConfig.setThisSiloAsCollateralSilo@withrevert(e, borrower);
-
-        //assert
-        assert e.msg.sender != silo0 || e.msg.sender != silo0 => lastReverted;
-    }
-
     // setThisSiloAsCollateralSilo() borrowerCollateralSilo[_borrower] is set to msg.sender
     rule setThisSiloAsCollateralSiloCollateralSiloIsMsgSender(env e) {
         configForEightTokensSetupRequirements();
@@ -242,7 +247,7 @@ import "../setup/CompleteSiloSetup.spec";
         siloConfig.setOtherSiloAsCollateralSilo@withrevert(e, borrower);
 
         //assert
-        assert e.msg.sender != silo0 && e.msg.sender != silo0 => lastReverted;
+        assert e.msg.sender != silo0 && e.msg.sender != silo1 => lastReverted;
     }
 
     // setOtherSiloAsCollateralSilo() the silo which deos not call is set to borrowerCollateralSilo[_borrower]

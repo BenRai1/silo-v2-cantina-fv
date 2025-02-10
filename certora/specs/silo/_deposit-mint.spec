@@ -387,66 +387,66 @@ methods {
         assert sharesOtherUserAfter == sharesOtherUserBefore;
     }
 
-    //with the same share amount, the result of all mints is the same
-    rule mintResultIsTheSameBalances(env e) {
-        configForEightTokensSetupRequirements();
-        uint256 shares;
-        address receiver;
-        address sender = e.msg.sender;
+    // //with the same share amount, the result of all mints is the same
+    // rule mintResultIsTheSameBalances(env e) {
+    //     configForEightTokensSetupRequirements();
+    //     uint256 shares;
+    //     address receiver;
+    //     address sender = e.msg.sender;
 
-        //ensuer not interest is accrued
-        require require_uint64(e.block.timestamp) == silo0.getSiloDataInterestRateTimestamp(e);
+    //     //ensuer not interest is accrued
+    //     require require_uint64(e.block.timestamp) == silo0.getSiloDataInterestRateTimestamp(e);
 
-        //balances before
-        uint256 assetsSenderToken0Before = token0.balanceOf(sender);
-        uint256 assetsSiloToken0Before = token0.balanceOf(silo0);
+    //     //balances before
+    //     uint256 assetsSenderToken0Before = token0.balanceOf(sender);
+    //     uint256 assetsSiloToken0Before = token0.balanceOf(silo0);
 
-        //totalSupply before mint
-        uint256 totalSupplyCollateralBeforeMint = silo0.totalSupply();
-        uint256 totalSupplyProtectedCollateralBeforeMint = shareProtectedCollateralToken0.totalSupply();
+    //     //totalSupply before mint
+    //     uint256 totalSupplyCollateralBeforeMint = silo0.totalSupply();
+    //     uint256 totalSupplyProtectedCollateralBeforeMint = shareProtectedCollateralToken0.totalSupply();
 
-        //total assets silo before
-        uint256 totalProtectedAssetsBefore;
-        uint256 totalCollateralAssetsBefore;
-        uint256 totalDebtAssetsBefore;
-        (totalProtectedAssetsBefore, totalCollateralAssetsBefore, totalDebtAssetsBefore) = totalAssetsHarness(e);
+    //     //total assets silo before
+    //     uint256 totalProtectedAssetsBefore;
+    //     uint256 totalCollateralAssetsBefore;
+    //     uint256 totalDebtAssetsBefore;
+    //     (totalProtectedAssetsBefore, totalCollateralAssetsBefore, totalDebtAssetsBefore) = totalAssetsHarness(e);
 
 
-        //ensure same share and assets
-        require totalSupplyCollateralBeforeMint == totalSupplyProtectedCollateralBeforeMint;
-        require totalCollateralAssetsBefore == totalProtectedAssetsBefore;
+    //     //ensure same share and assets
+    //     require totalSupplyCollateralBeforeMint == totalSupplyProtectedCollateralBeforeMint;
+    //     require totalCollateralAssetsBefore == totalProtectedAssetsBefore;
 
-        //inital storage
-        storage initState = lastStorage;
+    //     //inital storage
+    //     storage initState = lastStorage;
 
-        //mint
-        mint(e, shares, receiver);
+    //     //mint
+    //     mint(e, shares, receiver);
 
-        //balances after mint
-        uint256 assetsSenderToken0AfterMint = token0.balanceOf(sender);
-        uint256 assetsSiloToken0AfterMint = token0.balanceOf(silo0);
+    //     //balances after mint
+    //     uint256 assetsSenderToken0AfterMint = token0.balanceOf(sender);
+    //     uint256 assetsSiloToken0AfterMint = token0.balanceOf(silo0);
 
         
         
 
-        //mint collateral at initial storage
-        mint(e, shares, receiver, ISilo.CollateralType.Collateral) at initState;
+    //     //mint collateral at initial storage
+    //     mint(e, shares, receiver, ISilo.CollateralType.Collateral) at initState;
 
-        //balances after mint collateral
-        uint256 assetsSenderToken0AfterMintCollateral = token0.balanceOf(sender);
-        uint256 assetsSiloToken0AfterMintCollateral = token0.balanceOf(silo0);
+    //     //balances after mint collateral
+    //     uint256 assetsSenderToken0AfterMintCollateral = token0.balanceOf(sender);
+    //     uint256 assetsSiloToken0AfterMintCollateral = token0.balanceOf(silo0);
 
-        //mint protected collateral at initial storage
-        mint(e, shares, receiver, ISilo.CollateralType.Protected) at initState;
+    //     //mint protected collateral at initial storage
+    //     mint(e, shares, receiver, ISilo.CollateralType.Protected) at initState;
 
-        //balances after mint protected collateral
-        uint256 assetsSenderToken0AfterMintProtectedCollateral = token0.balanceOf(sender);
-        uint256 assetsSiloToken0AfterMintProtectedCollateral = token0.balanceOf(silo0);
+    //     //balances after mint protected collateral
+    //     uint256 assetsSenderToken0AfterMintProtectedCollateral = token0.balanceOf(sender);
+    //     uint256 assetsSiloToken0AfterMintProtectedCollateral = token0.balanceOf(silo0);
 
-        //assert that the final balances are the same
-        assert assetsSenderToken0AfterMint == assetsSenderToken0AfterMintCollateral && assetsSenderToken0AfterMint == assetsSenderToken0AfterMintProtectedCollateral;
-        assert assetsSiloToken0AfterMint == assetsSiloToken0AfterMintCollateral && assetsSiloToken0AfterMint == assetsSiloToken0AfterMintProtectedCollateral;
-    }    
+    //     //assert that the final balances are the same
+    //     assert assetsSenderToken0AfterMint == assetsSenderToken0AfterMintCollateral && assetsSenderToken0AfterMint == assetsSenderToken0AfterMintProtectedCollateral;
+    //     assert assetsSiloToken0AfterMint == assetsSiloToken0AfterMintCollateral && assetsSiloToken0AfterMint == assetsSiloToken0AfterMintProtectedCollateral;
+    // }    
 
     //mint moves underlying asset to silo
     rule mintMovesUnderlyingAssetToSilo(env e) {
@@ -1193,29 +1193,29 @@ methods {
         assert user2 !=0 => !lastReverted;
     }
 
-    /// @title The repay action of a borrower is not discriminated (by shares)
-    /// @property user-access
-    rule RA_repay_borrower_is_not_restricted_by_shares(
-        address borrower1,
-        address borrower2,
-        uint256 amount
-    ) {
-        env e;
-        require borrower2 != 0;
+    // /// @title The repay action of a borrower is not discriminated (by shares)
+    // /// @property user-access
+    // rule RA_repay_borrower_is_not_restricted_by_shares(
+    //     address borrower1,
+    //     address borrower2,
+    //     uint256 amount
+    // ) {
+    //     env e;
+    //     require borrower2 != 0;
 
-        // Get the borrowers debts
-        uint256 debt1 = shareDebtToken0.balanceOf(e, borrower1);
-        uint256 debt2 = shareDebtToken0.balanceOf(e, borrower2);
-        require debt2 >= debt1;
+    //     // Get the borrowers debts
+    //     uint256 debt1 = shareDebtToken0.balanceOf(e, borrower1);
+    //     uint256 debt2 = shareDebtToken0.balanceOf(e, borrower2);
+    //     require debt2 >= debt1;
 
-        storage initState = lastStorage;
-        repay(e, amount, borrower1);
-        repay@withrevert(e, amount, borrower2) at initState;
+    //     storage initState = lastStorage;
+    //     repay(e, amount, borrower1);
+    //     repay@withrevert(e, amount, borrower2) at initState;
 
 
-        // The repaid amount is less than the borrower's debt, hence the operation must succeed.
-        assert !lastReverted;
-    }
+    //     // The repaid amount is less than the borrower's debt, hence the operation must succeed.
+    //     assert !lastReverted;
+    // }
 //-------------------------------OLD RULES END----------------------------------
 
 

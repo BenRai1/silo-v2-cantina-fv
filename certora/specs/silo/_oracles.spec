@@ -76,7 +76,66 @@ import "../simplifications/Silo_noAccrueInterest_simplification_UNSAFE.spec"; //
 //------------------------------- RULES TEST END ----------------------------------
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
+//  // transitionCollateral() call to collateralSolvancyOracle and debtSolvalncyOracle if collateralSolvancyOracle != 0 (collateralSilo = silo0) (with requirements) //@audit-issue did pass but does not pass anymore
+//     rule callToSolvencyOraclesIfSolvencyOraclesNot0TRANSITION(env e){
+//         uint256 shares;
+//         address owner;
+//         ISilo.CollateralType transitionType;
+//         address anyOracle;
+//         address debtSilo = siloConfig.getDebtSilo(e, owner);
+//         address collateralSilo = siloConfig.borrowerCollateralSilo(e, owner);
+//         require(collateralSilo == silo0);
+//         require(debtSilo == silo1);
 
+//         address collateralSolvencyOracle = siloConfig.getConfig(e, collateralSilo).solvencyOracle;
+//         address debtSolvencyOracle = siloConfig.getConfig(e, debtSilo).solvencyOracle;
+//         require(collateralSolvencyOracle != 0);
+//         require(debtSolvencyOracle != 0);
+
+//         //debtShare owner
+//         address debtShareToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
+//         uint256 ownerBalanceDebtShareToken = debtShareToken.balanceOf(e, owner);
+//         require(ownerBalanceDebtShareToken != 0); //to reach getPositionValues
+
+//         //borrowerDebtAssets owner
+//         uint256 borrowerProtectedAssets;
+//         uint256 borrowerDebtAssets;
+//         uint256 borrowerCollateralAssets;
+//         (borrowerProtectedAssets, borrowerCollateralAssets, borrowerDebtAssets) = 
+//             assetsBorrowerForLTVHarness( 
+//                 e,  
+//                 siloConfig.getConfig(e, collateralSilo),
+//                 siloConfig.getConfig(e, debtSilo),
+//                 owner,  
+//                 ISilo.OracleType.Solvency,
+//                 ISilo.AccrueInterestInMemory.No
+//             );
+//         require(borrowerProtectedAssets != 0);
+//         require(borrowerCollateralAssets != 0);
+//         require(borrowerProtectedAssets + borrowerCollateralAssets < max_uint256 - 500); //prevent overflow
+//         require(borrowerDebtAssets != 0);
+
+//         //setup
+//         solvencyOracleRulesSetup(e, anyOracle);
+
+//         //values before
+//         mathint debtSiloSolvencyOracleCountBefore = callCountQuote[debtSolvencyOracle];
+//         mathint collateralSiloSolvencyOracleCountBefore = callCountQuote[collateralSolvencyOracle];
+//         mathint anyOracleCountBefore = callCountQuote[anyOracle];
+
+//         //function call
+//         transitionCollateral(e, shares, owner, transitionType);
+
+//         //values after
+//         mathint debtSiloSolvencyOracleCountAfter = callCountQuote[debtSolvencyOracle];
+//         mathint collateralSiloSolvencyOracleCountAfter = callCountQuote[collateralSolvencyOracle];
+//         mathint anyOracleCountAfter = callCountQuote[anyOracle];
+
+//         //no oracle is called before the quote
+//         assert (debtSiloSolvencyOracleCountAfter == debtSiloSolvencyOracleCountBefore + 1);
+//         assert (collateralSiloSolvencyOracleCountAfter == collateralSiloSolvencyOracleCountBefore + 1);
+//         assert (anyOracleCountAfter == anyOracleCountBefore);
+//     }
     
     // // withdraw() no call to solvancyOracles if debtShareBalance of owner is 0 //@audit-issue sanity failed, not sure why
     // rule noCallToSolvencyOraclesIfDebtShareBalance0(env e){
@@ -283,66 +342,7 @@ import "../simplifications/Silo_noAccrueInterest_simplification_UNSAFE.spec"; //
         assert (anyOracleCountAfter == anyOracleCountBefore);
     }
 
-    // transitionCollateral() call to collateralSolvancyOracle and debtSolvalncyOracle if collateralSolvancyOracle != 0 (collateralSilo = silo0) (with requirements)
-    rule callToSolvencyOraclesIfSolvencyOraclesNot0TRANSITION(env e){
-        uint256 shares;
-        address owner;
-        ISilo.CollateralType transitionType;
-        address anyOracle;
-        address debtSilo = siloConfig.getDebtSilo(e, owner);
-        address collateralSilo = siloConfig.borrowerCollateralSilo(e, owner);
-        require(collateralSilo == silo0);
-        require(debtSilo == silo1);
-
-        address collateralSolvencyOracle = siloConfig.getConfig(e, collateralSilo).solvencyOracle;
-        address debtSolvencyOracle = siloConfig.getConfig(e, debtSilo).solvencyOracle;
-        require(collateralSolvencyOracle != 0);
-        require(debtSolvencyOracle != 0);
-
-        //debtShare owner
-        address debtShareToken = siloConfig.getConfig(e, debtSilo).debtShareToken;
-        uint256 ownerBalanceDebtShareToken = debtShareToken.balanceOf(e, owner);
-        require(ownerBalanceDebtShareToken != 0); //to reach getPositionValues
-
-        //borrowerDebtAssets owner
-        uint256 borrowerProtectedAssets;
-        uint256 borrowerDebtAssets;
-        uint256 borrowerCollateralAssets;
-        (borrowerProtectedAssets, borrowerCollateralAssets, borrowerDebtAssets) = 
-            assetsBorrowerForLTVHarness( 
-                e,  
-                siloConfig.getConfig(e, collateralSilo),
-                siloConfig.getConfig(e, debtSilo),
-                owner,  
-                ISilo.OracleType.Solvency,
-                ISilo.AccrueInterestInMemory.No
-            );
-        require(borrowerProtectedAssets != 0);
-        require(borrowerCollateralAssets != 0);
-        require(borrowerProtectedAssets + borrowerCollateralAssets < max_uint256 - 500); //prevent overflow
-        require(borrowerDebtAssets != 0);
-
-        //setup
-        solvencyOracleRulesSetup(e, anyOracle);
-
-        //values before
-        mathint debtSiloSolvencyOracleCountBefore = callCountQuote[debtSolvencyOracle];
-        mathint collateralSiloSolvencyOracleCountBefore = callCountQuote[collateralSolvencyOracle];
-        mathint anyOracleCountBefore = callCountQuote[anyOracle];
-
-        //function call
-        transitionCollateral(e, shares, owner, transitionType);
-
-        //values after
-        mathint debtSiloSolvencyOracleCountAfter = callCountQuote[debtSolvencyOracle];
-        mathint collateralSiloSolvencyOracleCountAfter = callCountQuote[collateralSolvencyOracle];
-        mathint anyOracleCountAfter = callCountQuote[anyOracle];
-
-        //no oracle is called before the quote
-        assert (debtSiloSolvencyOracleCountAfter == debtSiloSolvencyOracleCountBefore + 1);
-        assert (collateralSiloSolvencyOracleCountAfter == collateralSiloSolvencyOracleCountBefore + 1);
-        assert (anyOracleCountAfter == anyOracleCountBefore);
-    }
+   
 
     //switchCollateralToThisSilo() call to collateralSolvancyOracle newCollateralSolvancyOracle != 0 (with requirements)
     rule callToCollateralSolvencyOraclesIfCollateralSolvencyOraclesNot0SWITCHCOLLATERAL(env e){

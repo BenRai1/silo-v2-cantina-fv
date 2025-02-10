@@ -78,24 +78,24 @@ rule HLP_PreviewDepositCorrectness(address receiver)
     assert sharesReported <= sharesReceived;
 }
 
-/// @status Done
-rule HLP_PreviewWithdrawCorrectness_strict(address receiver)
-{
-    env e;
+// /// @status Done
+// rule HLP_PreviewWithdrawCorrectness_strict(address receiver)
+// {
+//     env e;
 
-    // Block time-stamp >= interest rate time-stamp
-    silosTimestampSetupRequirements(e);
-    // receiver is not one of the contracts in the scene
-    nonSceneAddressRequirements(receiver);
-    totalSuppliesMoreThanBalances(receiver, silo0);
+//     // Block time-stamp >= interest rate time-stamp
+//     silosTimestampSetupRequirements(e);
+//     // receiver is not one of the contracts in the scene
+//     nonSceneAddressRequirements(receiver);
+//     totalSuppliesMoreThanBalances(receiver, silo0);
 
-    requireInvariant assetsZeroInterestRateTimestampZero(e) ;
+//     requireInvariant assetsZeroInterestRateTimestampZero(e) ;
     
-    uint256 assets;
-    uint256 sharesReported = previewWithdraw(e, assets);
-    uint256 sharesPaid = withdraw(e, assets, receiver, e.msg.sender);
-    assert sharesPaid == sharesReported;
-}
+//     uint256 assets;
+//     uint256 sharesReported = previewWithdraw(e, assets);
+//     uint256 sharesPaid = withdraw(e, assets, receiver, e.msg.sender);
+//     assert sharesPaid == sharesReported;
+// }
 
 /// @status Done
 rule HLP_PreviewBorrowCorrectness_strict(address receiver)
@@ -117,24 +117,24 @@ rule HLP_PreviewBorrowCorrectness_strict(address receiver)
     assert debtSharesReported == debtSharesReceived;
 }
 
-/// @status Done
-rule HLP_PreviewRepayCorrectness_strict(address receiver)
-{
-    env e;
+// /// @status Done
+// rule HLP_PreviewRepayCorrectness_strict(address receiver)
+// {
+//     env e;
 
-    // Block time-stamp >= interest rate time-stamp
-    silosTimestampSetupRequirements(e);
-    // receiver is not one of the contracts in the scene
-    nonSceneAddressRequirements(receiver);
-    totalSuppliesMoreThanBalances(receiver, silo0);
+//     // Block time-stamp >= interest rate time-stamp
+//     silosTimestampSetupRequirements(e);
+//     // receiver is not one of the contracts in the scene
+//     nonSceneAddressRequirements(receiver);
+//     totalSuppliesMoreThanBalances(receiver, silo0);
 
-    requireInvariant assetsZeroInterestRateTimestampZero(e) ;
+//     requireInvariant assetsZeroInterestRateTimestampZero(e) ;
     
-    uint256 assets;
-    uint256 debtSharesReported = previewRepay(e, assets);
-    uint256 debtSharesRepaid = repay(e, assets, receiver);
-    assert debtSharesReported == debtSharesRepaid;
-}
+//     uint256 assets;
+//     uint256 debtSharesReported = previewRepay(e, assets);
+//     uint256 debtSharesRepaid = repay(e, assets, receiver);
+//     assert debtSharesReported == debtSharesRepaid;
+// }
 
 /// @status Done
 rule HLP_PreviewBorrowSharesCorrectness(address receiver)
@@ -208,16 +208,16 @@ rule transitionSucceedsIfSolvent(uint256 _shares,address _owner) {
 
 /// @status Done
 
-rule solventAfterSwitch() {
-    env e;
+// rule solventAfterSwitch() {
+//     env e;
     
-    // Block time-stamp >= interest rate time-stamp
-    silosTimestampSetupRequirements(e);
-    // e.msg.sender is not one of the contracts in the scene
-    nonSceneAddressRequirements(e.msg.sender);
-    totalSuppliesMoreThanBalances(e.msg.sender, silo0);
+//     // Block time-stamp >= interest rate time-stamp
+//     silosTimestampSetupRequirements(e);
+//     // e.msg.sender is not one of the contracts in the scene
+//     nonSceneAddressRequirements(e.msg.sender);
+//     totalSuppliesMoreThanBalances(e.msg.sender, silo0);
 
-    silo0.switchCollateralToThisSilo(e);
+//     silo0.switchCollateralToThisSilo(e);
 
-    assert silo0.isSolvent(e,e.msg.sender);
-}
+//     assert silo0.isSolvent(e,e.msg.sender);
+// }

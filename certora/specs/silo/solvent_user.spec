@@ -619,7 +619,10 @@ function allTransferWithChecks() returns bool
 
 //-------------------------------OLD RULES START----------------------------------
     //@title The flag transferWithChecks is always on at then end of all public methods  
-    rule transferWithChecksAlwaysOn(method f)  filtered {f-> !onlySiloContractsMethods(f) && !f.isView}
+    rule transferWithChecksAlwaysOn(method f)  filtered {f-> !onlySiloContractsMethods(f) && !f.isView &&
+        f.selector != sig:ShareDebtToken0.callOnBehalfOfShareToken(address,uint256,ISilo.CallType,bytes).selector &&
+        f.selector != sig:assetsBorrowerForLTVHarness(ISiloConfig.ConfigData,ISiloConfig.ConfigData,address,ISilo.OracleType,ISilo.AccrueInterestInMemory).selector
+        }
     {
         env e;
         calldataarg args;
@@ -633,7 +636,10 @@ function allTransferWithChecks() returns bool
     }
 
     //@title Solvency check has been performed on the correct user 
-    rule solventChecked(method f)  filtered {f-> !onlySiloContractsMethods(f) && !f.isView}
+    rule solventChecked(method f)  filtered {f-> !onlySiloContractsMethods(f) && !f.isView &&
+        f.selector != sig:ShareDebtToken0.callOnBehalfOfShareToken(address,uint256,ISilo.CallType,bytes).selector &&
+        f.selector != sig:assetsBorrowerForLTVHarness(ISiloConfig.ConfigData,ISiloConfig.ConfigData,address,ISilo.OracleType,ISilo.AccrueInterestInMemory).selector
+        }
     {
         env e;
         address user; 

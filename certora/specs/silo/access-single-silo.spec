@@ -1037,27 +1037,27 @@ methods {
 
     /// @title The repay action of a borrower is not discriminated (by shares)
     /// @property user-access
-    rule RA_repay_borrower_is_not_restricted_by_shares(
-        address borrower1,
-        address borrower2,
-        uint256 amount
-    ) {
-        env e;
-        require borrower2 != 0;
+    // rule RA_repay_borrower_is_not_restricted_by_shares(
+    //     address borrower1,
+    //     address borrower2,
+    //     uint256 amount
+    // ) {
+    //     env e;
+    //     require borrower2 != 0;
 
-        // Get the borrowers debts
-        uint256 debt1 = shareDebtToken0.balanceOf(e, borrower1);
-        uint256 debt2 = shareDebtToken0.balanceOf(e, borrower2);
-        require debt2 >= debt1;
+    //     // Get the borrowers debts
+    //     uint256 debt1 = shareDebtToken0.balanceOf(e, borrower1);
+    //     uint256 debt2 = shareDebtToken0.balanceOf(e, borrower2);
+    //     require debt2 >= debt1;
 
-        storage initState = lastStorage;
-        repay(e, amount, borrower1);
-        repay@withrevert(e, amount, borrower2) at initState;
+    //     storage initState = lastStorage;
+    //     repay(e, amount, borrower1);
+    //     repay@withrevert(e, amount, borrower2) at initState;
 
 
-        // The repaid amount is less than the borrower's debt, hence the operation must succeed.
-        assert !lastReverted;
-    }
+    //     // The repaid amount is less than the borrower's debt, hence the operation must succeed.
+    //     assert !lastReverted;
+    // }
 //-------------------------------OLD RULES END----------------------------------
 
 

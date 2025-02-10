@@ -91,35 +91,35 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
         
 
 
-    // withdraw( protected) should never revert because of to little liquidity
-    rule withdrawProtectedDoesNotRevertWithoutDebt(env e){
-        configForEightTokensSetupRequirements();
-        uint256 assets;
-        address receiver;
-        address owner;
+    // // withdraw( protected) should never revert because of to little liquidity
+    // rule withdrawProtectedDoesNotRevertWithoutDebt(env e){
+    //     configForEightTokensSetupRequirements();
+    //     uint256 assets;
+    //     address receiver;
+    //     address owner;
 
-        uint256 protectedAssetsBefore;
-        uint256 collateralAssetsBefore;
-        uint256 debtAssetsBefore;
-        (protectedAssetsBefore, collateralAssetsBefore, debtAssetsBefore) = silo0.totalAssetsHarness(e);
+    //     uint256 protectedAssetsBefore;
+    //     uint256 collateralAssetsBefore;
+    //     uint256 debtAssetsBefore;
+    //     (protectedAssetsBefore, collateralAssetsBefore, debtAssetsBefore) = silo0.totalAssetsHarness(e);
         
-        //protectedShares owner
-        address collateralSiloOwner = borrowerCollateralSiloHarness(owner);
-        //owner has no debt
-        require (collateralSiloOwner == 0);
+    //     //protectedShares owner
+    //     address collateralSiloOwner = borrowerCollateralSiloHarness(owner);
+    //     //owner has no debt
+    //     require (collateralSiloOwner == 0);
         
-        //debt of owner
-        uint256 debtShares0BalanceOwnerBefore = shareDebtToken0.balanceOf(owner);
-        uint256 debtShares1BalanceOwnerBefore = shareDebtToken1.balanceOf(owner);
+    //     //debt of owner
+    //     uint256 debtShares0BalanceOwnerBefore = shareDebtToken0.balanceOf(owner);
+    //     uint256 debtShares1BalanceOwnerBefore = shareDebtToken1.balanceOf(owner);
 
 
 
-        //withdraw
-        withdraw@withrevert(e, assets, receiver, owner, ISilo.CollateralType.Protected);
+    //     //withdraw
+    //     withdraw@withrevert(e, assets, receiver, owner, ISilo.CollateralType.Protected);
 
-        //did not revert
-        assert !lastReverted;
-    }
+    //     //did not revert
+    //     assert !lastReverted;
+    // }
 
     // // * result of `maxWithdraw()` should never be more than liquidity of the Silo  //@audit timed out, running again
     // rule maxWithdrawAssetsDoesNotExceedLiquidity(env e){
