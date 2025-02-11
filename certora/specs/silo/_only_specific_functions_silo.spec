@@ -23,49 +23,52 @@ import "../simplifications/_flashloan_no_state_changes.spec";
         f.selector == sig:Silo0.initialize(address).selector ||
     f.selector == sig:ShareDebtToken0.initialize(address,address,uint24).selector;
 
-    // //invariant borrowerCollateralSilo can only be 0, silo0 or silo1
-    // invariant borrowerCollateralSiloCanOnlyBe0Silo0OrSilo1(address user, address owner) 
-    //  (siloConfig.borrowerCollateralSilo(user) == 0 || siloConfig.borrowerCollateralSilo(user) == silo0 || siloConfig.borrowerCollateralSilo(user) == silo1) &&
-    //  (siloConfig.borrowerCollateralSilo(owner) == 0 || siloConfig.borrowerCollateralSilo(owner) == silo0 || siloConfig.borrowerCollateralSilo(owner) == silo1)
-    //     filtered { 
-    //         f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)
-    //     }
+    //invariant borrowerCollateralSilo can only be 0, silo0 or silo1
+    invariant borrowerCollateralSiloCanOnlyBe0Silo0OrSilo1(env e, address user, address owner) 
+     (siloConfig.borrowerCollateralSilo(user) == 0 || siloConfig.borrowerCollateralSilo(user) == silo0 || siloConfig.borrowerCollateralSilo(user) == silo1) &&
+     (siloConfig.borrowerCollateralSilo(owner) == 0 || siloConfig.borrowerCollateralSilo(owner) == silo0 || siloConfig.borrowerCollateralSilo(owner) == silo1)
+        filtered { 
+            f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f)
+        }
 
-    //     { 
-    //             preserved transfer(address to, uint256 amount) with (env e){
-    //                 require e.msg.sender == owner;
-    //             }
+        { 
+                preserved transfer(address to, uint256 amount) with (env e1) {
+                    require siloConfig.borrowerCollateralSilo(e.msg.sender) == 0 || siloConfig.borrowerCollateralSilo(e.msg.sender) == silo0 || siloConfig.borrowerCollateralSilo(e1.msg.sender) == silo1;
+                }
 
-    //             preserved transferFrom(address from, address to, uint256 amount) with (env e1){
-    //                 require from == owner;
-    //             }
+                preserved transferFrom(address from, address to, uint256 amount) with (env e2) {
+                    require siloConfig.borrowerCollateralSilo(from) == 0 || siloConfig.borrowerCollateralSilo(from) == silo0 || siloConfig.borrowerCollateralSilo(from) == silo1;
+                }
                 
-    //             preserved forwardTransferFromNoChecks(address from, address to, uint256 amount) with (env e2){
-    //                 require from == owner;
-    //             }
-    // }
+                preserved forwardTransferFromNoChecks(address from, address to, uint256 amount) with (env e3) {
+                    require siloConfig.borrowerCollateralSilo(from) == 0 || siloConfig.borrowerCollateralSilo(from) == silo0 || siloConfig.borrowerCollateralSilo(from) == silo1;
+                }
+    }
 
     // //INVARIANT: if debt tokens, borrowerCollateralSilo must be silo0 or silo1 
-    // invariant ifDebtTokensBorrowerCollateralSiloMustBeSilo0OrSilo1(address user)
-    //     (shareDebtToken0.balanceOf(user) != 0 || shareDebtToken1.balanceOf(user) != 0) => 
-    //     (siloConfig.borrowerCollateralSilo(user) == silo0 || siloConfig.borrowerCollateralSilo(user) == silo1)
-    //     filtered { 
-    //         f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f) &&
-    //         f.selector != sig:ShareDebtToken0.mint(address,address,uint256).selector //can only be called by silo and not directly
-    //     }
-    //     {
-    //         preserved transfer(address to, uint256 amount) with (env e){
-    //             require siloConfig.borrowerCollateralSilo(e.msg.sender) == silo0 || siloConfig.borrowerCollateralSilo(e.msg.sender) == silo1;
-    //         }
+    invariant ifDebtTokensBorrowerCollateralSiloMustBeSilo0OrSilo1(address user)
+        (shareDebtToken0.balanceOf(user) != 0 || shareDebtToken1.balanceOf(user) != 0) => 
+        (siloConfig.borrowerCollateralSilo(user) == silo0 || siloConfig.borrowerCollateralSilo(user) == silo1)
+        filtered { 
+            f -> !f.isView && !HARNESS_METHODS(f) && !FUNCTIONS_TO_EXCLUDE(f) &&
+            f.selector != sig:ShareDebtToken0.mint(address,address,uint256).selector //can only be called by silo and not directly
+        }
+        {
+            preserved transfer(address to, uint256 amount) with (env e){
+                require siloConfig.borrowerCollateralSilo(e.msg.sender) == silo0 || siloConfig.borrowerCollateralSilo(e.msg.sender) == silo1;
+            }
 
-    //         preserved transferFrom(address from, address to, uint256 amount) with (env e1){
-    //             require siloConfig.borrowerCollateralSilo(from) == silo0 || siloConfig.borrowerCollateralSilo(from) == silo1;
-    //         }
+            preserved transferFrom(address from, address to, uint256 amount) with (env e1){
+                require siloConfig.borrowerCollateralSilo(from) == silo0 || siloConfig.borrowerCollateralSilo(from) == silo1;
+            }
 
-    //         preserved forwardTransferFromNoChecks(address from, address to, uint256 amount) with (env e2){
-    //             require siloConfig.borrowerCollateralSilo(from) == silo0 || siloConfig.borrowerCollateralSilo(from) == silo1;
-    //         }        
-    // }
+            preserved forwardTransferFromNoChecks(address from, address to, uint256 amount) with (env e2){
+                require siloConfig.borrowerCollateralSilo(from) == silo0 || siloConfig.borrowerCollateralSilo(from) == silo1;
+            }        
+            preserved mint(address owner, address spender, uint256 amount) with (env e3){
+                require siloConfig.borrowerCollateralSilo(from) == silo0 || siloConfig.borrowerCollateralSilo(from) == silo1;
+            }        
+    }
 
     // //INVARIANT: user can only have debtToken0 or debtToken1
     // invariant userCanOnlyHaveDebtToken0OrDebtToken1(address user)

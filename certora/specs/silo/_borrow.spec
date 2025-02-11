@@ -43,20 +43,20 @@ import "../simplifications/_Oracle_call_before_quote_UNSAFE.spec";
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 
-    // // borrow reverts if _assets to borrow > liquidity of the silo (SiloMathLib.liquidity) //@audit-issue has an unexpected error, asked Certora
-    // rule borrowRevertsIfAssetsToBorrowGreaterThanLiquidity(env e){
-    //     configForEightTokensSetupRequirements();
-    //     uint256 assets;
-    //     address receiver;
-    //     address borrower;
-    //     nonSceneAddressRequirements(borrower);
+    // borrow reverts if _assets to borrow > liquidity of the silo (SiloMathLib.liquidity) 
+    rule borrowRevertsIfAssetsToBorrowGreaterThanLiquidity(env e){
+        configForEightTokensSetupRequirements();
+        uint256 assets;
+        address receiver;
+        address borrower;
+        nonSceneAddressRequirements(borrower);
 
-    //     uint256 liquidity = getLiquidity(e);
+        uint256 liquidity = getLiquidity(e);
 
-    //     borrow@withrevert(e, assets, receiver, borrower);
+        borrow@withrevert(e, assets, receiver, borrower);
 
-    //     assert assets > liquidity => lastReverted;
-    // }
+        assert assets > liquidity => lastReverted;
+    }
 
     // // after borrow, borrower ltv is below MaxLtv (isBelowMaxLtv) //@audit-issue vacouse rule => strange, check closer
     // rule borrowerLtvIsbelwoMaxLtvAfterBorrow(env e){

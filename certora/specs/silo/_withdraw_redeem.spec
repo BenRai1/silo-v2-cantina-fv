@@ -122,15 +122,15 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
     // }
 
     // // * result of `maxWithdraw()` should never be more than liquidity of the Silo  //@audit timed out, running again
-    // rule maxWithdrawAssetsDoesNotExceedLiquidity(env e){
-    //     configForEightTokensSetupRequirements();
-    //     address owner;
+    rule maxWithdrawAssetsDoesNotExceedLiquidity(env e){
+        configForEightTokensSetupRequirements();
+        address owner;
 
-    //     uint256 liquidity = silo0.getLiquidity(e);
-    //     uint256 maxWithdraw = silo0.maxWithdraw(e, owner);
+        uint256 liquidity = silo0.getLiquidity(e);
+        uint256 maxWithdraw = silo0.maxWithdraw(e, owner);
 
-    //     assert maxWithdraw <= liquidity;
-    // }
+        assert maxWithdraw <= liquidity;
+    }
 
    
 
@@ -256,45 +256,45 @@ import "../simplifications/Oracle_quote_one_UNSAFE.spec";
     //     assert cvlApproxSameWithRange(underlyingTokenBalanceSiloAfterWithdraw, underlyingTokenBalanceSiloAfterRedeem, range);
     // }
 
-    // //withdraw if insolvent, no withdraw possible //@audit killed after 2 hours
-    // rule ifInsolventNoWithdrawPossible(env e){
-    //     configForEightTokensSetupRequirements();
-    //     uint256 assets;
-    //     address receiver;
-    //     address owner;
+    // //withdraw if insolvent, no withdraw possible //@audit time out
+    rule ifInsolventNoWithdrawPossible(env e){
+        configForEightTokensSetupRequirements();
+        uint256 assets;
+        address receiver;
+        address owner;
 
-    //     bool solventBefore = silo0.isSolvent(e,owner);
-    //     require(!solventBefore);
-    //     address collateralSiloOwner = siloConfig.borrowerCollateralSilo(e, owner);
-    //     //called silo must be collateralSilo
-    //     require(collateralSiloOwner == silo0);
+        bool solventBefore = silo0.isSolvent(e,owner);
+        require(!solventBefore);
+        address collateralSiloOwner = siloConfig.borrowerCollateralSilo(e, owner);
+        //called silo must be collateralSilo
+        require(collateralSiloOwner == silo0);
 
-    //     //withdraw
-    //     withdraw@withrevert(e, assets, receiver, owner);
+        //withdraw
+        withdraw@withrevert(e, assets, receiver, owner);
 
-    //     //reverted
-    //     assert lastReverted;
-    // }
+        //reverted
+        assert lastReverted;
+    }
 
     // //withdraw Protected if insolvent, no withdraw possible
-    // rule ifInsolventNoProtectedWithdrawPossible(env e){ //@audit killed after 2 hours
-    //     configForEightTokensSetupRequirements();
-    //     uint256 assets;
-    //     address receiver;
-    //     address owner;
+    rule ifInsolventNoProtectedWithdrawPossible(env e){ //@audit timeout
+        configForEightTokensSetupRequirements();
+        uint256 assets;
+        address receiver;
+        address owner;
 
-    //     bool solventBefore = silo0.isSolvent(e,owner);
-    //     require(!solventBefore);
-    //     address collateralSiloOwner = siloConfig.borrowerCollateralSilo(e, owner);
-    //     //called silo must be collateralSilo
-    //     require(collateralSiloOwner == silo0);
+        bool solventBefore = silo0.isSolvent(e,owner);
+        require(!solventBefore);
+        address collateralSiloOwner = siloConfig.borrowerCollateralSilo(e, owner);
+        //called silo must be collateralSilo
+        require(collateralSiloOwner == silo0);
 
-    //     //withdraw
-    //     withdraw@withrevert(e, assets, receiver, owner, ISilo.CollateralType.Protected);
+        //withdraw
+        withdraw@withrevert(e, assets, receiver, owner, ISilo.CollateralType.Protected);
 
-    //     //reverted
-    //     assert lastReverted;
-    // }
+        //reverted
+        assert lastReverted;
+    }
 
 //------------------------------- RULES PROBLEMS START ----------------------------------
 
