@@ -25,9 +25,9 @@ import "../setup/CompleteSiloSetup.spec";
         assert !lastReverted;
     }
 
-    // * `accrueInterest()` should be invisible for any other function including other silo and share tokens //@audit HÄ?
+    // * `accrueInterest()` should be invisible for any other function including other silo and share tokens 
 
-    // * `accrueInterest()` calling twice is the same as calling once (in a single block) //@audit-issue check for default havoc
+    // * `accrueInterest()` calling twice is the same as calling once (in a single block) 
     rule accrueInterestTwiceIsSameAsOnce(env e) {
         configForEightTokensSetupRequirements();
 
