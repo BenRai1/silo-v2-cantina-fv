@@ -8,6 +8,6 @@ The goal of the formal verification part of the competition was to formally veri
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | [Silo.sol](https://github.com/BenRai1/silo-v2-cantina-fv/blob/main/silo-core/contracts/Silo.sol)                                                              | 452  |
 | [PartialLiquidation.sol](https://github.com/BenRai1/silo-v2-cantina-fv/blob/main/silo-core/contracts/utils/hook-receivers/liquidation/PartialLiquidation.sol) | 155  |
-| [Actions.sol](https://github.com/BenRai1/silo-v2-cantina-fv/blob/main/silo-core/contracts/lib/Actions.soll)                                                   | 373  |
+| [Actions.sol](https://github.com/BenRai1/silo-v2-cantina-fv/blob/main/silo-core/contracts/lib/Actions.sol)                                                    | 373  |
 
 I wrote a total of [325 rules](https://github.com/BenRai1/silo-v2-cantina-fv/tree/main/certora/specs) and managed to catch 18 out of 28 mutations used for [evaluating the submissions](https://docs.google.com/spreadsheets/d/1libTv86GVO0MKF9gl-4PRoVXPtp_6xEmss0HT0ZNIdo/edit?gid=1970712821#gid=1970712821) which place me 3rd in the FV contest.
